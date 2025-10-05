@@ -4,17 +4,19 @@
   --accent:#35d2a8; --accent-2:#ffd166; --danger:#ff5a5f;
   --frame:#0f1729; --card:#111827; --card-border:rgba(255,255,255,.08);
   --shadow:0 10px 25px rgba(0,0,0,.35); --radius:18px;
-  --cell-h:120px; /* single row height; reels = 3 * cell */
-  --sym-size:76px;
+
+  /* Bigger wheel */
+  --cell-h:140px;
+  --sym-size:88px;
 }
 
 /* Slow drifting rainbow background */
 .background-rainbow{
-  position:fixed; inset:0; z-index:-2; pointer-events:none; opacity:.30;
+  position:fixed; inset:0; z-index:-2; pointer-events:none; opacity:.28;
   background: linear-gradient(90deg,#ff4d4f,#ffcd3c,#2ee59d,#40c4ff,#a78bfa,#ff4d4f);
   background-size: 300% 100%;
-  animation: bgSlide 18s linear infinite;
-  filter:saturate(1.1) blur(.5px);
+  animation: bgSlide 20s linear infinite;
+  filter:saturate(1.06) blur(.5px);
 }
 @keyframes bgSlide{0%{background-position:0% 50%}100%{background-position:300% 50%}}
 
@@ -45,6 +47,24 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
 .btn:hover{transform:translateY(-1px)}
 .btn:disabled{opacity:.6;cursor:not-allowed}
 
+/* Animated SPIN button (black base + rainbow rim) */
+.spin-btn{
+  position:relative; overflow:hidden; border:none; background:#0b0f1a; padding:0; border-radius:16px;
+}
+.spin-btn::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; padding:2px;
+  background:linear-gradient(90deg,#ff4d4f,#ffcd3c,#2ee59d,#40c4ff,#a78bfa,#ff4d4f);
+  background-size:300% 100%; animation:btnRainbow 2.2s linear infinite;
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+}
+.spin-btn .label{
+  position:relative; display:block; padding:12px 22px; border-radius:14px; background:#0b0f1a; color:#eafff6; letter-spacing:.6px; font-weight:900;
+  text-shadow:0 2px 0 #00120d;
+}
+@keyframes btnRainbow{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+
 .card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));border:1px solid var(--card-border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
 
 /* MACHINE */
@@ -54,47 +74,35 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
   background: conic-gradient(#ff4d4f,#ffcd3c,#2ee59d,#40c4ff,#a78bfa,#ff4d4f);
   -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude; padding:10px; filter:saturate(1.4);
-  /* IMPORTANT: no animation (static) */
+  -webkit-mask-composite:xor; mask-composite:exclude; padding:10px; filter:saturate(1.3);
 }
 .machine-bar{display:flex;justify-content:center;margin-bottom:10px}
 .machine-title{font-weight:900;letter-spacing:.4px;opacity:.95}
 
 /* 3×3 reels — BIGGER */
 .reels-3x3{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
   background:var(--frame);border-radius:16px;padding:22px;border:1px solid var(--card-border);
   position:relative;overflow:hidden; z-index:1;
 }
 .reel{
-  height:calc(var(--cell-h) * 3); /* 3 rows visible */
+  height:calc(var(--cell-h) * 3);
   background:linear-gradient(180deg,#0b1222,#0f192d);
   border-radius:16px;border:1px solid rgba(255,255,255,.08);
   position:relative;overflow:hidden; z-index:3;
   box-shadow: inset 0 10px 20px rgba(0,0,0,.25);
 }
-.track{
-  position:absolute; left:10px; right:10px; top:10px;
-  /* content height grows dynamically */
-}
+.track{position:absolute; left:10px; right:10px; top:10px}
 .cell{
-  height:var(--cell-h);
-  margin-bottom:6px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:var(--sym-size);
-  border-radius:12px; background:rgba(255,255,255,.02);
-  border:1px solid rgba(255,255,255,.06);
+  height:var(--cell-h); margin-bottom:6px; display:flex;align-items:center;justify-content:center;
+  font-size:var(--sym-size); border-radius:12px; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06)
 }
-.cell.mid{ /* the payline cell that ends centered */
-  background:rgba(255,255,255,.03);
-}
-
-/* Reel stopping highlight */
+.cell.mid{background:rgba(255,255,255,.03)}
 .reel.stopped .cell.mid{
-  background:linear-gradient(180deg, rgba(255,214,102,.25), rgba(255,214,102,.08));
-  border-color:rgba(255,214,102,.65);
+  background:linear-gradient(180deg, rgba(255,214,102,.28), rgba(255,214,102,.09));
+  border-color:rgba(255,214,102,.7);
   transform:translateY(-2px) scale(1.02);
-  box-shadow:0 12px 22px rgba(0,0,0,.35), 0 0 26px rgba(255,214,102,.45);
+  box-shadow:0 12px 22px rgba(0,0,0,.35), 0 0 30px rgba(255,214,102,.45);
 }
 
 /* payline */
@@ -105,7 +113,7 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
 .message.win{animation:pulse 1.2s ease 1}
 @keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
 
-/* Win banner */
+/* Win banner (kept for extra hype) */
 .win-banner{
   position:absolute;left:12px;right:12px;bottom:12px;background:linear-gradient(90deg,#ffe082,#ffd166,#ffc400);
   color:#3a2a00;border-radius:12px;padding:12px 16px;font-weight:900;letter-spacing:.6px;text-align:center;
@@ -113,7 +121,7 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
 }
 .win-banner.show{transform:translateY(0);opacity:1}
 
-/* Paytable & Admin */
+/* Paytable */
 .paytable h2{margin:0 0 10px}
 .pt-grid{display:grid;gap:8px}
 .pt-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--card-border);border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01))}
@@ -121,15 +129,36 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
 .pt-row.sub{opacity:.9}
 .rg{color:var(--muted);margin-top:10px}
 
+/* Admin — cleaner */
 .admin h2{margin:0 0 10px}
 .admin.hidden{display:none}
 .admin-row{margin:.25rem 0 .75rem}
 .admin-grid{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:12px}
-.admin input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--card-border);background:#0e1524;color:var(--ink)}
+.admin-item{display:flex;flex-direction:column;gap:6px}
+.admin input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--card-border);background:#0e1524;color:var(--ink);font-weight:700}
+.help{color:var(--muted);font-size:.8rem}
+.admin-subhead{margin:14px 0 6px}
 .admin-actions{display:flex;gap:10px;margin-top:10px}
 .muted{color:var(--muted);font-size:.9rem}
-.odds-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
-.odds-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px dashed var(--card-border);border-radius:10px}
+
+/* Odds grid with bars */
+.odds-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.odds-row{padding:10px 12px;border:1px dashed var(--card-border);border-radius:10px;background:rgba(255,255,255,.02)}
+.odds-line{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-weight:800}
+.odds-bar{height:6px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}
+.odds-bar span{display:block;height:100%;background:linear-gradient(90deg,#1de9b6,#00bfa6)}
+
+/* Win Modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:10000;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.modal.show{opacity:1;pointer-events:auto}
+.modal-content{
+  position:relative;background:linear-gradient(180deg,#101a2a,#0d1526);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:26px 28px;min-width:320px;box-shadow:0 30px 80px rgba(0,0,0,.55);transform:scale(.92);animation:modalIn .28s ease forwards
+}
+@keyframes modalIn{to{transform:scale(1)}}
+.modal-shine{position:absolute;inset:-2px;border-radius:22px;background:conic-gradient(#ffd166,#ff8a65,#4dd0e1,#81c784,#ffd166);filter:saturate(1.3);mix-blend-mode:screen;opacity:.25;pointer-events:none}
+#winTitle{margin:0 0 6px;text-align:center;font-size:24px;letter-spacing:.5px}
+.win-amount{font-size:42px;font-weight:900;text-align:center;margin:6px 0 2px}
+.win-sub{text-align:center;color:var(--muted);margin:0}
 
 /* Celebrations */
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:9999}
