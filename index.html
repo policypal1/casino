@@ -58,6 +58,8 @@
 
         <div class="controls">
           <button id="spinBtn" class="btn spin-btn big"><span class="label">SPIN</span></button>
+          <button id="convertBtn" class="btn">Convert Cash → Spins</button>
+          <button id="cashoutBtn" class="btn danger">Cash Out</button>
         </div>
 
         <div id="message" class="message" role="status" aria-live="polite"></div>
@@ -89,12 +91,21 @@
           <div class="admin-item">
             <label for="adminLuck">Luck Bias (0–100)</label>
             <input type="number" id="adminLuck" min="0" max="100" step="1" />
-            <small class="help">10¢ adds a small bonus automatically.</small>
+            <small class="help">10¢ adds a small baseline bonus automatically.</small>
           </div>
-          <div class="admin-item" style="grid-column:span 2">
+          <div class="admin-item">
             <label for="adminOdds">Odds (Tight ⇄ Loose)</label>
             <input type="range" id="adminOdds" min="0" max="200" step="1" />
             <small class="help">Controls player-favor. 100 = neutral. Diamonds unaffected.</small>
+          </div>
+          <div class="admin-item">
+            <label for="rtpTarget">RTP Target (%)</label>
+            <input type="range" id="rtpTarget" min="70" max="98" step="1" />
+            <small class="help">Aim for ~90% to keep players happy.</small>
+          </div>
+          <div class="admin-item">
+            <label>&nbsp;</label>
+            <button id="autoTune" class="btn primary">Auto-Tune to Target</button>
           </div>
         </div>
 
@@ -107,11 +118,11 @@
         <div class="admin-stats" id="rtpStats"></div>
 
         <div class="admin-actions">
-          <button id="saveAdmin" class="btn primary">Save</button>
+          <button id="saveAdmin" class="btn">Save</button>
           <button id="add10Spins" class="btn">+10 Spins</button>
           <button id="resetStats" class="btn danger">Reset User</button>
         </div>
-        <p class="muted">Passcode: <code>1111</code>. Odds simulate quickly in-browser.</p>
+        <p class="muted">Passcode: <code>1111</code>. Auto-Tune simulates quickly in-browser.</p>
       </section>
     </main>
 
