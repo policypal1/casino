@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
+  <!-- Slow rainbow background across page (kept) -->
   <div class="background-rainbow"></div>
 
   <div class="app" id="appRoot">
@@ -40,7 +41,8 @@
 
     <main>
       <section class="machine card" id="machine">
-        <div class="rainbow-border moving"></div>
+        <!-- Static thick rainbow frame (NOT rotating) -->
+        <div class="rainbow-border"></div>
 
         <header class="machine-bar">
           <div class="machine-title">Lucky Lemons — <span id="machineBet">25¢</span> Mode</div>
@@ -48,24 +50,11 @@
 
         <div class="win-banner" id="winBanner" aria-hidden="true"></div>
 
-        <!-- 3×3 reels -->
+        <!-- 3×3 Cylinder Reels -->
         <div class="reels reels-3x3" aria-live="polite" aria-atomic="true">
-          <!-- each reel has 3 visible cells; we rotate symbols through them -->
-          <div class="reel" id="reel-1">
-            <div class="cell">🍋</div>
-            <div class="cell mid">🍒</div>
-            <div class="cell">🍇</div>
-          </div>
-          <div class="reel" id="reel-2">
-            <div class="cell">🍋</div>
-            <div class="cell mid">🍒</div>
-            <div class="cell">🍇</div>
-          </div>
-          <div class="reel" id="reel-3">
-            <div class="cell">🍋</div>
-            <div class="cell mid">🍒</div>
-            <div class="cell">🍇</div>
-          </div>
+          <div class="reel" id="reel-1"><div class="track"></div></div>
+          <div class="reel" id="reel-2"><div class="track"></div></div>
+          <div class="reel" id="reel-3"><div class="track"></div></div>
           <div class="payline"></div>
         </div>
 
@@ -86,22 +75,10 @@
         <h2>Admin Controls</h2>
         <div class="admin-row"><label>Selected User: <strong id="adminUserLabel">Will</strong></label></div>
         <div class="admin-grid">
-          <div>
-            <label for="adminSpins">Spins Left</label>
-            <input type="number" id="adminSpins" min="0" step="1" />
-          </div>
-          <div>
-            <label for="adminEarned">Total Earned ($)</label>
-            <input type="number" id="adminEarned" min="0" step="0.01" />
-          </div>
-          <div>
-            <label for="adminSpent">Total Spent ($)</label>
-            <input type="number" id="adminSpent" min="0" step="0.01" />
-          </div>
-          <div>
-            <label for="adminLuck">Luck Bias (0–100)</label>
-            <input type="number" id="adminLuck" min="0" max="100" step="1" />
-          </div>
+          <div><label for="adminSpins">Spins Left</label><input type="number" id="adminSpins" min="0" step="1" /></div>
+          <div><label for="adminEarned">Total Earned ($)</label><input type="number" id="adminEarned" min="0" step="0.01" /></div>
+          <div><label for="adminSpent">Total Spent ($)</label><input type="number" id="adminSpent" min="0" step="0.01" /></div>
+          <div><label for="adminLuck">Luck Bias (0–100)</label><input type="number" id="adminLuck" min="0" max="100" step="1" /></div>
         </div>
 
         <h3 style="margin-top:14px">Outcome Probabilities (est.) — Middle Row</h3>
@@ -112,7 +89,7 @@
           <button id="add10Spins" class="btn">+10 Spins</button>
           <button id="resetStats" class="btn danger">Reset User</button>
         </div>
-        <p class="muted">Passcode: <code>1111</code> • Odds simulate quickly in-browser.</p>
+        <p class="muted">Passcode: <code>1111</code>. Odds simulate quickly in-browser.</p>
       </section>
     </main>
 
