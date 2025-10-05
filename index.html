@@ -93,8 +93,13 @@
           </div>
         </div>
 
+        <h3 class="admin-subhead">Symbol Base Chances</h3>
+        <div id="baseChances" class="odds-grid"></div>
+
         <h3 class="admin-subhead">Outcome Probabilities (est.) — Middle Row</h3>
         <div id="oddsGrid" class="odds-grid"></div>
+
+        <div class="admin-stats" id="rtpStats"></div>
 
         <div class="admin-actions">
           <button id="saveAdmin" class="btn primary">Save</button>
@@ -112,13 +117,16 @@
 
   <!-- Win Modal -->
   <div id="winModal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-content">
+    <div class="modal-content" id="winBox">
       <div class="modal-shine"></div>
       <h3 id="winTitle">BIG WIN</h3>
       <div class="win-amount" id="winAmount">$0.00</div>
       <p class="win-sub">Middle row pays</p>
     </div>
   </div>
+
+  <!-- Jackpot flash -->
+  <div id="flashOverlay" class="flash hidden"></div>
 
   <!-- Celebrations -->
   <canvas id="confettiCanvas" class="confetti hidden"></canvas>
