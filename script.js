@@ -1,42 +1,47 @@
-/* Lucky Lemons — 3×3 Cylinder Edition (v15)
-   - Null-safe DOM (prevents “getContext” crash)
-   - Admin launcher at bottom
-   - 10¢ / 25¢ bet toggle
-   - Longer staggered spins (5s, 7s, 10s)
-   - Luck/Odds/RTP controls; passcode 1111
+/* Lucky Lemons — 3×3 Cylinder (v17 generous)
+   - Forced triple-diamond rate (default 3%)
+   - Pity escalator after dry spins
+   - RTP governor to target ~92% by default
+   - Admin at bottom, passcode 1111
 */
 
-// Hoisted helpers (no TDZ issues)
-function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
-const wait = (ms) => new Promise(r => setTimeout(r, ms));
+function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
 
 (() => {
-  // ---------- Config ----------
-  const USERS = ["Will", "Isaac"];
+  // ===== TUNING KNOBS (edit these defaults) =====
+  const DEFAULT_RTP_TARGET = 92;     // % paid back long-run (set 95 for lighter edge)
+  const DEFAULT_RTP_GAIN   = 120;    // strength of auto-correction (0–200)
+  const FORCED_DIAMOND_PCT = 0.03;   // 0.00–0.05 => 0–5% forced 💎💎💎
+  const PITY_START_SPINS   = 2;      // after this many dry spins, start pity
+  const PITY_STEP_LUCK     = 14;     // extra luck added per dry spin
+  const DEFAULT_ODDS       = 150;    // 100 neutral; >100 looser (more wins)
+  const DEFAULT_LUCK       = 18;     // flat bias (0–100)
+  // ==============================================
+
+  const USERS = ["Will","Isaac"];
   const DEFAULT_SPINS = 0;
 
   // Payouts (per 25¢). 10¢ = ×0.4
-  const BASE_PAY_3 = {
-    diamond: 4.50, seven: 2.80, star: 1.70, bell: 1.20,
-    grape: 1.00, orange: 0.82, lemon: 0.65, cherry: 0.55
-  };
+  const BASE_PAY_3 = { diamond:4.50, seven:2.80, star:1.70, bell:1.20, grape:1.00, orange:0.82, lemon:0.65, cherry:0.55 };
   const BASE_PAY_2_CHERRY = 0.12;
   const BASE_PAY_2_OTHER  = 0.06;
 
-  // Base symbol weights (≈ diamond 5%)
+  // Base symbol weights (≈ diamond ~5% raw pick)
   const SYMBOLS = [
-    { k: "cherry",  weight: 20, rank: 1 },
-    { k: "lemon",   weight: 18, rank: 2 },
-    { k: "orange",  weight: 16, rank: 3 },
-    { k: "grape",   weight: 14, rank: 4 },
-    { k: "bell",    weight: 12, rank: 5 },
-    { k: "star",    weight: 10, rank: 6 },
-    { k: "seven",   weight:  5, rank: 7 },
-    { k: "diamond", weight:  5, rank: 8 }
+    { k:"cherry",  weight:20, rank:1 },
+    { k:"lemon",   weight:18, rank:2 },
+    { k:"orange",  weight:16, rank:3 },
+    { k:"grape",   weight:14, rank:4 },
+    { k:"bell",    weight:12, rank:5 },
+    { k:"star",    weight:10, rank:6 },
+    { k:"seven",   weight: 5, rank:7 },
+    { k:"diamond", weight: 5, rank:8 },
   ];
   const TOTAL_WEIGHT = SYMBOLS.reduce((s,x)=>s+x.weight,0);
+  const DIAMOND = SYMBOLS.find(s=>s.k==="diamond");
 
-  // Polished SVGs (non-cartoon)
+  // SVGs (polished)
   const ICON_SVGS = {
     diamond:`<svg viewBox="0 0 100 100" class="ico-base ico-diamond"><defs><linearGradient id="gd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#1e90ff"/></linearGradient></defs><polygon points="20,15 80,15 95,40 50,90 5,40" fill="url(#gd)" stroke="#aee3ff" stroke-width="4" stroke-linejoin="round"/><polyline points="20,15 50,50 80,15" fill="none" stroke="#dff4ff" stroke-width="2" opacity=".7"/></svg>`,
     seven:`<svg viewBox="0 0 100 100" class="ico-base ico-seven"><defs><linearGradient id="g7" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b2f5ea"/><stop offset="1" stop-color="#14b8a6"/></linearGradient></defs><path d="M20 20 H82 L44 86 H22 L58 32 H20 Z" fill="url(#g7)" stroke="#0c3b35" stroke-width="6" stroke-linejoin="round"/></svg>`,
@@ -48,31 +53,34 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
     cherry:`<svg viewBox="0 0 100 100" class="ico-base ico-cherry"><defs><linearGradient id="gc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8a80"/><stop offset="1" stop-color="#e53935"/></linearGradient></defs><path d="M32 34c10 10 22 8 32 0" fill="none" stroke="#2b5e2c" stroke-width="5"/><circle cx="36" cy="62" r="12" fill="url(#gc)" stroke="#5c0b0b" stroke-width="5"/><circle cx="58" cy="62" r="12" fill="url(#gc)" stroke="#5c0b0b" stroke-width="5"/><path d="M50 30 c8-8 16-10 24-10" fill="none" stroke="#2b5e2c" stroke-width="5"/></svg>`
   };
 
-  // ---------- State ----------
-  const storeKey = "lucky-lemons-v15-stats";
+  // ----- State -----
+  const storeKey = "lucky-lemons-v17-stats";
   let stats = loadStats();
-  let currentUser = ["Will", "Isaac"].includes(localStorage.getItem("ll-v15-user"))
-    ? localStorage.getItem("ll-v15-user")
-    : "Will";
-  let betCents = Number(localStorage.getItem("ll-v15-bet")) || 25;
-  if (![10, 25].includes(betCents)) betCents = 25;
+  let currentUser = ["Will","Isaac"].includes(localStorage.getItem("ll-v17-user")) ? localStorage.getItem("ll-v17-user") : "Will";
+  let betCents = Number(localStorage.getItem("ll-v17-bet")) || 25;
+  if (![10,25].includes(betCents)) betCents = 25;
 
-  function loadStats() {
-    try {
-      const raw = JSON.parse(localStorage.getItem(storeKey) || "{}");
-      for (const u of USERS) {
-        if (!raw[u]) raw[u] = { spins: DEFAULT_SPINS, earned: 0, spent: 0, luck: 0, odds: 120, rtpTarget: 90 };
-        if (raw[u].odds == null) raw[u].odds = 120;
-        if (raw[u].rtpTarget == null) raw[u].rtpTarget = 90;
+  function loadStats(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(storeKey)||"{}");
+      for (const u of USERS){
+        if (!raw[u]) raw[u] = {spins:DEFAULT_SPINS, earned:0, spent:0, luck:DEFAULT_LUCK, odds:DEFAULT_ODDS, rtpTarget:DEFAULT_RTP_TARGET, rtpGain:DEFAULT_RTP_GAIN, dry:0, diamond3:FORCED_DIAMOND_PCT};
+        if (raw[u].odds==null) raw[u].odds = DEFAULT_ODDS;
+        if (raw[u].rtpTarget==null) raw[u].rtpTarget = DEFAULT_RTP_TARGET;
+        if (raw[u].rtpGain==null) raw[u].rtpGain = DEFAULT_RTP_GAIN;
+        if (raw[u].luck==null) raw[u].luck = DEFAULT_LUCK;
+        if (raw[u].dry==null) raw[u].dry = 0;
+        if (raw[u].diamond3==null) raw[u].diamond3 = FORCED_DIAMOND_PCT;
       }
       return raw;
-    } catch {
-      return Object.fromEntries(USERS.map(u => [u, { spins: DEFAULT_SPINS, earned: 0, spent: 0, luck: 0, odds: 120, rtpTarget: 90 }]));
+    }catch{
+      const base = {spins:DEFAULT_SPINS, earned:0, spent:0, luck:DEFAULT_LUCK, odds:DEFAULT_ODDS, rtpTarget:DEFAULT_RTP_TARGET, rtpGain:DEFAULT_RTP_GAIN, dry:0, diamond3:FORCED_DIAMOND_PCT};
+      return Object.fromEntries(USERS.map(u=>[u, {...base}]));
     }
   }
   function saveStats(){ localStorage.setItem(storeKey, JSON.stringify(stats)); }
 
-  // ---------- DOM ----------
+  // ----- DOM -----
   const machine = document.getElementById("machine");
   const reelEls = [1,2,3].map(i => document.getElementById(`reel-${i}`));
   const spinBtn = document.getElementById("spinBtn");
@@ -84,7 +92,6 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
   const winTitle  = document.getElementById("winTitle");
   const winAmount = document.getElementById("winAmount");
   const noWinModal = document.getElementById("noWinModal");
-  const flashOverlay = document.getElementById("flashOverlay");
 
   const userSelect = document.getElementById("userSelect");
   const spinsLeftEl = document.getElementById("spinsLeft");
@@ -102,6 +109,11 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
   const adminLuck    = document.getElementById("adminLuck");
   const adminOdds    = document.getElementById("adminOdds");
   const rtpTargetEl  = document.getElementById("rtpTarget");
+  const rtpGainEl    = document.getElementById("rtpGain");
+  const diamond3El   = document.getElementById("diamond3Pct");
+  const pityStartEl  = document.getElementById("pityStart");
+  const pityStepEl   = document.getElementById("pityStep");
+  const dryLabel     = document.getElementById("dryLabel");
   const autoTuneBtn  = document.getElementById("autoTune");
   const saveAdmin    = document.getElementById("saveAdmin");
   const add10Spins   = document.getElementById("add10Spins");
@@ -115,32 +127,34 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
   const payRows = document.getElementById("payRows");
   const payNote = document.getElementById("payNote");
 
-  // FX (null-safe)
+  // FX canvas (null-safe)
   const confettiCanvas = document.getElementById("confettiCanvas");
   const ctx = confettiCanvas ? confettiCanvas.getContext("2d") : null;
-  function resizeCanvas(){
-    if (!confettiCanvas) return;
-    confettiCanvas.width = innerWidth;
-    confettiCanvas.height = innerHeight;
-  }
+  function resizeCanvas(){ if (!confettiCanvas) return; confettiCanvas.width=innerWidth; confettiCanvas.height=innerHeight; }
   resizeCanvas(); window.addEventListener("resize", resizeCanvas);
 
-  // ---------- Init ----------
+  // ----- Init -----
   userSelect.value = currentUser;
   markBet(); renderStats(); renderPaytable(); renderBaseChances(); refreshOdds(); updateSpinEnabled();
   reelEls.forEach(initReelTrack);
 
-  // ---------- RNG & Odds ----------
+  // ----- RNG & Odds -----
   function pickBase(){
     let r = Math.random() * TOTAL_WEIGHT;
-    for (const s of SYMBOLS) { if ((r -= s.weight) <= 0) return s; }
+    for (const s of SYMBOLS){ if ((r -= s.weight) <= 0) return s; }
     return SYMBOLS[SYMBOLS.length-1];
   }
   function effectiveLuck(overrideOdds=null){
     const base = (betCents===10 ? 14 : 0);
-    const odds = (overrideOdds==null) ? (stats[currentUser].odds ?? 120) : overrideOdds;
+    const odds = (overrideOdds==null) ? (stats[currentUser].odds ?? DEFAULT_ODDS) : overrideOdds;
     const extra = (odds - 100) * 0.9;
-    return clamp(stats[currentUser].luck + base + extra, 0, 100);
+    return clamp((stats[currentUser].luck ?? DEFAULT_LUCK) + base + extra, 0, 100);
+  }
+  function pityBonusLuck(){
+    const dry = stats[currentUser].dry || 0;
+    if (dry <= PITY_START_SPINS) return 0;
+    const steps = dry - PITY_START_SPINS;
+    return clamp(steps * PITY_STEP_LUCK, 0, 60);
   }
   function pickBiased(luck){
     const L = clamp(luck,0,100);
@@ -165,14 +179,29 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
     if (a===b || a===c || b===c) return P2O;
     return 0;
   }
-  function upgradeRow(row, luck, overrideOdds=null){
+  // Governor factor based on live RTP vs target
+  function governorBoost(){
+    const s = stats[currentUser];
+    const spent = s.spent || 0;
+    const earned = s.earned || 0;
+    const target = s.rtpTarget ?? DEFAULT_RTP_TARGET;
+    const gain   = s.rtpGain   ?? DEFAULT_RTP_GAIN;
+    if (spent <= 0) return 1 + (gain/600); // be generous early
+    const rtp = 100 * earned / spent;
+    const diff = target - rtp; // + => we are too tight; - => paying too much
+    // Convert diff (±%) into 0.7–1.4 multiplier depending on gain
+    const mult = 1 + clamp(diff/100, -0.25, 0.25) * (gain/100);
+    return clamp(mult, 0.7, 1.4);
+  }
+  function upgradeRow(row, luck){
     const L = clamp(luck,0,100);
-    const oddsScale = ((overrideOdds==null ? (stats[currentUser].odds??120) : overrideOdds) / 100);
-    const rtpTarget = stats[currentUser].rtpTarget ?? 90;
-    const rtpFactor = 1 + (rtpTarget - 90) / 20;
+    const g = governorBoost();         // governor multiplier
+    const oddsScale = (stats[currentUser].odds ?? DEFAULT_ODDS)/100;
 
-    const u  = clamp(0.22 * rtpFactor + (L/120) * 0.9 * oddsScale, 0, 0.75);
-    const u2 = clamp(0.10 * rtpFactor + (L/280) * 0.7 * (0.8 + 0.4*oddsScale), 0, 0.50);
+    // Base upgrade chances (boosted from earlier versions)
+    let u  = 0.28 * g + (L/110) * 0.9 * oddsScale; // create a 2-kind
+    let u2 = 0.14 * g + (L/260) * 0.7 * (0.9 + 0.4*oddsScale); // upgrade 2-kind to 3-kind
+    u = clamp(u, 0, 0.85); u2 = clamp(u2, 0, 0.60);
 
     const k = row.map(r=>r.k);
     const counts={}; k.forEach(x=>counts[x]=(counts[x]||0)+1);
@@ -180,17 +209,20 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
     const hasPair  = Object.values(counts).some(c=>c===2);
 
     if (!hasPair && !hasThree && Math.random()<u){
+      // pick best of row (avoid diamond here so diamond rate stays under admin control)
       const pool = row.slice().sort((a,b)=>a.rank-b.rank);
       let pick = pool[0]; if (pick.k==="diamond") pick = pool[1]||pick;
       row[2] = pick;
     } else if (hasPair && !hasThree && Math.random()<u2){
       let sym = Object.entries(counts).find(([_,c])=>c===2)[0];
-      if (sym!=="diamond") for (let i=0;i<3;i++) if (row[i].k!==sym) row[i]=row.find(r=>r.k===sym);
+      // Allow diamond upgrade occasionally but not always
+      if (sym==="diamond" && Math.random()<0.5) return row;
+      for (let i=0;i<3;i++) if (row[i].k!==sym) row[i]=row.find(r=>r.k===sym);
     }
     return row;
   }
 
-  // ---------- UI ----------
+  // ----- UI -----
   function renderPaytable(){
     const {PAY_3,P2C,P2O} = currentPayouts();
     payNote.textContent = betCents===25 ? "per 25¢ bet" : "per 10¢ bet";
@@ -213,15 +245,20 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
   function renderStats(){
     const s = stats[currentUser];
     spinsLeftEl.textContent = s.spins.toString();
-    totalEarnedEl.textContent = `$${s.earned.toFixed(2)}`;
-    totalSpentEl.textContent  = `$${s.spent.toFixed(2)}`;
-    adminUserLabel.textContent = currentUser;
-    adminSpins.value = s.spins;
-    adminEarned.value = s.earned.toFixed(2);
-    adminSpent.value  = s.spent.toFixed(2);
-    adminLuck.value   = s.luck;
-    adminOdds.value   = s.odds ?? 120;
-    rtpTargetEl.value = s.rtpTarget ?? 90;
+    totalEarnedEl.textContent = `$${(s.earned||0).toFixed(2)}`;
+    totalSpentEl.textContent  = `$${(s.spent||0).toFixed(2)}`;
+    adminUserLabel && (adminUserLabel.textContent = currentUser);
+    adminSpins    && (adminSpins.value = s.spins);
+    adminEarned   && (adminEarned.value = (s.earned||0).toFixed(2));
+    adminSpent    && (adminSpent.value  = (s.spent ||0).toFixed(2));
+    adminLuck     && (adminLuck.value   = s.luck ?? DEFAULT_LUCK);
+    adminOdds     && (adminOdds.value   = s.odds ?? DEFAULT_ODDS);
+    rtpTargetEl   && (rtpTargetEl.value = s.rtpTarget ?? DEFAULT_RTP_TARGET);
+    rtpGainEl     && (rtpGainEl.value   = s.rtpGain   ?? DEFAULT_RTP_GAIN);
+    diamond3El    && (diamond3El.value  = 100*(s.diamond3 ?? FORCED_DIAMOND_PCT));
+    pityStartEl   && (pityStartEl.value = PITY_START_SPINS);
+    pityStepEl    && (pityStepEl.value  = PITY_STEP_LUCK);
+    dryLabel      && (dryLabel.textContent = s.dry ?? 0);
     updateSpinEnabled();
   }
   function markBet(){
@@ -229,21 +266,17 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
     bet25.classList.toggle("active", betCents===25);
     machineBetEl.textContent = betCents===25 ? "25¢" : "10¢";
   }
-  function updateSpinEnabled(){ spinBtn.disabled = stats[currentUser].spins <= 0; }
+  function updateSpinEnabled(){ if (spinBtn) spinBtn.disabled = (stats[currentUser].spins || 0) <= 0; }
 
-  // ---------- Reels ----------
-  const CELL_H = 150 + 6; // height + gap used in CSS
+  // ----- Reels -----
+  const CELL_H = 156;
   function icon(k){ return ICON_SVGS[k]; }
   function initReelTrack(reel){
     const track = reel.querySelector(".track");
     track.innerHTML = "";
     for (let i=0;i<6;i++) track.appendChild(makeCell(icon(randSymbol().k), i===1));
   }
-  function makeCell(svg, isMid=false){
-    const d = document.createElement("div");
-    d.className = "cell" + (isMid ? " mid" : "");
-    d.innerHTML = svg; return d;
-  }
+  function makeCell(svg, isMid=false){ const d=document.createElement("div"); d.className="cell"+(isMid?" mid":""); d.innerHTML=svg; return d; }
   function randSymbol(){ return SYMBOLS[(Math.random()*SYMBOLS.length)|0]; }
 
   async function scrollReelTo(reel, finalCol, totalRows, fakeHops, durationMs){
@@ -255,39 +288,42 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
     track.appendChild(makeCell(icon(finalCol.top.k), false));
     track.appendChild(makeCell(icon(finalCol.mid.k), true));
     track.appendChild(makeCell(icon(finalCol.bot.k), false));
-
     track.style.transform = `translateY(0px)`; track.style.transition = "none";
     void track.offsetHeight;
-
     const distance = -(CELL_H * (totalRows - 3));
     track.style.transition = `transform ${durationMs}ms cubic-bezier(.12,.86,.16,1)`;
     track.style.transform  = `translateY(${distance}px)`;
     await wait(durationMs);
-
     for (let i=0;i<fakeHops;i++){
-      track.style.transition = "transform 180ms ease-out";
-      track.style.transform = `translateY(${distance + 18}px)`; await wait(180);
-      track.style.transition = "transform 210ms ease-in";
-      track.style.transform = `translateY(${distance}px)`; await wait(210);
+      track.style.transition = "transform 180ms ease-out"; track.style.transform = `translateY(${distance + 18}px)`; await wait(180);
+      track.style.transition = "transform 210ms ease-in";  track.style.transform = `translateY(${distance}px)`;       await wait(210);
     }
     reel.classList.add("stopped");
   }
 
-  // ---------- Spin ----------
+  // ----- Spin -----
   let spinning=false;
   async function doSpin(){
     if (spinning) return;
     const s = stats[currentUser];
-    if (s.spins <= 0) { messageEl.textContent = "No spins left. Convert cash or add spins in Admin."; return; }
+    if ((s.spins||0) <= 0){ messageEl.textContent = "No spins left. Convert cash or add spins in Admin."; return; }
 
     spinning=true; machine.classList.add("spinning");
     reelEls.forEach(r=>r.classList.remove("stopped"));
 
-    s.spins -= 1; s.spent = +(s.spent + betCents/100).toFixed(2); saveStats(); renderStats();
+    s.spins -= 1; s.spent = +((s.spent||0) + betCents/100).toFixed(2); saveStats(); renderStats();
 
-    const L = effectiveLuck();
-    let midRow = [pickBiased(L), pickBiased(L), pickBiased(L)];
-    midRow = upgradeRow(midRow, L);
+    // Build row with luck + pity bonus, then governor upgrades
+    const luck = effectiveLuck() + pityBonusLuck();
+    let midRow;
+
+    // Forced 💎💎💎 rate
+    if (Math.random() < (s.diamond3 ?? FORCED_DIAMOND_PCT)){
+      midRow = [DIAMOND, DIAMOND, DIAMOND];
+    } else {
+      midRow = [pickBiased(luck), pickBiased(luck), pickBiased(luck)];
+      midRow = upgradeRow(midRow, luck);
+    }
 
     const finals = [
       {top: randSymbol(), mid: midRow[0], bot: randSymbol()},
@@ -302,94 +338,103 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
     await scrollReelTo(reelEls[2], finals[2], 120, 2, 10000);
 
     const win = calcWinRow(midRow);
-    const triple = (midRow[0].k===midRow[1].k && midRow[1].k===midRow[2].k) ? midRow[0].k : null;
-
     if (win>0){
-      stats[currentUser].earned = +(stats[currentUser].earned + win).toFixed(2);
-      saveStats(); renderStats();
-      winAmount.textContent = `$${win.toFixed(2)}`;
-      winTitle.textContent = (triple==="diamond") ? "JACKPOT!" : (win>=1.5 ? "MEGA WIN!" : "BIG WIN!");
-      winModal.classList.remove("hidden"); winModal.classList.add("show");
-      setTimeout(()=>{ winModal.classList.remove("show"); setTimeout(()=>winModal.classList.add("hidden"), 250); }, 3000);
-      winBanner.textContent = `✨ You won $${win.toFixed(2)} ✨`;
-      winBanner.classList.add("show");
-      setTimeout(()=> winBanner.classList.remove("show"), 2800);
-      if (triple==="diamond"){ flashOverlay.classList.remove("hidden"); flashOverlay.classList.add("show"); setTimeout(()=>{ flashOverlay.classList.remove("show"); setTimeout(()=>flashOverlay.classList.add("hidden"), 200); }, 900); }
-    } else {
-      noWinModal.classList.remove("hidden"); noWinModal.classList.add("show");
-      setTimeout(()=>{ noWinModal.classList.remove("show"); setTimeout(()=>noWinModal.classList.add("hidden"), 220); }, 1600);
+      s.earned = +((s.earned||0) + win).toFixed(2);
+      s.dry = 0;
+      showWin(win, midRow);
+    }else{
+      s.dry = (s.dry||0) + 1;
+      showNoWin();
     }
-
+    saveStats(); renderStats();
     machine.classList.remove("spinning");
     spinning=false;
   }
 
-  // ---------- Money ----------
+  function showWin(win, row){
+    winAmount && (winAmount.textContent = `$${win.toFixed(2)}`);
+    const triple = (row[0].k===row[1].k && row[1].k===row[2].k) ? row[0].k : null;
+    winTitle && (winTitle.textContent = (triple==="diamond") ? "JACKPOT!" : (win>=1.5 ? "MEGA WIN!" : "BIG WIN!"));
+    if (winModal){ winModal.classList.remove("hidden"); winModal.classList.add("show"); setTimeout(()=>{ winModal.classList.remove("show"); setTimeout(()=>winModal.classList.add("hidden"), 250); }, 3000); }
+    if (winBanner){ winBanner.textContent = `✨ You won $${win.toFixed(2)} ✨`; winBanner.classList.add("show"); setTimeout(()=> winBanner.classList.remove("show"), 2800); }
+  }
+  function showNoWin(){
+    if (!noWinModal) return;
+    noWinModal.classList.remove("hidden"); noWinModal.classList.add("show");
+    setTimeout(()=>{ noWinModal.classList.remove("show"); setTimeout(()=>noWinModal.classList.add("hidden"), 220); }, 1400);
+  }
+
+  // ----- Money -----
   convertBtn.addEventListener("click", ()=>{
     const s = stats[currentUser];
-    if (s.earned <= 0) { alert("No cash available to convert."); return; }
+    if ((s.earned||0) <= 0){ alert("No cash available to convert."); return; }
     const bet = betCents/100;
-    const val = prompt(`Convert how much to spins? ($${s.earned.toFixed(2)} available)\nCurrent bet: $${bet.toFixed(2)} per spin`, s.earned.toFixed(2));
+    const val = prompt(`Convert how much to spins? ($${(s.earned||0).toFixed(2)} available)\nCurrent bet: $${bet.toFixed(2)} per spin`, (s.earned||0).toFixed(2));
     if (val==null) return;
     const dollars = Math.max(0, Number(val));
     if (!Number.isFinite(dollars)) return;
     const spinsToAdd = Math.floor(dollars / bet);
-    if (spinsToAdd <= 0) { alert("Amount too small for one spin at current bet."); return; }
+    if (spinsToAdd <= 0){ alert("Amount too small for one spin at current bet."); return; }
     const cost = +(spinsToAdd * bet).toFixed(2);
-    if (cost > s.earned) { alert("Insufficient funds."); return; }
-    s.earned = +(s.earned - cost).toFixed(2);
-    s.spins  += spinsToAdd;
+    if (cost > (s.earned||0)){ alert("Insufficient funds."); return; }
+    s.earned = +((s.earned||0) - cost).toFixed(2);
+    s.spins  = (s.spins||0) + spinsToAdd;
     saveStats(); renderStats();
   });
 
   cashoutBtn.addEventListener("click", ()=>{
     const s = stats[currentUser];
-    if (s.earned <= 0) { alert("Nothing to cash out."); return; }
-    if (confirm(`Cash out $${s.earned.toFixed(2)}? This will reset Earned to $0.00.`)){
+    if ((s.earned||0) <= 0){ alert("Nothing to cash out."); return; }
+    if (confirm(`Cash out $${(s.earned||0).toFixed(2)}? This will reset Earned to $0.00.`)){
       s.earned = 0; saveStats(); renderStats();
     }
   });
 
-  // ---------- Admin ----------
-  let adminUnlocked = localStorage.getItem("ll-v15-admin") === "1";
-  adminToggle.addEventListener("click", ()=>{
+  // ----- Admin -----
+  let adminUnlocked = localStorage.getItem("ll-v17-admin") === "1";
+  adminToggle && adminToggle.addEventListener("click", ()=>{
     if(!adminUnlocked){
       const code = prompt("Enter admin passcode:");
-      if(code==="1111"){ adminUnlocked=true; localStorage.setItem("ll-v15-admin","1"); showAdmin(); }
+      if(code==="1111"){ adminUnlocked=true; localStorage.setItem("ll-v17-admin","1"); showAdmin(); }
       else alert("Incorrect passcode.");
     } else { adminPanel.classList.contains("hidden") ? showAdmin() : hideAdmin(); }
   });
   function showAdmin(){ adminPanel.classList.remove("hidden"); adminPanel.setAttribute("aria-hidden","false"); adminToggle.setAttribute("aria-expanded","true"); adminPanel.focus({preventScroll:true}); refreshOdds(); }
   function hideAdmin(){ adminPanel.classList.add("hidden"); adminPanel.setAttribute("aria-hidden","true"); adminToggle.setAttribute("aria-expanded","false"); }
-  closeAdmin.addEventListener("click", hideAdmin);
+  closeAdmin && closeAdmin.addEventListener("click", hideAdmin);
 
-  saveAdmin.addEventListener("click", ()=>{
+  saveAdmin && saveAdmin.addEventListener("click", ()=>{
+    const s = stats[currentUser];
     const spins  = Math.max(0, Math.floor(Number(adminSpins.value)));
     const earned = Math.max(0, Number(adminEarned.value));
     const spent  = Math.max(0, Number(adminSpent.value));
     let luck     = clamp(Math.floor(Number(adminLuck.value)),0,100);
     let odds     = clamp(Math.floor(Number(adminOdds.value)),0,200);
     let rtpt     = clamp(Math.floor(Number(rtpTargetEl.value)),70,98);
-    if([spins,earned,spent,luck,odds,rtpt].some(v=>!Number.isFinite(v))){ alert("Invalid values."); return; }
-    stats[currentUser]={spins, earned:+earned.toFixed(2), spent:+spent.toFixed(2), luck, odds, rtpTarget:rtpt};
+    let rGain    = clamp(Math.floor(Number(rtpGainEl.value)),0,200);
+    let d3pct    = clamp(Number(diamond3El.value)/100, 0, 0.05);
+    s.spins=spins; s.earned=+earned.toFixed(2); s.spent=+spent.toFixed(2);
+    s.luck=luck; s.odds=odds; s.rtpTarget=rtpt; s.rtpGain=rGain; s.diamond3=d3pct;
     saveStats(); renderStats(); refreshOdds(); hideAdmin();
   });
-  add10Spins.addEventListener("click", ()=>{ stats[currentUser].spins += 10; saveStats(); renderStats(); refreshOdds(); });
-  resetStatsBtn.addEventListener("click", ()=>{
+
+  add10Spins && add10Spins.addEventListener("click", ()=>{ stats[currentUser].spins = (stats[currentUser].spins||0)+10; saveStats(); renderStats(); refreshOdds(); });
+  resetStatsBtn && resetStatsBtn.addEventListener("click", ()=>{
     if(confirm(`Reset stats for ${currentUser}?`)){
-      stats[currentUser] = {spins:DEFAULT_SPINS, earned:0, spent:0, luck:0, odds:120, rtpTarget:90};
+      stats[currentUser] = {spins:DEFAULT_SPINS, earned:0, spent:0, luck:DEFAULT_LUCK, odds:DEFAULT_ODDS, rtpTarget:DEFAULT_RTP_TARGET, rtpGain:DEFAULT_RTP_GAIN, dry:0, diamond3:FORCED_DIAMOND_PCT};
       saveStats(); renderStats(); refreshOdds();
     }
   });
 
-  userSelect.addEventListener("change", ()=>{ currentUser=userSelect.value; localStorage.setItem("ll-v15-user", currentUser); renderStats(); refreshOdds(); hideAdmin(); });
+  userSelect.addEventListener("change", ()=>{ currentUser=userSelect.value; localStorage.setItem("ll-v17-user", currentUser); renderStats(); refreshOdds(); hideAdmin(); });
 
-  // ---------- Bet toggle ----------
-  bet10.addEventListener("click", ()=>{ betCents=10; localStorage.setItem("ll-v15-bet","10"); markBet(); renderPaytable(); refreshOdds(); });
-  bet25.addEventListener("click", ()=>{ betCents=25; localStorage.setItem("ll-v15-bet","25"); markBet(); renderPaytable(); refreshOdds(); });
+  // Bet toggle
+  bet10.addEventListener("click", ()=>{ betCents=10; localStorage.setItem("ll-v17-bet","10"); markBet(); renderPaytable(); refreshOdds(); });
+  bet25.addEventListener("click", ()=>{ betCents=25; localStorage.setItem("ll-v17-bet","25"); markBet(); renderPaytable(); refreshOdds(); });
 
-  // ---------- Base chances + Odds UI ----------
+  // Base chances / Odds display
   function renderBaseChances(){
+    if (!baseChances) return;
     const rows = SYMBOLS.slice().reverse().map(s=>{
       const pct = (100*s.weight/TOTAL_WEIGHT);
       return `
@@ -403,16 +448,25 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
   function labelFor(k){ return {diamond:"💎",seven:"7️⃣",star:"⭐",bell:"🔔",grape:"🍇",orange:"🍊",lemon:"🍋",cherry:"🍒"}[k]; }
 
   function refreshOdds(){
-    const L = effectiveLuck();
+    if (!oddsGrid) return;
+    const s = stats[currentUser];
     const trials = 8000;
     let c3 = {diamond:0, seven:0, star:0, bell:0, grape:0, orange:0, lemon:0, cherry:0};
     let twoCherry=0, twoOther=0, none=0, totalPaid=0;
+    const d3 = s.diamond3 ?? FORCED_DIAMOND_PCT;
     for(let i=0;i<trials;i++){
-      let row=[pickBiased(L), pickBiased(L), pickBiased(L)];
-      row = upgradeRow(row, L);
-      const p = calcWinRow(row);
+      let midRow;
+      if (Math.random()<d3){
+        midRow=[DIAMOND,DIAMOND,DIAMOND];
+      } else {
+        const L = effectiveLuck() + pityBonusLuck();
+        let row=[pickBiased(L), pickBiased(L), pickBiased(L)];
+        row = upgradeRow(row, L);
+        midRow=row;
+      }
+      const p = calcWinRow(midRow);
       totalPaid += p;
-      const [a,b,c]=row.map(x=>x.k);
+      const [a,b,c]=midRow.map(x=>x.k);
       if (a===b && b===c){ c3[a]++; continue; }
       const cherries=[a,b,c].filter(k=>k==="cherry").length;
       if (cherries===2) twoCherry++;
@@ -421,33 +475,22 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
     }
     const makeRow = (label, val) => {
       const pct = (100*val/trials);
-      return `
-        <div class="odds-row">
-          <div class="odds-line"><span>${label}</span><span>${pct.toFixed(2)}%</span></div>
-          <div class="odds-bar"><span style="width:${pct}%;"></span></div>
-        </div>`;
+      return `<div class="odds-row"><div class="odds-line"><span>${label}</span><span>${pct.toFixed(2)}%</span></div><div class="odds-bar"><span style="width:${pct}%"></span></div></div>`;
     };
     oddsGrid.innerHTML =
-      makeRow("💎💎💎", c3.diamond) +
-      makeRow("7️⃣7️⃣7️⃣", c3.seven) +
-      makeRow("⭐⭐⭐", c3.star) +
-      makeRow("🔔🔔🔔", c3.bell) +
-      makeRow("🍇🍇🍇", c3.grape) +
-      makeRow("🍊🍊🍊", c3.orange) +
-      makeRow("🍋🍋🍋", c3.lemon) +
-      makeRow("🍒🍒🍒", c3.cherry) +
-      makeRow("🍒🍒X (exactly two)", twoCherry) +
-      makeRow("Any other 2-of-a-kind", twoOther) +
+      makeRow("💎💎💎", c3.diamond) + makeRow("7️⃣7️⃣7️⃣", c3.seven) + makeRow("⭐⭐⭐", c3.star) +
+      makeRow("🔔🔔🔔", c3.bell) + makeRow("🍇🍇🍇", c3.grape) + makeRow("🍊🍊🍊", c3.orange) +
+      makeRow("🍋🍋🍋", c3.lemon) + makeRow("🍒🍒🍒", c3.cherry) +
+      makeRow("🍒🍒X (exactly two)", twoCherry) + makeRow("Any other 2-of-a-kind", twoOther) +
       makeRow("No win", none);
 
     const bet = betCents/100;
     const rtp = 100 * (totalPaid / trials) / bet;
     const hitRate = 100 * (trials - none) / trials;
-    const target = stats[currentUser].rtpTarget ?? 90;
-    rtpStats.innerHTML = `Estimated Hit Rate: <b>${hitRate.toFixed(1)}%</b> · Estimated RTP: <b>${rtp.toFixed(1)}%</b> · Target: <b>${target}%</b> · Odds: <b>${stats[currentUser].odds}%</b>`;
+    rtpStats && (rtpStats.innerHTML = `Estimated Hit Rate: <b>${hitRate.toFixed(1)}%</b> · Estimated RTP: <b>${rtp.toFixed(1)}%</b> · Target: <b>${s.rtpTarget ?? DEFAULT_RTP_TARGET}%</b> · Odds: <b>${s.odds ?? DEFAULT_ODDS}%</b> · Diamond 3×: <b>${((s.diamond3 ?? FORCED_DIAMOND_PCT)*100).toFixed(1)}%</b>`);
   }
 
-  // ---------- Spin controls ----------
+  // Controls
   spinBtn.addEventListener("click", ()=> doSpin());
   window.addEventListener("keydown", (e)=>{ if(e.code==="Space"){ e.preventDefault(); doSpin(); } });
 })();
