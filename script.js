@@ -1,14 +1,10 @@
-=/* Lucky Lemons — 3×3 Cylinder Edition (v14)
-   Fix: hoist clamp() to remove TDZ error, so Admin + Bet toggle work again.
-   Admin launcher is now at the bottom (below the pay table).
-*/
+/* Lucky Lemons — 3×3 Cylinder Edition (v14) */
+
+// HOISTED helpers (prevents TDZ issues)
+function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
+
 (() => {
-  // --- small helpers (HOISTED) ---
-  function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); } // <-- declared first
-
-  const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
-
-  // ---------- Config ----------
   const USERS = ["Will", "Isaac"];
   const DEFAULT_SPINS = 0;
 
@@ -28,7 +24,7 @@
     { k: "bell",    weight: 12, rank: 5 },
     { k: "star",    weight: 10, rank: 6 },
     { k: "seven",   weight:  5, rank: 7 },
-    { k: "diamond", weight:  5, rank: 8 } // fixed at ~5%
+    { k: "diamond", weight:  5, rank: 8 }
   ];
   const TOTAL_WEIGHT = SYMBOLS.reduce((s,x)=>s+x.weight,0);
 
@@ -43,7 +39,7 @@
     cherry:`<svg viewBox="0 0 100 100" class="ico-base ico-cherry"><defs><linearGradient id="gc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--a)"/><stop offset="1" stop-color="var(--b)"/></linearGradient></defs><path d="M32 34c10 10 22 8 32 0" fill="none" stroke="#2b5e2c" stroke-width="5"/><circle cx="36" cy="62" r="12" fill="url(#gc)" stroke="#5c0b0b" stroke-width="5"/><circle cx="58" cy="62" r="12" fill="url(#gc)" stroke="#5c0b0b" stroke-width="5"/><path d="M50 30 c8-8 16-10 24-10" fill="none" stroke="#2b5e2c" stroke-width="5"/></svg>`
   };
 
-  // ---------- State ----------
+  // State
   const storeKey = "lucky-lemons-v14-stats";
   let stats = loadStats();
   let currentUser = ["Will","Isaac"].includes(localStorage.getItem("ll-v14-user")) ? localStorage.getItem("ll-v14-user") : "Will";
@@ -65,7 +61,7 @@
   }
   function saveStats(){ localStorage.setItem(storeKey, JSON.stringify(stats)); }
 
-  // ---------- DOM ----------
+  // DOM
   const machine = document.getElementById("machine");
   const reelEls = [1,2,3].map(i => document.getElementById(`reel-${i}`));
   const spinBtn = document.getElementById("spinBtn");
@@ -109,18 +105,17 @@
   const payRows = document.getElementById("payRows");
   const payNote = document.getElementById("payNote");
 
-  // FX
   const confettiCanvas = document.getElementById("confettiCanvas");
   const ctx = confettiCanvas.getContext("2d");
   const balloonLayer = document.getElementById("balloonLayer");
   resizeCanvas(); window.addEventListener("resize", resizeCanvas);
 
-  // ---------- Init ----------
+  // Init
   userSelect.value = currentUser;
   markBet(); renderStats(); renderPaytable(); renderBaseChances(); refreshOdds(); updateSpinEnabled();
   reelEls.forEach(initReelTrack);
 
-  // ---------- RNG & Odds ----------
+  // RNG & odds
   function pickBase(){
     let r = Math.random() * TOTAL_WEIGHT;
     for (const s of SYMBOLS) { if ((r -= s.weight) <= 0) return s; }
@@ -162,7 +157,7 @@
     const rtpFactor = 1 + (rtpTarget - 90) / 20;
 
     const u  = clamp(0.22 * rtpFactor + (L/120) * 0.9 * oddsScale, 0, 0.75);
-    let   u2 = clamp(0.10 * rtpFactor + (L/280) * 0.7 * (0.8 + 0.4*oddsScale), 0, 0.50);
+    const u2 = clamp(0.10 * rtpFactor + (L/280) * 0.7 * (0.8 + 0.4*oddsScale), 0, 0.50);
 
     const k = row.map(r=>r.k);
     const counts={}; k.forEach(x=>counts[x]=(counts[x]||0)+1);
@@ -180,7 +175,7 @@
     return row;
   }
 
-  // ---------- UI ----------
+  // UI
   function renderPaytable(){
     const {PAY_3,P2C,P2O} = currentPayouts();
     payNote.textContent = betCents===25 ? "per 25¢ bet" : "per 10¢ bet";
@@ -221,7 +216,7 @@
   }
   function updateSpinEnabled(){ spinBtn.disabled = stats[currentUser].spins <= 0; }
 
-  // ---------- Reels ----------
+  // Reels
   const CELL_H = 150 + 6;
   function icon(k){ return ICON_SVGS[k]; }
   function initReelTrack(reel){
@@ -263,12 +258,12 @@
     reel.classList.add("stopped");
   }
 
-  // ---------- Spin ----------
+  // Spin
   let spinning=false;
   async function doSpin(){
     if (spinning) return;
     const s = stats[currentUser];
-    if (s.spins <= 0) { flash("No spins left. Convert cash or add spins in Admin."); return; }
+    if (s.spins <= 0) { messageEl.textContent = "No spins left. Convert cash or add spins in Admin."; return; }
 
     spinning=true; machine.classList.add("spinning");
     reelEls.forEach(r=>r.classList.remove("stopped"));
@@ -297,22 +292,20 @@
     if (win>0){
       stats[currentUser].earned = +(stats[currentUser].earned + win).toFixed(2);
       saveStats(); renderStats();
-      celebrate(win);
-      if (symTriple==="diamond") jackpotBlast(win);
-      else if (win >= 1.50) showWinModal("MEGA WIN", win);
-      else showWinModal("BIG WIN", win);
-      flash(`Win $${win.toFixed(2)} on the middle row!`);
+      winBanner.textContent = `✨ ${win >= 1.5 ? (symTriple==="diamond"?"JACKPOT":"MEGA WIN") : "BIG WIN"} — $${win.toFixed(2)} ✨`;
+      winBanner.classList.add("show");
+      setTimeout(()=> winBanner.classList.remove("show"), 2800);
     } else {
-      showNoWinModal();
-      flash("No win. Try again!");
+      const noWinModal = document.getElementById("noWinModal");
+      noWinModal.classList.add("show"); noWinModal.classList.remove("hidden");
+      setTimeout(()=>{ noWinModal.classList.remove("show"); setTimeout(()=>noWinModal.classList.add("hidden"), 220); }, 1600);
     }
+
     machine.classList.remove("spinning");
     spinning=false;
   }
 
-  function flash(t){ messageEl.textContent = t; }
-
-  // ---------- Money controls ----------
+  // Money
   convertBtn.addEventListener("click", ()=>{
     const s = stats[currentUser];
     if (s.earned <= 0) { alert("No cash available to convert."); return; }
@@ -328,53 +321,24 @@
     s.earned = +(s.earned - cost).toFixed(2);
     s.spins  += spinsToAdd;
     saveStats(); renderStats();
-    alert(`Converted $${cost.toFixed(2)} → ${spinsToAdd} spins.`);
   });
 
   cashoutBtn.addEventListener("click", ()=>{
     const s = stats[currentUser];
     if (s.earned <= 0) { alert("Nothing to cash out."); return; }
     if (confirm(`Cash out $${s.earned.toFixed(2)}? This will reset Earned to $0.00.`)){
-      s.earned = 0; saveStats(); renderStats(); alert("Cashed out. (Demo)");
+      s.earned = 0; saveStats(); renderStats();
     }
   });
 
-  // ---------- Celebrations ----------
-  function celebrate(amount){
-    const tier = amount>=3 ? "JACKPOT" : amount>=1.5 ? "MEGA WIN" : "BIG WIN";
-    winBanner.textContent = `✨ ${tier}! You won $${amount.toFixed(2)} ✨`;
-    winBanner.classList.add("show");
-    setTimeout(()=> winBanner.classList.remove("show"), 2800);
-  }
-  function showWinModal(title, amount){
-    winTitle.textContent = title;
-    winAmount.textContent = `$${amount.toFixed(2)}`;
-    winModal.classList.add("show"); winModal.classList.remove("hidden");
-    setTimeout(()=>{ winModal.classList.remove("show"); setTimeout(()=>winModal.classList.add("hidden"), 250); }, 3000);
-    winModal.addEventListener("click", ()=>{ winModal.classList.remove("show"); setTimeout(()=>winModal.classList.add("hidden"), 250); }, { once:true });
-  }
-  function showNoWinModal(){
-    noWinModal.classList.add("show"); noWinModal.classList.remove("hidden");
-    setTimeout(()=>{ noWinModal.classList.remove("show"); setTimeout(()=>noWinModal.classList.add("hidden"), 220); }, 1600);
-    noWinModal.addEventListener("click", ()=>{ noWinModal.classList.remove("show"); setTimeout(()=>noWinModal.classList.add("hidden"), 220); }, { once:true });
-  }
-  function jackpotBlast(){
-    flashOverlay.classList.remove("hidden");
-    flashOverlay.classList.add("show");
-    setTimeout(()=>{ flashOverlay.classList.remove("show"); setTimeout(()=>flashOverlay.classList.add("hidden"), 200); }, 900);
-  }
-  function resizeCanvas(){ confettiCanvas.width=innerWidth; confettiCanvas.height=innerHeight; }
-
-  // ---------- Admin & Odds ----------
+  // Admin
   let adminUnlocked = localStorage.getItem("ll-v14-admin") === "1";
   adminToggle.addEventListener("click", ()=>{
     if(!adminUnlocked){
-      const code = prompt("Enter admin passcode:");
+      const code = prompt("Enter admin passcode:"); 
       if(code==="1111"){ adminUnlocked=true; localStorage.setItem("ll-v14-admin","1"); showAdmin(); }
       else alert("Incorrect passcode.");
-    } else {
-      adminPanel.classList.contains("hidden") ? showAdmin() : hideAdmin();
-    }
+    } else { adminPanel.classList.contains("hidden") ? showAdmin() : hideAdmin(); }
   });
   function showAdmin(){ adminPanel.classList.remove("hidden"); adminPanel.setAttribute("aria-hidden","false"); adminToggle.setAttribute("aria-expanded","true"); adminPanel.focus({preventScroll:true}); refreshOdds(); }
   function hideAdmin(){ adminPanel.classList.add("hidden"); adminPanel.setAttribute("aria-hidden","true"); adminToggle.setAttribute("aria-expanded","false"); }
@@ -401,11 +365,11 @@
 
   userSelect.addEventListener("change", ()=>{ currentUser=userSelect.value; localStorage.setItem("ll-v14-user", currentUser); renderStats(); refreshOdds(); hideAdmin(); });
 
-  // BET TOGGLE
+  // Bet toggle
   bet10.addEventListener("click", ()=>{ betCents=10; localStorage.setItem("ll-v14-bet","10"); markBet(); renderPaytable(); refreshOdds(); });
   bet25.addEventListener("click", ()=>{ betCents=25; localStorage.setItem("ll-v14-bet","25"); markBet(); renderPaytable(); refreshOdds(); });
 
-  // Base chances
+  // Base chances UI
   function renderBaseChances(){
     const rows = SYMBOLS.slice().reverse().map(s=>{
       const pct = (100*s.weight/TOTAL_WEIGHT);
@@ -421,7 +385,7 @@
     return {diamond:"💎",seven:"7️⃣",star:"⭐",bell:"🔔",grape:"🍇",orange:"🍊",lemon:"🍋",cherry:"🍒"}[k];
   }
 
-  // Monte Carlo summary
+  // Monte Carlo odds
   function refreshOdds(){
     const L = effectiveLuck();
     const trials = 8000;
@@ -467,7 +431,10 @@
     rtpStats.innerHTML = `Estimated Hit Rate: <b>${hitRate.toFixed(1)}%</b> · Estimated RTP: <b>${rtp.toFixed(1)}%</b> · Target: <b>${target}%</b> · Odds: <b>${stats[currentUser].odds}%</b>`;
   }
 
-  // Controls
+  // Spin controls
   spinBtn.addEventListener("click", ()=> doSpin());
   window.addEventListener("keydown", (e)=>{ if(e.code==="Space"){ e.preventDefault(); doSpin(); } });
+
+  // mark app booted (used by the html helper)
+  window.LL_READY = true;
 })();
