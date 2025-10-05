@@ -1,166 +1,247 @@
-*{box-sizing:border-box}
-:root{
-  --bg:#0c1016; --ink:#e9f1ff; --muted:#9fb3c8;
-  --accent:#35d2a8; --accent-2:#ffd166; --danger:#ff5a5f;
-  --frame:#0f1729; --card:#111827;
-  --card-border:rgba(255,255,255,.06);
-  --shadow:0 10px 25px rgba(0,0,0,.35);
-  --radius:18px;
-}
-html,body{height:100%}
-body{
-  margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-  background: radial-gradient(1200px 600px at 10% -10%, #142034 0%, var(--bg) 45%) no-repeat, var(--bg);
-  color:var(--ink);
-}
-.app{max-width:960px;margin:0 auto;padding:22px}
+/* Lucky Lemons — 3-Reel Slot (clean header, crisp spin, rainbow lights, user stats) */
+(() => {
+  // ----- Config -----
+  const USERS = ["Will", "Isaac"];
+  const DEFAULT_SPINS = 20;
 
-/* Top bar — compact, seamless */
-.topbar{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px
-}
-.brand{margin:0;font-size:clamp(18px,2.6vw,26px);font-weight:800;letter-spacing:.2px}
-.logo{filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
-.hud{
-  display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:999px;
-  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
-  border:1px solid var(--card-border);
-}
-.userpick{display:flex;align-items:center;gap:6px;color:var(--muted)}
-.userpick select{
-  padding:6px 10px;border-radius:10px;border:1px solid var(--card-border);
-  background:#0f1730;color:var(--ink)
-}
-.divider{width:1px;height:20px;background:var(--card-border)}
-.stat{display:flex;gap:6px;align-items:center;color:var(--muted);font-weight:800}
-.stat .k{opacity:.9}
-.stat .v{color:var(--ink)}
-.btn{
-  background:#1a2438;color:var(--ink);border:1px solid rgba(255,255,255,.12);
-  padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800;letter-spacing:.3px;
-  transition:.18s;box-shadow:var(--shadow)
-}
-.btn.ghost{background:transparent}
-.btn.primary{background:linear-gradient(90deg, #1de9b6, #00bfa6);color:#001b18;border:none}
-.btn.big{font-size:18px;padding:12px 18px;border-radius:14px}
-.btn:hover{transform:translateY(-1px)}
-.btn:disabled{opacity:.6;cursor:not-allowed}
+  const SYMBOLS = [
+    { k: "cherry",  glyph: "🍒", weight: 25 },
+    { k: "lemon",   glyph: "🍋", weight: 20 },
+    { k: "orange",  glyph: "🍊", weight: 15 },
+    { k: "grape",   glyph: "🍇", weight: 12 },
+    { k: "bell",    glyph: "🔔", weight: 10 },
+    { k: "star",    glyph: "⭐", weight:  8 },
+    { k: "seven",   glyph: "7️⃣", weight:  6 },
+    { k: "diamond", glyph: "💎", weight:  4 },
+  ];
 
-/* Cards */
-.card{
-  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
-  border:1px solid var(--card-border);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:18px;
-}
+  const PAY_3 = {
+    cherry: 0.53, lemon: 0.70, orange: 0.88, grape: 1.23,
+    bell: 1.75, star: 2.80, seven: 5.25, diamond: 8.75
+  };
+  const PAY_2_CHERRY = 0.14;
+  const PAY_2_OTHER  = 0.07;
 
-/* Machine */
-.machine{padding:22px;margin-bottom:16px;position:relative;overflow:hidden}
-.win-banner{
-  position:absolute;left:12px;right:12px;bottom:12px;
-  background:linear-gradient(90deg,#ffe082,#ffd166,#ffc400);
-  color:#3a2a00;border-radius:12px;padding:10px 14px;font-weight:900;letter-spacing:.5px;
-  text-align:center;box-shadow:var(--shadow);transform:translateY(150%);opacity:0;
-  transition:transform .45s cubic-bezier(.2,.8,.2,1), opacity .45s;
-}
-.win-banner.show{transform:translateY(0);opacity:1}
+  // ----- State -----
+  const storeKey = "lucky-lemons-v3-stats";
+  let stats = loadStats();
+  let currentUser = USERS.includes(localStorage.getItem("ll-v3-user")) ? localStorage.getItem("ll-v3-user") : USERS[0];
 
-/* Reels + rainbow lights frame */
-.reels{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
-  background:var(--frame);border-radius:14px;padding:18px;border:1px solid var(--card-border);
-  position:relative;overflow:hidden;
-}
+  function loadStats() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(storeKey) || "{}");
+      for (const u of USERS) {
+        if (!raw[u]) raw[u] = { spins: DEFAULT_SPINS, earned: 0 };
+        if (!Number.isFinite(raw[u].spins)) raw[u].spins = DEFAULT_SPINS;
+        if (!Number.isFinite(raw[u].earned)) raw[u].earned = 0;
+      }
+      return raw;
+    } catch {
+      return Object.fromEntries(USERS.map(u => [u, { spins: DEFAULT_SPINS, earned: 0 }]));
+    }
+  }
+  function saveStats(){ localStorage.setItem(storeKey, JSON.stringify(stats)); }
 
-/* Rotating rainbow border */
-.lightframe::before{
-  content:""; position:absolute; inset:-2px; border-radius:16px; z-index:0;
-  background:conic-gradient(#ff4d4f, #ffcd3c, #2ee59d, #40c4ff, #a78bfa, #ff4d4f);
-  filter:saturate(1.4); mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude; padding:2px; opacity:.0;
-  transition:opacity .2s ease;
-}
-.machine.spinning .lightframe::before{opacity:.9; animation:spinRainbow 2.2s linear infinite}
-@keyframes spinRainbow { to { transform: rotate(1turn); } }
+  // ----- DOM -----
+  const app = document.getElementById("appRoot");
+  const reelEls = [1,2,3].map(i => document.getElementById(`reel-${i}`));
+  const messageEl = document.getElementById("message");
+  const spinBtn = document.getElementById("spinBtn");
+  const userSelect = document.getElementById("userSelect");
+  const spinsLeftEl = document.getElementById("spinsLeft");
+  const totalEarnedEl = document.getElementById("totalEarned");
+  const adminToggle = document.getElementById("adminToggle");
+  const adminPanel = document.getElementById("adminPanel");
+  const adminUserLabel = document.getElementById("adminUserLabel");
+  const adminSpins = document.getElementById("adminSpins");
+  const adminEarned = document.getElementById("adminEarned");
+  const saveAdmin = document.getElementById("saveAdmin");
+  const add10Spins = document.getElementById("add10Spins");
+  const resetStatsBtn = document.getElementById("resetStats");
+  const winBanner = document.getElementById("winBanner");
 
-/* LED strip at bottom */
-.reels::after{
-  content:""; position:absolute; left:0; right:0; bottom:0; height:8px; z-index:1;
-  background:
-    radial-gradient(6px 6px at 6px 50%, #ffd166 50%, transparent 52%),
-    radial-gradient(6px 6px at 30px 50%, #76e4f7 50%, transparent 52%),
-    radial-gradient(6px 6px at 54px 50%, #a78bfa 50%, transparent 52%),
-    radial-gradient(6px 6px at 78px 50%, #ff8a80 50%, transparent 52%);
-  background-size:96px 100%;
-  filter:saturate(1.3) drop-shadow(0 2px 6px rgba(0,0,0,.4));
-  opacity:.0; transition:opacity .2s ease;
-  animation:chase 1.2s linear infinite paused;
-}
-.machine.spinning .reels::after{opacity:.9; animation-play-state:running}
-@keyframes chase { to { background-position:96px 0 } }
+  // Confetti
+  const confettiCanvas = document.getElementById("confettiCanvas");
+  const ctx = confettiCanvas.getContext("2d");
 
-.reel{
-  height:120px;background:linear-gradient(180deg,#0b1222,#0f192d);
-  border-radius:12px;border:1px solid rgba(255,255,255,.08);
-  display:flex;align-items:center;justify-content:center;
-  font-size:64px;box-shadow: inset 0 10px 20px rgba(0,0,0,.25);
-  position:relative;overflow:hidden; z-index:2;
-}
-.symbol{transform:translateY(0);}
+  // Init
+  userSelect.value = currentUser;
+  renderStats();
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
 
-/* Crisp motion (no blur) + slight punch on stop */
-.reel.spinning .symbol{transform:translateY(0) scale(1)}
-.reel.stop .symbol{animation:pop .18s ease}
-@keyframes pop{0%{transform:scale(0.96)}100%{transform:scale(1)}}
+  // RNG
+  const totalWeight = SYMBOLS.reduce((s, x) => s + x.weight, 0);
+  function pickSymbol() {
+    let r = Math.random() * totalWeight;
+    for (const s of SYMBOLS) { if ((r -= s.weight) <= 0) return s; }
+    return SYMBOLS[SYMBOLS.length - 1];
+  }
 
-/* Win glow */
-.reel.win{
-  animation:glow 1200ms ease-in-out 1;
-  box-shadow:0 0 0 rgba(0,0,0,0), inset 0 10px 20px rgba(0,0,0,.25);
-}
-@keyframes glow{
-  0%{box-shadow:0 0 0 rgba(255,255,255,0)}
-  30%{box-shadow:0 0 24px rgba(255,214,102,.9), 0 0 60px rgba(255,214,102,.5)}
-  100%{box-shadow:0 0 0 rgba(255,255,255,0)}
-}
+  // Spin flow with ramp → steady → slow
+  spinBtn.addEventListener("click", async () => {
+    const s = stats[currentUser];
+    if (s.spins <= 0) { flash("No spins left. Ask admin to add more."); nudge(spinBtn); return; }
 
-.controls{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;justify-content:center}
-.message{margin-top:10px;min-height:24px;color:var(--accent-2);font-weight:800;letter-spacing:.3px}
-.message.win{animation:pulse 1.2s ease 1}
-@keyframes pulse{
-  0%{transform:scale(1);text-shadow:none}
-  40%{transform:scale(1.06);text-shadow:0 0 18px rgba(255,209,102,.9)}
-  100%{transform:scale(1);text-shadow:none}
-}
+    lock(true);
+    app.querySelector(".machine").classList.add("spinning");
 
-/* Paytable — simpler rows */
-.paytable h2{margin:0 0 10px}
-.pt-grid{display:grid;gap:8px}
-.pt-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 12px;border:1px solid var(--card-border);border-radius:10px;
-  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
-}
-.pt-row b{font-size:1.02rem}
-.pt-row.sub{opacity:.9}
-.rg{color:var(--muted);margin-top:10px}
+    s.spins -= 1; saveStats(); renderStats();
 
-/* Admin */
-.admin h2{margin:0 0 10px}
-.admin.hidden{display:none}
-.admin-row{margin:.25rem 0 .75rem}
-.admin-grid{display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:12px}
-.admin input{
-  width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--card-border);
-  background:#0e1524;color:var(--ink)
-}
-.admin-actions{display:flex;gap:10px;margin-top:10px}
-.muted{color:var(--muted);font-size:.9rem}
+    const results = [pickSymbol(), pickSymbol(), pickSymbol()];
 
-/* Confetti canvas */
-.confetti{position:fixed;inset:0;pointer-events:none;z-index:9999}
-.hidden{display:none}
+    // Spin reels with easing and stagger
+    for (let i = 0; i < 3; i++) {
+      await spinReel(reelEls[i], results[i], i);
+    }
 
-.foot{margin-top:18px;color:var(--muted);text-align:center}
+    const win = calcWin(results);
+    clearWinClasses();
+    if (win > 0) {
+      s.earned = +(s.earned + win).toFixed(2); saveStats(); renderStats();
+      highlightWinners(results);
+      celebrate(win);
+    } else {
+      flash("No win. Try again!");
+    }
+
+    app.querySelector(".machine").classList.remove("spinning");
+    lock(false);
+  });
+
+  function calcWin(results) {
+    const a = results[0].k, b = results[1].k, c = results[2].k;
+    if (a === b && b === c) return +(PAY_3[a] || 0).toFixed(2);
+    const cherries = [a,b,c].filter(k => k === "cherry").length;
+    if (cherries === 2) return PAY_2_CHERRY;
+    if (a===b || a===c || b===c) return PAY_2_OTHER;
+    return 0;
+  }
+
+  async function spinReel(el, finalSymbol, reelIndex) {
+    el.classList.add("spinning");
+    const symEl = el.querySelector(".symbol");
+
+    // Total cycles + easing profile
+    const total = 36 + Math.floor(Math.random() * 10); // number of symbol swaps
+    for (let i = 0; i < total; i++) {
+      // During spin we show random symbols (crisp, no blur)
+      symEl.textContent = pickSymbol().glyph;
+
+      // Easing: start fast → slow down; plus stagger per reel
+      const t = i / total;
+      const ease = 40 + 20 * t + 300 * t*t; // quadratic slowdown
+      const stagger = reelIndex * 90;
+      await wait(ease + stagger);
+    }
+
+    // Land on final symbol
+    symEl.textContent = finalSymbol.glyph;
+    el.classList.remove("spinning");
+    el.classList.add("stop");
+    await wait(160);
+    el.classList.remove("stop");
+  }
+
+  function highlightWinners([a,b,c]) {
+    if (a.k === b.k && b.k === c.k) { reelEls.forEach(el => el.classList.add("win")); return; }
+    const arr = [a.k,b.k,c.k];
+    const cherryCount = arr.filter(k => k === "cherry").length;
+    if (cherryCount === 2) { arr.forEach((k,i)=>{ if(k==="cherry") reelEls[i].classList.add("win"); }); return; }
+    for (let i=0;i<3;i++) for (let j=i+1;j<3;j++) if (arr[i]===arr[j]) { reelEls[i].classList.add("win"); reelEls[j].classList.add("win"); }
+  }
+  function clearWinClasses(){ reelEls.forEach(el=>el.classList.remove("win")); }
+
+  function lock(on){ spinBtn.disabled = !!on; }
+  function flash(text){ messageEl.textContent = text; }
+  function nudge(el){ el.animate([{transform:"translateX(0)"},{transform:"translateX(4px)"},{transform:"translateX(0)"}],{duration:180}); }
+  const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
+
+  // Win effects
+  function celebrate(amount){
+    winBanner.textContent = `🎉 You won $${amount.toFixed(2)}! 🎉`;
+    winBanner.classList.add("show");
+    messageEl.textContent = `You won $${amount.toFixed(2)}!`;
+    messageEl.classList.add("win");
+    setTimeout(()=> winBanner.classList.remove("show"), 2200);
+    setTimeout(()=> messageEl.classList.remove("win"), 1400);
+    burstConfetti(600);
+  }
+
+  // Confetti (lightweight)
+  let confettiAnim = null;
+  function resizeCanvas(){ confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight; }
+  function burstConfetti(durationMs=700){
+    const colors = ["#ffd166","#ffe082","#ff8a65","#4dd0e1","#81c784","#ba68c8","#fff59d"];
+    const particles = [];
+    const count = 120;
+    for (let i=0;i<count;i++){
+      particles.push({
+        x: innerWidth*(0.3+Math.random()*0.4), y: innerHeight*0.35,
+        vx:(Math.random()-0.5)*6, vy:-(3+Math.random()*6),
+        s:4+Math.random()*6, c:colors[(Math.random()*colors.length)|0],
+        r: Math.random()*Math.PI, vr:(Math.random()-0.5)*0.2, ay:0.15
+      });
+    }
+    let start=null; confettiCanvas.classList.remove("hidden");
+    function step(ts){
+      if(!start) start=ts; const e=ts-start;
+      ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+      for(const p of particles){
+        p.x+=p.vx; p.y+=p.vy; p.vy+=p.ay; p.r+=p.vr;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
+        ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s); ctx.restore();
+      }
+      if(e<durationMs){ confettiAnim=requestAnimationFrame(step); }
+      else{ ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); confettiCanvas.classList.add("hidden"); cancelAnimationFrame(confettiAnim); confettiAnim=null; }
+    }
+    confettiAnim=requestAnimationFrame(step);
+  }
+
+  // User switching
+  userSelect.addEventListener("change", ()=>{
+    currentUser = userSelect.value;
+    localStorage.setItem("ll-v3-user", currentUser);
+    renderStats();
+    hideAdmin();
+  });
+
+  function renderStats(){
+    const s = stats[currentUser];
+    spinsLeftEl.textContent = s.spins.toString();
+    totalEarnedEl.textContent = `$${s.earned.toFixed(2)}`;
+    adminUserLabel.textContent = currentUser;
+    adminSpins.value = s.spins;
+    adminEarned.value = s.earned.toFixed(2);
+  }
+
+  // Admin (1111)
+  let adminUnlocked=false;
+  adminToggle.addEventListener("click", ()=>{
+    if(!adminUnlocked){
+      const code = prompt("Enter admin passcode:");
+      if(code==="1111"){ adminUnlocked=true; showAdmin(); }
+      else alert("Incorrect passcode.");
+    }else{
+      adminPanel.classList.contains("hidden") ? showAdmin() : hideAdmin();
+    }
+  });
+  function showAdmin(){ adminPanel.classList.remove("hidden"); adminPanel.setAttribute("aria-hidden","false"); }
+  function hideAdmin(){ adminPanel.classList.add("hidden"); adminPanel.setAttribute("aria-hidden","true"); }
+
+  saveAdmin.addEventListener("click", ()=>{
+    const spins = Math.max(0, Math.floor(Number(adminSpins.value)));
+    const earned = Math.max(0, Number(adminEarned.value));
+    if(!Number.isFinite(spins) || !Number.isFinite(earned)){ alert("Invalid values."); return; }
+    stats[currentUser].spins = spins;
+    stats[currentUser].earned = +earned.toFixed(2);
+    saveStats(); renderStats();
+  });
+  add10Spins.addEventListener("click", ()=>{ stats[currentUser].spins += 10; saveStats(); renderStats(); });
+  resetStatsBtn.addEventListener("click", ()=>{
+    if(confirm(`Reset stats for ${currentUser}?`)){
+      stats[currentUser] = { spins: DEFAULT_SPINS, earned: 0 };
+      saveStats(); renderStats();
+    }
+  });
+})();
