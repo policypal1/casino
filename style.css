@@ -6,13 +6,13 @@
   --shadow:0 10px 25px rgba(0,0,0,.35); --radius:18px;
 
   /* Bigger wheel */
-  --cell-h:140px;
-  --sym-size:88px;
+  --cell-h:150px;
+  --sym-size:92px;
 }
 
 /* Slow drifting rainbow background */
 .background-rainbow{
-  position:fixed; inset:0; z-index:-2; pointer-events:none; opacity:.28;
+  position:fixed; inset:0; z-index:-2; pointer-events:none; opacity:.26;
   background: linear-gradient(90deg,#ff4d4f,#ffcd3c,#2ee59d,#40c4ff,#a78bfa,#ff4d4f);
   background-size: 300% 100%;
   animation: bgSlide 20s linear infinite;
@@ -22,7 +22,7 @@
 
 html,body{height:100%}
 body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--ink)}
-.app{max-width:1120px;margin:0 auto;padding:22px}
+.app{max-width:1160px;margin:0 auto;padding:22px}
 
 /* Header */
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
@@ -43,14 +43,12 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
 .btn{background:#1a2438;color:var(--ink);border:1px solid rgba(255,255,255,.12);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800;letter-spacing:.3px;transition:.18s;box-shadow:var(--shadow)}
 .btn.ghost{background:transparent}
 .btn.primary{background:linear-gradient(90deg, #1de9b6, #00bfa6);color:#001b18;border:none}
-.btn.big{font-size:18px;padding:12px 18px;border-radius:14px}
+.btn.big{font-size:18px;padding:12px 22px;border-radius:16px}
 .btn:hover{transform:translateY(-1px)}
 .btn:disabled{opacity:.6;cursor:not-allowed}
 
 /* Animated SPIN button (black base + rainbow rim) */
-.spin-btn{
-  position:relative; overflow:hidden; border:none; background:#0b0f1a; padding:0; border-radius:16px;
-}
+.spin-btn{position:relative; overflow:hidden; border:none; background:#0b0f1a; padding:0; border-radius:18px}
 .spin-btn::before{
   content:""; position:absolute; inset:0; border-radius:inherit; padding:2px;
   background:linear-gradient(90deg,#ff4d4f,#ffcd3c,#2ee59d,#40c4ff,#a78bfa,#ff4d4f);
@@ -59,10 +57,7 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
   mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite:xor; mask-composite:exclude;
 }
-.spin-btn .label{
-  position:relative; display:block; padding:12px 22px; border-radius:14px; background:#0b0f1a; color:#eafff6; letter-spacing:.6px; font-weight:900;
-  text-shadow:0 2px 0 #00120d;
-}
+.spin-btn .label{position:relative; display:block; padding:14px 30px; border-radius:16px; background:#0b0f1a; color:#eafff6; letter-spacing:.6px; font-weight:900; text-shadow:0 2px 0 #00120d}
 @keyframes btnRainbow{0%{background-position:0% 50%}100%{background-position:300% 50%}}
 
 .card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));border:1px solid var(--card-border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
@@ -81,7 +76,7 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
 
 /* 3×3 reels — BIGGER */
 .reels-3x3{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:26px;
   background:var(--frame);border-radius:16px;padding:22px;border:1px solid var(--card-border);
   position:relative;overflow:hidden; z-index:1;
 }
@@ -95,8 +90,9 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
 .track{position:absolute; left:10px; right:10px; top:10px}
 .cell{
   height:var(--cell-h); margin-bottom:6px; display:flex;align-items:center;justify-content:center;
-  font-size:var(--sym-size); border-radius:12px; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06)
+  border-radius:12px; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06)
 }
+.cell svg{width:var(--sym-size);height:var(--sym-size);display:block}
 .cell.mid{background:rgba(255,255,255,.03)}
 .reel.stopped .cell.mid{
   background:linear-gradient(180deg, rgba(255,214,102,.28), rgba(255,214,102,.09));
@@ -113,7 +109,7 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
 .message.win{animation:pulse 1.2s ease 1}
 @keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
 
-/* Win banner (kept for extra hype) */
+/* Win banner (kept for small wins) */
 .win-banner{
   position:absolute;left:12px;right:12px;bottom:12px;background:linear-gradient(90deg,#ffe082,#ffd166,#ffc400);
   color:#3a2a00;border-radius:12px;padding:12px 16px;font-weight:900;letter-spacing:.6px;text-align:center;
@@ -140,6 +136,7 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
 .admin-subhead{margin:14px 0 6px}
 .admin-actions{display:flex;gap:10px;margin-top:10px}
 .muted{color:var(--muted);font-size:.9rem}
+.admin-stats{margin-top:10px;color:var(--muted);font-weight:800}
 
 /* Odds grid with bars */
 .odds-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
@@ -148,25 +145,34 @@ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,
 .odds-bar{height:6px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}
 .odds-bar span{display:block;height:100%;background:linear-gradient(90deg,#1de9b6,#00bfa6)}
 
-/* Win Modal */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:10000;opacity:0;pointer-events:none;transition:opacity .25s ease}
+/* Win Modal (bigger) */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:10000;opacity:0;pointer-events:none;transition:opacity .25s ease}
 .modal.show{opacity:1;pointer-events:auto}
 .modal-content{
-  position:relative;background:linear-gradient(180deg,#101a2a,#0d1526);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:26px 28px;min-width:320px;box-shadow:0 30px 80px rgba(0,0,0,.55);transform:scale(.92);animation:modalIn .28s ease forwards
+  position:relative;background:linear-gradient(180deg,#101a2a,#0d1526);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:30px 36px;width:min(80vw,860px);
+  box-shadow:0 30px 80px rgba(0,0,0,.55);transform:scale(.92);animation:modalIn .28s ease forwards
 }
 @keyframes modalIn{to{transform:scale(1)}}
-.modal-shine{position:absolute;inset:-2px;border-radius:22px;background:conic-gradient(#ffd166,#ff8a65,#4dd0e1,#81c784,#ffd166);filter:saturate(1.3);mix-blend-mode:screen;opacity:.25;pointer-events:none}
-#winTitle{margin:0 0 6px;text-align:center;font-size:24px;letter-spacing:.5px}
-.win-amount{font-size:42px;font-weight:900;text-align:center;margin:6px 0 2px}
+.modal-shine{position:absolute;inset:-2px;border-radius:26px;background:conic-gradient(#ffd166,#ff8a65,#4dd0e1,#81c784,#ffd166);filter:saturate(1.3);mix-blend-mode:screen;opacity:.25;pointer-events:none}
+#winTitle{margin:0 0 8px;text-align:center;font-size:30px;letter-spacing:.5px}
+.win-amount{font-size:56px;font-weight:900;text-align:center;margin:8px 0 6px}
 .win-sub{text-align:center;color:var(--muted);margin:0}
 
-/* Celebrations */
-.confetti{position:fixed;inset:0;pointer-events:none;z-index:9999}
-.balloons{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:visible}
-.balloons.hidden{display:none}
-.balloon{position:absolute;bottom:-80px;width:36px;height:44px;border-radius:20px 20px 20px 20px / 26px 26px 18px 18px;background:var(--balloonColor,#ff8a80);box-shadow:0 8px 14px rgba(0,0,0,.25);animation:floatUp var(--t,5s) ease-in forwards}
-.balloon::after{content:"";position:absolute;left:50%;bottom:-16px;width:2px;height:18px;background:rgba(255,255,255,.8)}
-@keyframes floatUp{0%{transform:translate(-50%,0) scale(0.9);opacity:.95}100%{transform:translate(-50%,-110vh) scale(1.05);opacity:1}}
+/* Jackpot blast */
+.flash{position:fixed;inset:0;background:radial-gradient(closest-side,#fff,#fff0);z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.flash.show{opacity:.85;animation:flashOut .9s ease forwards}
+@keyframes flashOut{0%{opacity:.85}100%{opacity:0}}
 
-.hidden{display:none}
-.foot{margin-top:18px;color:var(--muted);text-align:center}
+.shake{animation:shake .6s ease 1}
+@keyframes shake{0%{transform:translate(0)}20%{transform:translate(-6px,2px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,1px)}80%{transform:translate(3px,2px)}100%{transform:translate(0)}}
+
+/* SVG icon styles (subtle gloss) */
+.ico-base{filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+.ico-diamond{--a:#7dd3fc;--b:#1e90ff}
+.ico-seven{--a:#b2f5ea;--b:#14b8a6}
+.ico-star{--a:#ffe082;--b:#ffca28}
+.ico-bell{--a:#ffd54f;--b:#f6c342}
+.ico-grape{--a:#b39ddb;--b:#7e57c2}
+.ico-orange{--a:#ffab66;--b:#ff784e}
+.ico-lemon{--a:#ffe082;--b:#ffd54f}
+.ico-cherry{--a:#ff8a80;--b:#e53935}
