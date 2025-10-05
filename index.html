@@ -9,23 +9,20 @@
 <body>
   <div class="app" id="appRoot">
     <header class="topbar">
-      <h1>🍀 Lucky Lemons — 3-Reel Slot</h1>
+      <h1 class="brand"><span class="logo">🍀</span> Lucky Lemons — 3-Reel Slot</h1>
 
-      <div class="right-controls">
+      <div class="hud">
         <label class="userpick">
-          <span>User:</span>
+          <span>User</span>
           <select id="userSelect" aria-label="Select user">
             <option value="Will">Will</option>
             <option value="Isaac">Isaac</option>
           </select>
         </label>
-
-        <div class="stats">
-          <div>Spins Left: <strong id="spinsLeft">—</strong></div>
-          <div>Total Earned: <strong id="totalEarned">$0.00</strong></div>
-        </div>
-
-        <button id="adminToggle" class="btn">Admin</button>
+        <div class="divider"></div>
+        <div class="stat"><span class="k">Spins</span><span id="spinsLeft" class="v">—</span></div>
+        <div class="stat"><span class="k">Earned</span><span id="totalEarned" class="v">$0.00</span></div>
+        <button id="adminToggle" class="btn ghost">Admin</button>
       </div>
     </header>
 
@@ -33,40 +30,34 @@
       <section class="machine card">
         <div class="win-banner" id="winBanner" aria-hidden="true"></div>
 
-        <div class="reels" aria-live="polite" aria-atomic="true">
+        <div class="reels lightframe" aria-live="polite" aria-atomic="true">
           <div class="reel" id="reel-1"><div class="symbol">🍋</div></div>
           <div class="reel" id="reel-2"><div class="symbol">🍒</div></div>
           <div class="reel" id="reel-3"><div class="symbol">🍇</div></div>
         </div>
 
         <div class="controls">
-          <button id="spinBtn" class="btn primary">Spin</button>
+          <button id="spinBtn" class="btn primary big">SPIN</button>
         </div>
 
         <div id="message" class="message" role="status" aria-live="polite"></div>
       </section>
 
       <section class="paytable card">
-        <h2>Pay Table</h2>
-        <p>Each spin uses <strong>1 credit</strong>. Winnings add to <em>Total Earned</em>.</p>
-        <table>
-          <thead>
-            <tr><th>Combo</th><th>Payout</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>💎💎💎</td><td>$8.75</td></tr>
-            <tr><td>7️⃣7️⃣7️⃣</td><td>$5.25</td></tr>
-            <tr><td>⭐⭐⭐</td><td>$2.80</td></tr>
-            <tr><td>🔔🔔🔔</td><td>$1.75</td></tr>
-            <tr><td>🍇🍇🍇</td><td>$1.23</td></tr>
-            <tr><td>🍊🍊🍊</td><td>$0.88</td></tr>
-            <tr><td>🍋🍋🍋</td><td>$0.70</td></tr>
-            <tr><td>🍒🍒🍒</td><td>$0.53</td></tr>
-            <tr><td>🍒🍒X (exactly 2 cherries)</td><td>$0.14</td></tr>
-            <tr><td>XXY (any other 2-of-a-kind)</td><td>$0.07</td></tr>
-          </tbody>
-        </table>
-        <p class="rg">Demo credits only. For fun!</p>
+        <h2>Pay Table (per spin)</h2>
+        <div class="pt-grid">
+          <div class="pt-row"><span>💎💎💎</span><b>$8.75</b></div>
+          <div class="pt-row"><span>7️⃣7️⃣7️⃣</span><b>$5.25</b></div>
+          <div class="pt-row"><span>⭐⭐⭐</span><b>$2.80</b></div>
+          <div class="pt-row"><span>🔔🔔🔔</span><b>$1.75</b></div>
+          <div class="pt-row"><span>🍇🍇🍇</span><b>$1.23</b></div>
+          <div class="pt-row"><span>🍊🍊🍊</span><b>$0.88</b></div>
+          <div class="pt-row"><span>🍋🍋🍋</span><b>$0.70</b></div>
+          <div class="pt-row"><span>🍒🍒🍒</span><b>$0.53</b></div>
+          <div class="pt-row sub"><span>🍒🍒X (exactly two)</span><b>$0.14</b></div>
+          <div class="pt-row sub"><span>Any other 2-of-a-kind</span><b>$0.07</b></div>
+        </div>
+        <p class="rg">Demo credits only • RTP ≈ 97.8% • Have fun.</p>
       </section>
 
       <section id="adminPanel" class="admin card hidden" aria-hidden="true">
@@ -87,9 +78,9 @@
         <div class="admin-actions">
           <button id="saveAdmin" class="btn primary">Save</button>
           <button id="add10Spins" class="btn">+10 Spins</button>
-          <button id="resetStats" class="btn danger">Reset User Stats</button>
+          <button id="resetStats" class="btn danger">Reset User</button>
         </div>
-        <p class="muted">Passcode required to open: <code>1111</code></p>
+        <p class="muted">Passcode to open: <code>1111</code></p>
       </section>
     </main>
 
