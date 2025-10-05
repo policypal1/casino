@@ -7,51 +7,89 @@
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <div class="app">
+  <div class="app" id="appRoot">
     <header class="topbar">
       <h1>🍀 Lucky Lemons — 3-Reel Slot</h1>
-      <div class="credits">
-        <div class="balance">Balance: <span id="balance">$10.00</span></div>
-        <div class="bet">Bet per spin: <strong>$0.25</strong></div>
+
+      <div class="right-controls">
+        <label class="userpick">
+          <span>User:</span>
+          <select id="userSelect" aria-label="Select user">
+            <option value="Will">Will</option>
+            <option value="Isaac">Isaac</option>
+          </select>
+        </label>
+
+        <div class="stats">
+          <div>Spins Left: <strong id="spinsLeft">—</strong></div>
+          <div>Total Earned: <strong id="totalEarned">$0.00</strong></div>
+        </div>
+
+        <button id="adminToggle" class="btn">Admin</button>
       </div>
     </header>
 
     <main>
       <section class="machine card">
+        <div class="win-banner" id="winBanner" aria-hidden="true"></div>
+
         <div class="reels" aria-live="polite" aria-atomic="true">
           <div class="reel" id="reel-1"><div class="symbol">🍋</div></div>
           <div class="reel" id="reel-2"><div class="symbol">🍒</div></div>
           <div class="reel" id="reel-3"><div class="symbol">🍇</div></div>
         </div>
+
         <div class="controls">
-          <button id="spinBtn" class="btn primary">Spin ($0.25)</button>
-          <button id="addBtn" class="btn">+ Add $1.00</button>
-          <button id="resetBtn" class="btn">Reset</button>
+          <button id="spinBtn" class="btn primary">Spin</button>
         </div>
+
         <div id="message" class="message" role="status" aria-live="polite"></div>
       </section>
 
       <section class="paytable card">
         <h2>Pay Table</h2>
-        <p>All wins are paid per $0.25 spin.</p>
+        <p>Each spin uses <strong>1 credit</strong>. Winnings add to <em>Total Earned</em>.</p>
         <table>
           <thead>
-          <tr><th>Combo</th><th>Payout</th></tr>
+            <tr><th>Combo</th><th>Payout</th></tr>
           </thead>
           <tbody>
-          <tr><td>💎💎💎</td><td>$8.75</td></tr>
-          <tr><td>7️⃣7️⃣7️⃣</td><td>$5.25</td></tr>
-          <tr><td>⭐⭐⭐</td><td>$2.80</td></tr>
-          <tr><td>🔔🔔🔔</td><td>$1.75</td></tr>
-          <tr><td>🍇🍇🍇</td><td>$1.23</td></tr>
-          <tr><td>🍊🍊🍊</td><td>$0.88</td></tr>
-          <tr><td>🍋🍋🍋</td><td>$0.70</td></tr>
-          <tr><td>🍒🍒🍒</td><td>$0.53</td></tr>
-          <tr><td>🍒🍒X (exactly 2 cherries)</td><td>$0.14</td></tr>
-          <tr><td>XXY (any other 2-of-a-kind)</td><td>$0.07</td></tr>
+            <tr><td>💎💎💎</td><td>$8.75</td></tr>
+            <tr><td>7️⃣7️⃣7️⃣</td><td>$5.25</td></tr>
+            <tr><td>⭐⭐⭐</td><td>$2.80</td></tr>
+            <tr><td>🔔🔔🔔</td><td>$1.75</td></tr>
+            <tr><td>🍇🍇🍇</td><td>$1.23</td></tr>
+            <tr><td>🍊🍊🍊</td><td>$0.88</td></tr>
+            <tr><td>🍋🍋🍋</td><td>$0.70</td></tr>
+            <tr><td>🍒🍒🍒</td><td>$0.53</td></tr>
+            <tr><td>🍒🍒X (exactly 2 cherries)</td><td>$0.14</td></tr>
+            <tr><td>XXY (any other 2-of-a-kind)</td><td>$0.07</td></tr>
           </tbody>
         </table>
-        <p class="rg">Play responsibly. Demo credits only.</p>
+        <p class="rg">Demo credits only. For fun!</p>
+      </section>
+
+      <section id="adminPanel" class="admin card hidden" aria-hidden="true">
+        <h2>Admin Controls</h2>
+        <div class="admin-row">
+          <label>Selected User: <strong id="adminUserLabel">Will</strong></label>
+        </div>
+        <div class="admin-grid">
+          <div>
+            <label for="adminSpins">Spins Left</label>
+            <input type="number" id="adminSpins" min="0" step="1" />
+          </div>
+          <div>
+            <label for="adminEarned">Total Earned ($)</label>
+            <input type="number" id="adminEarned" min="0" step="0.01" />
+          </div>
+        </div>
+        <div class="admin-actions">
+          <button id="saveAdmin" class="btn primary">Save</button>
+          <button id="add10Spins" class="btn">+10 Spins</button>
+          <button id="resetStats" class="btn danger">Reset User Stats</button>
+        </div>
+        <p class="muted">Passcode required to open: <code>1111</code></p>
       </section>
     </main>
 
@@ -59,6 +97,9 @@
       <small>© 2025 Lucky Lemons — Demo.</small>
     </footer>
   </div>
+
+  <!-- Confetti overlay -->
+  <canvas id="confettiCanvas" class="confetti hidden"></canvas>
 
   <script src="/script.js"></script>
 </body>
