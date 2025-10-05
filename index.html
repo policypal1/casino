@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lucky Lemons — 3-Reel Slot (Rainbow Edition)</title>
+  <title>Lucky Lemons — 3-Reel Slot</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
@@ -34,27 +34,14 @@
 
     <main>
       <section class="machine card" id="machine">
-        <!-- Ambient rainbow beams -->
-        <div class="spot spot-left"></div>
-        <div class="spot spot-right"></div>
-        <div class="corner-glow corner-1"></div>
-        <div class="corner-glow corner-2"></div>
-        <div class="corner-glow corner-3"></div>
-        <div class="corner-glow corner-4"></div>
+        <div class="rainbow-border"></div>
 
         <div class="win-banner" id="winBanner" aria-hidden="true"></div>
 
-        <div class="machine-row">
-          <div class="lever" id="lever" aria-label="Lever" title="Pull to spin">
-            <div class="lever-stick"></div>
-            <div class="lever-ball"></div>
-          </div>
-
-          <div class="reels lightframe mega-neon" aria-live="polite" aria-atomic="true">
-            <div class="reel" id="reel-1"><div class="symbol">🍋</div></div>
-            <div class="reel" id="reel-2"><div class="symbol">🍒</div></div>
-            <div class="reel" id="reel-3"><div class="symbol">🍇</div></div>
-          </div>
+        <div class="reels" aria-live="polite" aria-atomic="true">
+          <div class="reel" id="reel-1"><div class="symbol">🍋</div></div>
+          <div class="reel" id="reel-2"><div class="symbol">🍒</div></div>
+          <div class="reel" id="reel-3"><div class="symbol">🍇</div></div>
         </div>
 
         <div class="controls">
@@ -67,7 +54,7 @@
       <section class="paytable card">
         <h2>Pay Table (<span id="payNote">per 25¢ bet</span>)</h2>
         <div class="pt-grid" id="payRows"></div>
-        <p class="rg">Demo credits only • Base RTP ≈ 97.8% (Luck can raise/ lower actual RTP).</p>
+        <p class="rg">Demo credits only • Base RTP ≈ 97.8% (Luck modifies actual RTP).</p>
       </section>
 
       <section id="adminPanel" class="admin card hidden" aria-hidden="true">
@@ -91,12 +78,18 @@
             <input type="number" id="adminLuck" min="0" max="100" step="1" />
           </div>
         </div>
+
+        <h3 style="margin-top:14px">Outcome Probabilities (est.)</h3>
+        <div id="oddsGrid" class="odds-grid">
+          <!-- filled by JS -->
+        </div>
+
         <div class="admin-actions">
           <button id="saveAdmin" class="btn primary">Save</button>
           <button id="add10Spins" class="btn">+10 Spins</button>
           <button id="resetStats" class="btn danger">Reset User</button>
         </div>
-        <p class="muted">Passcode to open: <code>1111</code></p>
+        <p class="muted">Passcode to open: <code>1111</code> • Odds simulate quickly in-browser.</p>
       </section>
     </main>
 
@@ -107,7 +100,6 @@
 
   <!-- Celebrations -->
   <canvas id="confettiCanvas" class="confetti hidden"></canvas>
-  <canvas id="fireworksCanvas" class="fireworks hidden"></canvas>
   <div id="balloonLayer" class="balloons hidden" aria-hidden="true"></div>
 
   <script src="/script.js"></script>
