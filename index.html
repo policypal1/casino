@@ -30,11 +30,11 @@
         <div class="divider"></div>
         <div class="betgroup" role="group" aria-label="Bet amount">
           <span class="bet-label">Bet:</span>
-          <button id="bet10" class="chip">10¢</button>
-          <button id="bet25" class="chip active">25¢</button>
+          <button id="bet10" class="chip" type="button">10¢</button>
+          <button id="bet25" class="chip active" type="button">25¢</button>
         </div>
 
-        <button id="adminToggle" class="btn ghost">Admin</button>
+        <button id="adminToggle" class="btn ghost" type="button" aria-expanded="false" aria-controls="adminPanel">Admin</button>
       </div>
     </header>
 
@@ -56,10 +56,17 @@
           <div class="payline"></div>
         </div>
 
+        <!-- Controls: left/center/right -->
         <div class="controls">
-          <button id="spinBtn" class="btn spin-btn big"><span class="label">SPIN</span></button>
-          <button id="convertBtn" class="btn">Convert Cash → Spins</button>
-          <button id="cashoutBtn" class="btn danger">Cash Out</button>
+          <div class="left">
+            <button id="convertBtn" class="btn" type="button" title="Convert Earned cash to spins at current bet">Convert Cash → Spins</button>
+          </div>
+          <div class="center">
+            <button id="spinBtn" class="btn spin-btn big" type="button"><span class="label">SPIN</span></button>
+          </div>
+          <div class="right">
+            <button id="cashoutBtn" class="btn danger" type="button" title="Reset Earned to $0 (demo payout)">Cash Out</button>
+          </div>
         </div>
 
         <div id="message" class="message" role="status" aria-live="polite"></div>
@@ -68,10 +75,10 @@
       <section class="paytable card">
         <h2>Pay Table (<span id="payNote">per 25¢ bet</span>) — Middle Row</h2>
         <div class="pt-grid" id="payRows"></div>
-        <p class="rg">Demo credits only • Luck increases hit rate; payouts scale with bet.</p>
+        <p class="rg">Demo credits only • Luck/Odds affect hit rate; payouts scale with bet.</p>
       </section>
 
-      <section id="adminPanel" class="admin card hidden" aria-hidden="true">
+      <section id="adminPanel" class="admin card hidden" aria-hidden="true" tabindex="-1">
         <h2>Admin Controls</h2>
         <div class="admin-row"><label>Selected User: <strong id="adminUserLabel">Will</strong></label></div>
 
@@ -96,16 +103,16 @@
           <div class="admin-item">
             <label for="adminOdds">Odds (Tight ⇄ Loose)</label>
             <input type="range" id="adminOdds" min="0" max="200" step="1" />
-            <small class="help">Controls player-favor. 100 = neutral. Diamonds unaffected.</small>
+            <small class="help">100 = neutral. Diamonds unaffected.</small>
           </div>
           <div class="admin-item">
             <label for="rtpTarget">RTP Target (%)</label>
             <input type="range" id="rtpTarget" min="70" max="98" step="1" />
-            <small class="help">Aim for ~90% to keep players happy.</small>
+            <small class="help">Aim ≈90% (your request).</small>
           </div>
           <div class="admin-item">
             <label>&nbsp;</label>
-            <button id="autoTune" class="btn primary">Auto-Tune to Target</button>
+            <button id="autoTune" class="btn primary" type="button">Auto-Tune to Target</button>
           </div>
         </div>
 
@@ -118,11 +125,12 @@
         <div class="admin-stats" id="rtpStats"></div>
 
         <div class="admin-actions">
-          <button id="saveAdmin" class="btn">Save</button>
-          <button id="add10Spins" class="btn">+10 Spins</button>
-          <button id="resetStats" class="btn danger">Reset User</button>
+          <button id="saveAdmin" class="btn" type="button">Save</button>
+          <button id="add10Spins" class="btn" type="button">+10 Spins</button>
+          <button id="resetStats" class="btn danger" type="button">Reset User</button>
+          <button id="closeAdmin" class="btn ghost" type="button">Close</button>
         </div>
-        <p class="muted">Passcode: <code>1111</code>. Auto-Tune simulates quickly in-browser.</p>
+        <p class="muted">Passcode: <code>1111</code>. Auto-Tune simulates locally.</p>
       </section>
     </main>
 
