@@ -22,18 +22,34 @@
         <div class="divider"></div>
         <div class="stat"><span class="k">Spins</span><span id="spinsLeft" class="v">—</span></div>
         <div class="stat"><span class="k">Earned</span><span id="totalEarned" class="v">$0.00</span></div>
+        <div class="divider"></div>
+        <div class="betgroup" role="group" aria-label="Bet amount">
+          <button id="bet10" class="chip">10¢</button>
+          <button id="bet25" class="chip active">25¢</button>
+        </div>
         <button id="adminToggle" class="btn ghost">Admin</button>
       </div>
     </header>
 
     <main>
-      <section class="machine card">
+      <section class="machine card" id="machine">
+        <!-- Side spotlights -->
+        <div class="spot spot-left"></div>
+        <div class="spot spot-right"></div>
+
         <div class="win-banner" id="winBanner" aria-hidden="true"></div>
 
-        <div class="reels lightframe" aria-live="polite" aria-atomic="true">
-          <div class="reel" id="reel-1"><div class="symbol">🍋</div></div>
-          <div class="reel" id="reel-2"><div class="symbol">🍒</div></div>
-          <div class="reel" id="reel-3"><div class="symbol">🍇</div></div>
+        <div class="machine-row">
+          <div class="lever" id="lever" aria-label="Lever" title="Pull to spin">
+            <div class="lever-stick"></div>
+            <div class="lever-ball"></div>
+          </div>
+
+          <div class="reels lightframe" aria-live="polite" aria-atomic="true">
+            <div class="reel" id="reel-1"><div class="symbol">🍋</div></div>
+            <div class="reel" id="reel-2"><div class="symbol">🍒</div></div>
+            <div class="reel" id="reel-3"><div class="symbol">🍇</div></div>
+          </div>
         </div>
 
         <div class="controls">
@@ -44,27 +60,16 @@
       </section>
 
       <section class="paytable card">
-        <h2>Pay Table (per spin)</h2>
-        <div class="pt-grid">
-          <div class="pt-row"><span>💎💎💎</span><b>$8.75</b></div>
-          <div class="pt-row"><span>7️⃣7️⃣7️⃣</span><b>$5.25</b></div>
-          <div class="pt-row"><span>⭐⭐⭐</span><b>$2.80</b></div>
-          <div class="pt-row"><span>🔔🔔🔔</span><b>$1.75</b></div>
-          <div class="pt-row"><span>🍇🍇🍇</span><b>$1.23</b></div>
-          <div class="pt-row"><span>🍊🍊🍊</span><b>$0.88</b></div>
-          <div class="pt-row"><span>🍋🍋🍋</span><b>$0.70</b></div>
-          <div class="pt-row"><span>🍒🍒🍒</span><b>$0.53</b></div>
-          <div class="pt-row sub"><span>🍒🍒X (exactly two)</span><b>$0.14</b></div>
-          <div class="pt-row sub"><span>Any other 2-of-a-kind</span><b>$0.07</b></div>
+        <h2>Pay Table (<span id="payNote">per 25¢ bet</span>)</h2>
+        <div class="pt-grid" id="payRows">
+          <!-- rows injected by JS based on bet -->
         </div>
         <p class="rg">Demo credits only • RTP ≈ 97.8% • Have fun.</p>
       </section>
 
       <section id="adminPanel" class="admin card hidden" aria-hidden="true">
         <h2>Admin Controls</h2>
-        <div class="admin-row">
-          <label>Selected User: <strong id="adminUserLabel">Will</strong></label>
-        </div>
+        <div class="admin-row"><label>Selected User: <strong id="adminUserLabel">Will</strong></label></div>
         <div class="admin-grid">
           <div>
             <label for="adminSpins">Spins Left</label>
@@ -73,6 +78,10 @@
           <div>
             <label for="adminEarned">Total Earned ($)</label>
             <input type="number" id="adminEarned" min="0" step="0.01" />
+          </div>
+          <div>
+            <label for="adminLuck">Luck Bias (0–100)</label>
+            <input type="number" id="adminLuck" min="0" max="100" step="1" />
           </div>
         </div>
         <div class="admin-actions">
@@ -89,8 +98,9 @@
     </footer>
   </div>
 
-  <!-- Confetti overlay -->
+  <!-- Celebration overlays -->
   <canvas id="confettiCanvas" class="confetti hidden"></canvas>
+  <div id="balloonLayer" class="balloons hidden" aria-hidden="true"></div>
 
   <script src="/script.js"></script>
 </body>
