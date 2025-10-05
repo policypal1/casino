@@ -1,315 +1,166 @@
-/* Lucky Lemons — 3-Reel Slot (no balance, user stats, fancy win effects) */
-(() => {
-  // ---------- Game Config ----------
-  const USERS = ["Will", "Isaac"];
-  const DEFAULT_SPINS = 20;
+*{box-sizing:border-box}
+:root{
+  --bg:#0c1016; --ink:#e9f1ff; --muted:#9fb3c8;
+  --accent:#35d2a8; --accent-2:#ffd166; --danger:#ff5a5f;
+  --frame:#0f1729; --card:#111827;
+  --card-border:rgba(255,255,255,.06);
+  --shadow:0 10px 25px rgba(0,0,0,.35);
+  --radius:18px;
+}
+html,body{height:100%}
+body{
+  margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  background: radial-gradient(1200px 600px at 10% -10%, #142034 0%, var(--bg) 45%) no-repeat, var(--bg);
+  color:var(--ink);
+}
+.app{max-width:960px;margin:0 auto;padding:22px}
 
-  const SYMBOLS = [
-    { k: "cherry",  glyph: "🍒", weight: 25 },
-    { k: "lemon",   glyph: "🍋", weight: 20 },
-    { k: "orange",  glyph: "🍊", weight: 15 },
-    { k: "grape",   glyph: "🍇", weight: 12 },
-    { k: "bell",    glyph: "🔔", weight: 10 },
-    { k: "star",    glyph: "⭐", weight:  8 },
-    { k: "seven",   glyph: "7️⃣", weight:  6 },
-    { k: "diamond", glyph: "💎", weight:  4 },
-  ];
+/* Top bar — compact, seamless */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px
+}
+.brand{margin:0;font-size:clamp(18px,2.6vw,26px);font-weight:800;letter-spacing:.2px}
+.logo{filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
+.hud{
+  display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+  border:1px solid var(--card-border);
+}
+.userpick{display:flex;align-items:center;gap:6px;color:var(--muted)}
+.userpick select{
+  padding:6px 10px;border-radius:10px;border:1px solid var(--card-border);
+  background:#0f1730;color:var(--ink)
+}
+.divider{width:1px;height:20px;background:var(--card-border)}
+.stat{display:flex;gap:6px;align-items:center;color:var(--muted);font-weight:800}
+.stat .k{opacity:.9}
+.stat .v{color:var(--ink)}
+.btn{
+  background:#1a2438;color:var(--ink);border:1px solid rgba(255,255,255,.12);
+  padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800;letter-spacing:.3px;
+  transition:.18s;box-shadow:var(--shadow)
+}
+.btn.ghost{background:transparent}
+.btn.primary{background:linear-gradient(90deg, #1de9b6, #00bfa6);color:#001b18;border:none}
+.btn.big{font-size:18px;padding:12px 18px;border-radius:14px}
+.btn:hover{transform:translateY(-1px)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
 
-  // Payouts (same as before, per spin)
-  const PAY_3 = {
-    cherry: 0.53, lemon: 0.70, orange: 0.88, grape: 1.23,
-    bell: 1.75, star: 2.80, seven: 5.25, diamond: 8.75
-  };
-  const PAY_2_CHERRY = 0.14;
-  const PAY_2_OTHER  = 0.07;
+/* Cards */
+.card{
+  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+  border:1px solid var(--card-border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
+}
 
-  // ---------- State & Persistence ----------
-  const storeKey = "lucky-lemons-v2-stats";
-  let stats = loadStats();
-  let currentUser = USERS.includes(localStorage.getItem("ll-v2-user")) ? localStorage.getItem("ll-v2-user") : USERS[0];
+/* Machine */
+.machine{padding:22px;margin-bottom:16px;position:relative;overflow:hidden}
+.win-banner{
+  position:absolute;left:12px;right:12px;bottom:12px;
+  background:linear-gradient(90deg,#ffe082,#ffd166,#ffc400);
+  color:#3a2a00;border-radius:12px;padding:10px 14px;font-weight:900;letter-spacing:.5px;
+  text-align:center;box-shadow:var(--shadow);transform:translateY(150%);opacity:0;
+  transition:transform .45s cubic-bezier(.2,.8,.2,1), opacity .45s;
+}
+.win-banner.show{transform:translateY(0);opacity:1}
 
-  function loadStats() {
-    try {
-      const raw = JSON.parse(localStorage.getItem(storeKey) || "{}");
-      for (const u of USERS) {
-        if (!raw[u]) raw[u] = { spins: DEFAULT_SPINS, earned: 0 };
-        if (!Number.isFinite(raw[u].spins)) raw[u].spins = DEFAULT_SPINS;
-        if (!Number.isFinite(raw[u].earned)) raw[u].earned = 0;
-      }
-      return raw;
-    } catch {
-      return Object.fromEntries(USERS.map(u => [u, { spins: DEFAULT_SPINS, earned: 0 }]));
-    }
-  }
-  function saveStats() {
-    localStorage.setItem(storeKey, JSON.stringify(stats));
-  }
+/* Reels + rainbow lights frame */
+.reels{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  background:var(--frame);border-radius:14px;padding:18px;border:1px solid var(--card-border);
+  position:relative;overflow:hidden;
+}
 
-  // ---------- DOM ----------
-  const reelEls = [1,2,3].map(i => document.getElementById(`reel-${i}`));
-  const messageEl = document.getElementById("message");
-  const spinBtn = document.getElementById("spinBtn");
-  const userSelect = document.getElementById("userSelect");
-  const spinsLeftEl = document.getElementById("spinsLeft");
-  const totalEarnedEl = document.getElementById("totalEarned");
-  const adminToggle = document.getElementById("adminToggle");
-  const adminPanel = document.getElementById("adminPanel");
-  const adminUserLabel = document.getElementById("adminUserLabel");
-  const adminSpins = document.getElementById("adminSpins");
-  const adminEarned = document.getElementById("adminEarned");
-  const saveAdmin = document.getElementById("saveAdmin");
-  const add10Spins = document.getElementById("add10Spins");
-  const resetStatsBtn = document.getElementById("resetStats");
-  const winBanner = document.getElementById("winBanner");
+/* Rotating rainbow border */
+.lightframe::before{
+  content:""; position:absolute; inset:-2px; border-radius:16px; z-index:0;
+  background:conic-gradient(#ff4d4f, #ffcd3c, #2ee59d, #40c4ff, #a78bfa, #ff4d4f);
+  filter:saturate(1.4); mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude; padding:2px; opacity:.0;
+  transition:opacity .2s ease;
+}
+.machine.spinning .lightframe::before{opacity:.9; animation:spinRainbow 2.2s linear infinite}
+@keyframes spinRainbow { to { transform: rotate(1turn); } }
 
-  // Confetti
-  const confettiCanvas = document.getElementById("confettiCanvas");
-  const ctx = confettiCanvas.getContext("2d");
+/* LED strip at bottom */
+.reels::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:8px; z-index:1;
+  background:
+    radial-gradient(6px 6px at 6px 50%, #ffd166 50%, transparent 52%),
+    radial-gradient(6px 6px at 30px 50%, #76e4f7 50%, transparent 52%),
+    radial-gradient(6px 6px at 54px 50%, #a78bfa 50%, transparent 52%),
+    radial-gradient(6px 6px at 78px 50%, #ff8a80 50%, transparent 52%);
+  background-size:96px 100%;
+  filter:saturate(1.3) drop-shadow(0 2px 6px rgba(0,0,0,.4));
+  opacity:.0; transition:opacity .2s ease;
+  animation:chase 1.2s linear infinite paused;
+}
+.machine.spinning .reels::after{opacity:.9; animation-play-state:running}
+@keyframes chase { to { background-position:96px 0 } }
 
-  // ---------- Init ----------
-  userSelect.value = currentUser;
-  renderStats();
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
+.reel{
+  height:120px;background:linear-gradient(180deg,#0b1222,#0f192d);
+  border-radius:12px;border:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;
+  font-size:64px;box-shadow: inset 0 10px 20px rgba(0,0,0,.25);
+  position:relative;overflow:hidden; z-index:2;
+}
+.symbol{transform:translateY(0);}
 
-  // ---------- RNG helpers ----------
-  const totalWeight = SYMBOLS.reduce((s, x) => s + x.weight, 0);
-  function pickSymbol() {
-    let r = Math.random() * totalWeight;
-    for (const s of SYMBOLS) { if ((r -= s.weight) <= 0) return s; }
-    return SYMBOLS[SYMBOLS.length - 1];
-  }
+/* Crisp motion (no blur) + slight punch on stop */
+.reel.spinning .symbol{transform:translateY(0) scale(1)}
+.reel.stop .symbol{animation:pop .18s ease}
+@keyframes pop{0%{transform:scale(0.96)}100%{transform:scale(1)}}
 
-  // ---------- Spin Flow ----------
-  spinBtn.addEventListener("click", async () => {
-    const s = stats[currentUser];
-    if (s.spins <= 0) { flash("No spins left. Ask admin to add more."); shakeButton(); return; }
+/* Win glow */
+.reel.win{
+  animation:glow 1200ms ease-in-out 1;
+  box-shadow:0 0 0 rgba(0,0,0,0), inset 0 10px 20px rgba(0,0,0,.25);
+}
+@keyframes glow{
+  0%{box-shadow:0 0 0 rgba(255,255,255,0)}
+  30%{box-shadow:0 0 24px rgba(255,214,102,.9), 0 0 60px rgba(255,214,102,.5)}
+  100%{box-shadow:0 0 0 rgba(255,255,255,0)}
+}
 
-    lock(true);
-    s.spins -= 1;
-    saveStats();
-    renderStats();
+.controls{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+.message{margin-top:10px;min-height:24px;color:var(--accent-2);font-weight:800;letter-spacing:.3px}
+.message.win{animation:pulse 1.2s ease 1}
+@keyframes pulse{
+  0%{transform:scale(1);text-shadow:none}
+  40%{transform:scale(1.06);text-shadow:0 0 18px rgba(255,209,102,.9)}
+  100%{transform:scale(1);text-shadow:none}
+}
 
-    // Pre-pick final symbols
-    const results = [pickSymbol(), pickSymbol(), pickSymbol()];
+/* Paytable — simpler rows */
+.paytable h2{margin:0 0 10px}
+.pt-grid{display:grid;gap:8px}
+.pt-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;border:1px solid var(--card-border);border-radius:10px;
+  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+}
+.pt-row b{font-size:1.02rem}
+.pt-row.sub{opacity:.9}
+.rg{color:var(--muted);margin-top:10px}
 
-    // Spin reels with slowdown
-    for (let i = 0; i < 3; i++) {
-      await spinReel(reelEls[i], results[i], i);
-    }
+/* Admin */
+.admin h2{margin:0 0 10px}
+.admin.hidden{display:none}
+.admin-row{margin:.25rem 0 .75rem}
+.admin-grid{display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:12px}
+.admin input{
+  width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--card-border);
+  background:#0e1524;color:var(--ink)
+}
+.admin-actions{display:flex;gap:10px;margin-top:10px}
+.muted{color:var(--muted);font-size:.9rem}
 
-    // Evaluate
-    const win = calcWin(results);
-    clearWinClasses();
-    if (win > 0) {
-      s.earned = +(s.earned + win).toFixed(2);
-      saveStats();
-      renderStats();
-      highlightWinners(results);
-      celebrate(win);
-    } else {
-      flash("No win. Try again!");
-    }
+/* Confetti canvas */
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:9999}
+.hidden{display:none}
 
-    lock(false);
-  });
-
-  function calcWin(results) {
-    const a = results[0].k, b = results[1].k, c = results[2].k;
-    // 3 of a kind
-    if (a === b && b === c) return +(PAY_3[a] || 0).toFixed(2);
-    // exactly 2 cherries
-    const cherries = [a,b,c].filter(k => k === "cherry").length;
-    if (cherries === 2) return PAY_2_CHERRY;
-    // any other 2 of a kind
-    if (a===b || a===c || b===c) return PAY_2_OTHER;
-    return 0;
-  }
-
-  async function spinReel(el, finalSymbol, reelIndex) {
-    el.classList.add("spinning");
-    const symEl = el.querySelector(".symbol");
-
-    // variable cycles for drama
-    const baseCycles = 14 + Math.floor(Math.random() * 8);
-    for (let i = 0; i < baseCycles; i++) {
-      const temp = pickSymbol();
-      symEl.textContent = temp.glyph;
-      // Slow down toward the end
-      const delay = 60 + i * 18 + reelIndex * 80; // stagger reels
-      await wait(delay);
-    }
-    // Final landing
-    symEl.textContent = finalSymbol.glyph;
-    await wait(120 + reelIndex * 80);
-    el.classList.remove("spinning");
-  }
-
-  function highlightWinners([a,b,c]) {
-    // 3 of a kind
-    if (a.k === b.k && b.k === c.k) {
-      reelEls.forEach(el => el.classList.add("win"));
-      return;
-    }
-    // exactly 2 cherries
-    const arr = [a.k,b.k,c.k];
-    const cherryCount = arr.filter(k => k === "cherry").length;
-    if (cherryCount === 2) {
-      arr.forEach((k, idx) => { if (k === "cherry") reelEls[idx].classList.add("win"); });
-      return;
-    }
-    // any other 2 of a kind
-    for (let i=0;i<3;i++){
-      for (let j=i+1;j<3;j++){
-        if (arr[i] === arr[j]) {
-          reelEls[i].classList.add("win");
-          reelEls[j].classList.add("win");
-        }
-      }
-    }
-  }
-
-  function clearWinClasses() { reelEls.forEach(el => el.classList.remove("win")); }
-
-  function lock(on){ spinBtn.disabled = !!on; }
-  function flash(text){
-    messageEl.textContent = text;
-  }
-  function shakeButton(){
-    spinBtn.style.transform = "translateX(3px)"; setTimeout(()=>spinBtn.style.transform="",150);
-  }
-  const wait = (ms) => new Promise(r => setTimeout(r, ms));
-
-  // ---------- Win Effects (banner + confetti) ----------
-  function celebrate(amount) {
-    // Banner
-    winBanner.textContent = `🎉 You won $${amount.toFixed(2)}! 🎉`;
-    winBanner.classList.add("show");
-    messageEl.textContent = `You won $${amount.toFixed(2)}!`;
-    messageEl.classList.add("win");
-    setTimeout(() => { winBanner.classList.remove("show"); }, 2000);
-    setTimeout(() => { messageEl.classList.remove("win"); }, 1400);
-
-    // Confetti
-    burstConfetti(500); // duration ms
-  }
-
-  // ---------- Confetti (lightweight) ----------
-  let confettiAnim = null;
-  function resizeCanvas() {
-    confettiCanvas.width = window.innerWidth;
-    confettiCanvas.height = window.innerHeight;
-  }
-
-  function burstConfetti(durationMs=700) {
-    const colors = ["#ffd166","#ffe082","#ff8a65","#4dd0e1","#81c784","#ba68c8","#fff59d"];
-    const particles = [];
-    const count = 120;
-
-    // initialize particles above top center-ish
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        x: window.innerWidth * (0.3 + Math.random()*0.4),
-        y: window.innerHeight * 0.35,
-        vx: (Math.random() - 0.5) * 6,
-        vy: - (3 + Math.random() * 6),
-        size: 4 + Math.random() * 6,
-        color: colors[(Math.random()*colors.length)|0],
-        rot: Math.random() * Math.PI,
-        vr: (Math.random() - 0.5) * 0.2,
-        ay: 0.15
-      });
-    }
-
-    let start = null;
-    confettiCanvas.classList.remove("hidden");
-
-    function step(ts) {
-      if (!start) start = ts;
-      const elapsed = ts - start;
-      ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
-
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += p.ay;
-        p.rot += p.vr;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
-        ctx.restore();
-      }
-
-      if (elapsed < durationMs) {
-        confettiAnim = requestAnimationFrame(step);
-      } else {
-        ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
-        confettiCanvas.classList.add("hidden");
-        cancelAnimationFrame(confettiAnim);
-        confettiAnim = null;
-      }
-    }
-    confettiAnim = requestAnimationFrame(step);
-  }
-
-  // ---------- User Switching ----------
-  userSelect.addEventListener("change", () => {
-    currentUser = userSelect.value;
-    localStorage.setItem("ll-v2-user", currentUser);
-    renderStats();
-    // Hide admin panel if visible; keep it safer
-    hideAdmin();
-  });
-
-  function renderStats() {
-    const s = stats[currentUser];
-    spinsLeftEl.textContent = s.spins.toString();
-    totalEarnedEl.textContent = `$${s.earned.toFixed(2)}`;
-    adminUserLabel.textContent = currentUser;
-    adminSpins.value = s.spins;
-    adminEarned.value = s.earned.toFixed(2);
-  }
-
-  // ---------- Admin Panel ----------
-  let adminUnlocked = false;
-  adminToggle.addEventListener("click", () => {
-    if (!adminUnlocked) {
-      const code = prompt("Enter admin passcode:");
-      if (code === "1111") {
-        adminUnlocked = true;
-        showAdmin();
-      } else {
-        alert("Incorrect passcode.");
-      }
-    } else {
-      if (adminPanel.classList.contains("hidden")) showAdmin(); else hideAdmin();
-    }
-  });
-
-  function showAdmin(){ adminPanel.classList.remove("hidden"); adminPanel.setAttribute("aria-hidden","false"); }
-  function hideAdmin(){ adminPanel.classList.add("hidden"); adminPanel.setAttribute("aria-hidden","true"); }
-
-  saveAdmin.addEventListener("click", () => {
-    const spins = Math.max(0, Math.floor(Number(adminSpins.value)));
-    const earned = Math.max(0, Number(adminEarned.value));
-    if (!Number.isFinite(spins) || !Number.isFinite(earned)) { alert("Invalid values."); return; }
-    stats[currentUser].spins = spins;
-    stats[currentUser].earned = +earned.toFixed(2);
-    saveStats(); renderStats();
-  });
-
-  add10Spins.addEventListener("click", () => {
-    stats[currentUser].spins += 10;
-    saveStats(); renderStats();
-  });
-
-  resetStatsBtn.addEventListener("click", () => {
-    if (confirm(`Reset stats for ${currentUser}?`)) {
-      stats[currentUser] = { spins: DEFAULT_SPINS, earned: 0 };
-      saveStats(); renderStats();
-    }
-  });
-
-})();
+.foot{margin-top:18px;color:var(--muted);text-align:center}
