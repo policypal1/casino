@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <!-- Slow rainbow background across page (kept) -->
   <div class="background-rainbow"></div>
 
   <div class="app" id="appRoot">
@@ -41,7 +40,6 @@
 
     <main>
       <section class="machine card" id="machine">
-        <!-- Static thick rainbow frame (NOT rotating) -->
         <div class="rainbow-border"></div>
 
         <header class="machine-bar">
@@ -59,7 +57,7 @@
         </div>
 
         <div class="controls">
-          <button id="spinBtn" class="btn primary big">SPIN</button>
+          <button id="spinBtn" class="btn spin-btn big"><span class="label">SPIN</span></button>
         </div>
 
         <div id="message" class="message" role="status" aria-live="polite"></div>
@@ -74,14 +72,28 @@
       <section id="adminPanel" class="admin card hidden" aria-hidden="true">
         <h2>Admin Controls</h2>
         <div class="admin-row"><label>Selected User: <strong id="adminUserLabel">Will</strong></label></div>
+
         <div class="admin-grid">
-          <div><label for="adminSpins">Spins Left</label><input type="number" id="adminSpins" min="0" step="1" /></div>
-          <div><label for="adminEarned">Total Earned ($)</label><input type="number" id="adminEarned" min="0" step="0.01" /></div>
-          <div><label for="adminSpent">Total Spent ($)</label><input type="number" id="adminSpent" min="0" step="0.01" /></div>
-          <div><label for="adminLuck">Luck Bias (0–100)</label><input type="number" id="adminLuck" min="0" max="100" step="1" /></div>
+          <div class="admin-item">
+            <label for="adminSpins">Spins Left</label>
+            <input type="number" id="adminSpins" min="0" step="1" />
+          </div>
+          <div class="admin-item">
+            <label for="adminEarned">Total Earned ($)</label>
+            <input type="number" id="adminEarned" min="0" step="0.01" />
+          </div>
+          <div class="admin-item">
+            <label for="adminSpent">Total Spent ($)</label>
+            <input type="number" id="adminSpent" min="0" step="0.01" />
+          </div>
+          <div class="admin-item">
+            <label for="adminLuck">Luck Bias (0–100)</label>
+            <input type="number" id="adminLuck" min="0" max="100" step="1" />
+            <small class="help">10¢ adds a small bonus automatically.</small>
+          </div>
         </div>
 
-        <h3 style="margin-top:14px">Outcome Probabilities (est.) — Middle Row</h3>
+        <h3 class="admin-subhead">Outcome Probabilities (est.) — Middle Row</h3>
         <div id="oddsGrid" class="odds-grid"></div>
 
         <div class="admin-actions">
@@ -96,6 +108,16 @@
     <footer class="foot">
       <small>© 2025 Lucky Lemons — Demo.</small>
     </footer>
+  </div>
+
+  <!-- Win Modal -->
+  <div id="winModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <div class="modal-shine"></div>
+      <h3 id="winTitle">BIG WIN</h3>
+      <div class="win-amount" id="winAmount">$0.00</div>
+      <p class="win-sub">Middle row pays</p>
+    </div>
   </div>
 
   <!-- Celebrations -->
