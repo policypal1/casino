@@ -1,41 +1,46 @@
-/* Lucky Lemons — 3×3 Cylinder Edition
-   - Visual cylinder: 3x3 grid; middle row pays
-   - Bigger reels; rotating rainbow border; moving page rainbow
+/* Lucky Lemons — 3×3 Cylinder Edition (polished)
+   - Static rainbow frame; bigger reels; smooth scroll (no flashing)
+   - As each reel stops, middle cell lifts with gold highlight and stays until next spin
+   - Diamonds target ~3% per symbol appearance; payouts reduced to keep edge
    - Bet 10¢/25¢; per-user spins/earned/spent/luck; odds estimator
-   - Luck bias + upgrade pass tuned to deliver more wins (still a house edge)
-   - Clear spin lock at 0 spins; Save closes Admin
 */
 (() => {
   // ---------- Config ----------
   const USERS = ["Will", "Isaac"];
   const DEFAULT_SPINS = 20;
 
-  // Base payouts (for 25¢). 10¢ scales by 0.4
+  // Payouts (25¢). 10¢ = ×0.4
   const BASE_PAY_3 = {
-    diamond: 8.75, seven: 5.25, star: 2.80, bell: 1.75,
-    grape: 1.23, orange: 0.88, lemon: 0.70, cherry: 0.53
+    diamond: 4.25,  // lowered
+    seven:   3.10,
+    star:    1.85,
+    bell:    1.20,
+    grape:   0.95,
+    orange:  0.75,
+    lemon:   0.60,
+    cherry:  0.50
   };
-  const BASE_PAY_2_CHERRY = 0.14;
-  const BASE_PAY_2_OTHER  = 0.07;
+  const BASE_PAY_2_CHERRY = 0.12;
+  const BASE_PAY_2_OTHER  = 0.06;
 
-  // Re-tuned weights to feel more rewarding (more pairs, occasional triples)
+  // Symbol set — weights sum to ~100, diamond ≈ 3%
   const SYMBOLS = [
-    { k: "cherry",  glyph: "🍒", weight: 26, rank: 1 },
-    { k: "lemon",   glyph: "🍋", weight: 20, rank: 2 },
+    { k: "cherry",  glyph: "🍒", weight: 23, rank: 1 },
+    { k: "lemon",   glyph: "🍋", weight: 19, rank: 2 },
     { k: "orange",  glyph: "🍊", weight: 16, rank: 3 },
-    { k: "grape",   glyph: "🍇", weight: 12, rank: 4 },
-    { k: "bell",    glyph: "🔔", weight: 10, rank: 5 },
-    { k: "star",    glyph: "⭐", weight:  8, rank: 6 },
+    { k: "grape",   glyph: "🍇", weight: 14, rank: 4 },
+    { k: "bell",    glyph: "🔔", weight: 11, rank: 5 },
+    { k: "star",    glyph: "⭐", weight:  9, rank: 6 },
     { k: "seven",   glyph: "7️⃣", weight:  5, rank: 7 },
     { k: "diamond", glyph: "💎", weight:  3, rank: 8 },
   ];
   const TOTAL_WEIGHT = SYMBOLS.reduce((s,x)=>s+x.weight,0);
 
   // ---------- State ----------
-  const storeKey = "lucky-lemons-v7-stats";
+  const storeKey = "lucky-lemons-v8-stats";
   let stats = loadStats();
-  let currentUser = USERS.includes(localStorage.getItem("ll-v7-user")) ? localStorage.getItem("ll-v7-user") : USERS[0];
-  let betCents = Number(localStorage.getItem("ll-v7-bet")) || 25;
+  let currentUser = USERS.includes(localStorage.getItem("ll-v8-user")) ? localStorage.getItem("ll-v8-user") : USERS[0];
+  let betCents = Number(localStorage.getItem("ll-v8-bet")) || 25;
   if (![10,25].includes(betCents)) betCents = 25;
 
   function loadStats(){
@@ -56,6 +61,7 @@
 
   // ---------- DOM ----------
   const machine = document.getElementById("machine");
+  const reelEls = [1,2,3].map(i => document.getElementById(`reel-${i}`));
   const spinBtn = document.getElementById("spinBtn");
   const messageEl = document.getElementById("message");
   const winBanner = document.getElementById("winBanner");
@@ -83,8 +89,6 @@
   const payRows = document.getElementById("payRows");
   const payNote = document.getElementById("payNote");
 
-  const reels = [1,2,3].map(i => document.getElementById(`reel-${i}`));
-
   // FX
   const confettiCanvas = document.getElementById("confettiCanvas");
   const ctx = confettiCanvas.getContext("2d");
@@ -94,6 +98,8 @@
   // ---------- Init ----------
   userSelect.value = currentUser;
   markBet(); renderStats(); renderPaytable(); refreshOdds(); updateSpinEnabled();
+  // Seed tracks initially
+  reelEls.forEach(initReelTrack);
 
   // ---------- RNG & Luck ----------
   function pickBase(){
@@ -101,10 +107,9 @@
     for (const s of SYMBOLS) { if ((r -= s.weight) <= 0) return s; }
     return SYMBOLS[SYMBOLS.length-1];
   }
-  // Tournament selection: more luck → higher chance of higher-rank symbol
   function pickBiased(luck){
     const L = Math.max(0, Math.min(100, luck));
-    const candidates = 1 + Math.floor(L / 20); // slightly stronger than before
+    const candidates = 1 + Math.floor(L / 20);
     let best = pickBase();
     for (let i=1;i<candidates;i++){ const c = pickBase(); if (c.rank > best.rank) best = c; }
     return best;
@@ -125,18 +130,15 @@
     if (a===b || a===c || b===c) return P2O;
     return 0;
   }
-  // Upgrade pass (milder guardrails, but more helpful)
   function upgradeRow(row, luck){
     const L = Math.max(0, Math.min(100, luck));
-    const u  = Math.min(0.42, L/160); // make a pair
-    const u2 = Math.min(0.18, L/360); // upgrade pair to triple
+    const u  = Math.min(0.40, L/160); // pair
+    const u2 = Math.min(0.18, L/360); // triple
     const k = row.map(r=>r.k);
     const counts={}; k.forEach(x=>counts[x]=(counts[x]||0)+1);
     const hasThree = Object.values(counts).some(c=>c===3);
     const hasPair  = Object.values(counts).some(c=>c===2);
-
     if (!hasPair && !hasThree && Math.random()<u){
-      // force pair by matching the right-most to the better of left/middle
       const best = row[0].rank >= row[1].rank ? row[0] : row[1];
       row[2] = best;
     } else if (hasPair && !hasThree && Math.random()<u2){
@@ -184,22 +186,66 @@
     machineBetEl.textContent = betCents===25 ? "25¢" : "10¢";
   }
   function updateSpinEnabled(){
-    const s = stats[currentUser];
-    spinBtn.disabled = s.spins <= 0;
+    spinBtn.disabled = stats[currentUser].spins <= 0;
   }
 
-  // ---------- Cylinder helpers (3 visible per reel) ----------
+  // ---------- Reel building & smooth scroll ----------
+  const CELL_H = 120 + 6; // match CSS var(--cell-h) + gap
+
+  function initReelTrack(reel){
+    const track = reel.querySelector(".track");
+    track.innerHTML = "";
+    // seed with 6 randoms so wheel isn't empty
+    for (let i=0;i<6;i++) track.appendChild(makeCell(randSymbol().glyph, i===1));
+  }
+  function makeCell(glyph, isMid=false){
+    const d = document.createElement("div");
+    d.className = "cell" + (isMid ? " mid" : "");
+    d.textContent = glyph;
+    return d;
+  }
   function randSymbol(){ return SYMBOLS[(Math.random()*SYMBOLS.length)|0]; }
-  function setColumn(reelEl, top, mid, bot){
-    const cells = reelEl.querySelectorAll(".cell");
-    cells[0].textContent = top.glyph;
-    cells[1].textContent = mid.glyph;
-    cells[2].textContent = bot.glyph;
+
+  // Spin one reel with smooth translateY
+  async function scrollReelTo(reel, finalCol, totalRows, fakeHops){
+    const track = reel.querySelector(".track");
+    reel.classList.remove("stopped");
+
+    // Build sequence: many randoms + final (top, mid, bot)
+    track.innerHTML = "";
+    const filler = totalRows - 3; // rows before final trio
+    for (let i=0;i<filler;i++) track.appendChild(makeCell(randSymbol().glyph, false));
+    track.appendChild(makeCell(finalCol.top.glyph, false));
+    track.appendChild(makeCell(finalCol.mid.glyph, true));   // mid visible end
+    track.appendChild(makeCell(finalCol.bot.glyph, false));
+
+    // Start position
+    track.style.transform = `translateY(0px)`;
+    track.style.transition = "none";
+    // Reflow
+    void track.offsetHeight;
+
+    // Slow-down scroll to the end
+    const distance = -(CELL_H * (totalRows - 3));
+    track.style.transition = "transform 1200ms cubic-bezier(.12,.86,.16,1)";
+    track.style.transform  = `translateY(${distance}px)`;
+    await wait(1200);
+
+    // Fake-out hops (tiny extra steps)
+    for (let i=0;i<fakeHops;i++){
+      track.style.transition = "transform 160ms ease-out";
+      track.style.transform = `translateY(${distance + 18}px)`; await wait(160);
+      track.style.transition = "transform 190ms ease-in";
+      track.style.transform = `translateY(${distance}px)`; await wait(190);
+    }
+
+    // Raise & gold-highlight this reel's middle cell
+    reel.classList.add("stopped");
   }
 
   // ---------- Spin flow ----------
   let spinning=false;
-  let lastHighlighted = []; // keep highlights until next spin
+  reelEls.forEach(r=>r.classList.remove("stopped"));
 
   async function doSpin(){
     if (spinning) return;
@@ -208,8 +254,7 @@
 
     spinning=true; machine.classList.add("spinning");
     // clear previous highlights
-    lastHighlighted.forEach(el=>el.classList.remove("win"));
-    lastHighlighted = [];
+    reelEls.forEach(r=>r.classList.remove("stopped"));
 
     s.spins -= 1; s.spent = +(s.spent + betCents/100).toFixed(2); saveStats(); renderStats();
 
@@ -217,17 +262,19 @@
     let midRow = [pickBiased(s.luck), pickBiased(s.luck), pickBiased(s.luck)];
     midRow = upgradeRow(midRow, s.luck);
 
-    // Build final columns (top/mid/bot). We keep neighbors random for realism.
+    // Final columns (neighbors random)
     const finals = [
       {top: randSymbol(), mid: midRow[0], bot: randSymbol()},
       {top: randSymbol(), mid: midRow[1], bot: randSymbol()},
       {top: randSymbol(), mid: midRow[2], bot: randSymbol()},
     ];
 
-    // Start all reels “rotating”; stop with long gaps + fake-out hops
-    await spinReel(reels[0], finals[0], 36, 2);
-    await spinReel(reels[1], finals[1], 48, 2);
-    await spinReel(reels[2], finals[2], 62, 2);
+    // Start all together; stop 1→2→3 with longer gaps & fake-out
+    await scrollReelTo(reelEls[0], finals[0], 28, 1);
+    await wait(180);
+    await scrollReelTo(reelEls[1], finals[1], 34, 1);
+    await wait(240);
+    await scrollReelTo(reelEls[2], finals[2], 40, 2);
 
     // Score using middle row only
     const win = calcWinRow(midRow);
@@ -235,11 +282,8 @@
     if (win>0){
       stats[currentUser].earned = +(stats[currentUser].earned + win).toFixed(2);
       saveStats(); renderStats();
-      // highlight middle cells
-      reels.forEach(r => r.classList.add("win"));
-      lastHighlighted = [...reels]; // persist highlight until next spin
       celebrate(win);
-      flash(`Win $${win.toFixed(2)} on middle row!`);
+      flash(`Win $${win.toFixed(2)} on the middle row!`);
     } else {
       flash("No win. Try again!");
     }
@@ -248,39 +292,12 @@
     spinning=false;
   }
 
-  // “Cylinder” spin: cycle visible cells, slow down, fake-out, then land
-  async function spinReel(reelEl, finalCol, swaps, fakeOutHops){
-    reelEl.classList.add("stopping");
-
-    // start from random symbols
-    let t=randSymbol(), m=randSymbol(), b=randSymbol();
-    setColumn(reelEl, t, m, b);
-
-    for (let i=0;i<swaps;i++){
-      // rotate down: b→out, m→b, t→m, new→t
-      b = m; m = t; t = randSymbol();
-      setColumn(reelEl, t, m, b);
-      const x = i/swaps;
-      const delay = 26 + 14*x + 360*x*x; // slow down
-      await wait(delay);
-    }
-    // a couple fake near-stops for drama
-    for (let j=0;j<fakeOutHops;j++){
-      b = m; m = t; t = randSymbol();
-      setColumn(reelEl, t, m, b);
-      await wait(220 + j*70);
-    }
-    // land final
-    setColumn(reelEl, finalCol.top, finalCol.mid, finalCol.bot);
-    reelEl.classList.remove("stopping");
-  }
-
   function flash(t){ messageEl.textContent = t; }
   const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
 
   // ---------- Celebrations ----------
   function celebrate(amount){
-    const tier = amount>=5 ? "JACKPOT" : amount>=2 ? "MEGA WIN" : "BIG WIN";
+    const tier = amount>=3 ? "JACKPOT" : amount>=1.5 ? "MEGA WIN" : "BIG WIN";
     winBanner.textContent = `✨ ${tier}! You won $${amount.toFixed(2)} ✨`;
     winBanner.classList.add("show");
     messageEl.classList.add("win");
@@ -344,7 +361,7 @@
     if(!Number.isFinite(spins)||!Number.isFinite(earned)||!Number.isFinite(spent)||!Number.isFinite(luck)){ alert("Invalid values."); return; }
     stats[currentUser].spins=spins; stats[currentUser].earned=+earned.toFixed(2);
     stats[currentUser].spent=+spent.toFixed(2); stats[currentUser].luck=luck;
-    saveStats(); renderStats(); refreshOdds(); hideAdmin(); // close on save
+    saveStats(); renderStats(); refreshOdds(); hideAdmin();
   });
   add10Spins.addEventListener("click", ()=>{ stats[currentUser].spins += 10; saveStats(); renderStats(); refreshOdds(); });
   resetStatsBtn.addEventListener("click", ()=>{
@@ -354,15 +371,14 @@
     }
   });
 
-  userSelect.addEventListener("change", ()=>{ currentUser=userSelect.value; localStorage.setItem("ll-v7-user", currentUser); renderStats(); refreshOdds(); hideAdmin(); });
+  userSelect.addEventListener("change", ()=>{ currentUser=userSelect.value; localStorage.setItem("ll-v8-user", currentUser); renderStats(); refreshOdds(); hideAdmin(); });
+  bet10.addEventListener("click", ()=>{ betCents=10; localStorage.setItem("ll-v8-bet","10"); markBet(); renderPaytable(); refreshOdds(); });
+  bet25.addEventListener("click", ()=>{ betCents=25; localStorage.setItem("ll-v8-bet","25"); markBet(); renderPaytable(); refreshOdds(); });
 
-  bet10.addEventListener("click", ()=>{ betCents=10; localStorage.setItem("ll-v7-bet","10"); markBet(); renderPaytable(); refreshOdds(); });
-  bet25.addEventListener("click", ()=>{ betCents=25; localStorage.setItem("ll-v7-bet","25"); markBet(); renderPaytable(); refreshOdds(); });
-
-  // Quick Monte-Carlo for 3×3 middle-row odds (with luck + upgrade)
+  // Monte-Carlo odds for middle row with current luck
   function refreshOdds(){
     const s = stats[currentUser];
-    const trials = 18000; // fast and smooth
+    const trials = 15000;
     let c3 = {diamond:0, seven:0, star:0, bell:0, grape:0, orange:0, lemon:0, cherry:0};
     let twoCherry=0, twoOther=0, none=0;
     for(let i=0;i<trials;i++){
