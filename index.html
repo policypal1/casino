@@ -33,8 +33,6 @@
           <button id="bet10" class="chip" type="button">10¢</button>
           <button id="bet25" class="chip active" type="button">25¢</button>
         </div>
-
-        <button id="adminToggle" class="btn ghost" type="button" aria-expanded="false" aria-controls="adminPanel">Admin</button>
       </div>
     </header>
 
@@ -59,13 +57,13 @@
         <!-- Controls: left/center/right -->
         <div class="controls">
           <div class="left">
-            <button id="convertBtn" class="btn" type="button" title="Convert Earned cash to spins at current bet">Convert Cash → Spins</button>
+            <button id="convertBtn" class="btn" type="button">Convert Cash → Spins</button>
           </div>
           <div class="center">
             <button id="spinBtn" class="btn spin-btn big" type="button"><span class="label">SPIN</span></button>
           </div>
           <div class="right">
-            <button id="cashoutBtn" class="btn danger" type="button" title="Reset Earned to $0 (demo payout)">Cash Out</button>
+            <button id="cashoutBtn" class="btn danger" type="button">Cash Out</button>
           </div>
         </div>
 
@@ -76,6 +74,11 @@
         <h2>Pay Table (<span id="payNote">per 25¢ bet</span>) — Middle Row</h2>
         <div class="pt-grid" id="payRows"></div>
         <p class="rg">Demo credits only • Luck/Odds affect hit rate; payouts scale with bet.</p>
+      </section>
+
+      <!-- Admin launcher moved to bottom -->
+      <section class="admin-launch">
+        <button id="adminToggle" class="btn ghost" type="button" aria-expanded="false" aria-controls="adminPanel">Admin</button>
       </section>
 
       <section id="adminPanel" class="admin card hidden" aria-hidden="true" tabindex="-1">
@@ -108,7 +111,7 @@
           <div class="admin-item">
             <label for="rtpTarget">RTP Target (%)</label>
             <input type="range" id="rtpTarget" min="70" max="98" step="1" />
-            <small class="help">Aim ≈90% (your request).</small>
+            <small class="help">Aim ≈90%.</small>
           </div>
           <div class="admin-item">
             <label>&nbsp;</label>
