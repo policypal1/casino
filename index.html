@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lucky Lemons — 3-Reel Slot</title>
+  <title>Lucky Lemons — 3×3 Slot</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
+  <div class="background-rainbow"></div>
+
   <div class="app" id="appRoot">
     <header class="topbar">
-      <h1 class="brand"><span class="logo">🍀</span> Lucky Lemons — 3-Reel Slot</h1>
+      <h1 class="brand"><span class="logo">🍀</span> Lucky Lemons — 3×3 Slot</h1>
 
       <div class="hud">
         <label class="userpick">
@@ -19,29 +21,52 @@
             <option value="Isaac">Isaac</option>
           </select>
         </label>
+
         <div class="divider"></div>
         <div class="stat"><span class="k">Spins</span><span id="spinsLeft" class="v">—</span></div>
         <div class="stat"><span class="k">Earned</span><span id="totalEarned" class="v">$0.00</span></div>
         <div class="stat"><span class="k">Spent</span><span id="totalSpent" class="v">$0.00</span></div>
+
         <div class="divider"></div>
         <div class="betgroup" role="group" aria-label="Bet amount">
+          <span class="bet-label">Bet:</span>
           <button id="bet10" class="chip">10¢</button>
           <button id="bet25" class="chip active">25¢</button>
         </div>
+
         <button id="adminToggle" class="btn ghost">Admin</button>
       </div>
     </header>
 
     <main>
       <section class="machine card" id="machine">
-        <div class="rainbow-border"></div>
+        <div class="rainbow-border moving"></div>
+
+        <header class="machine-bar">
+          <div class="machine-title">Lucky Lemons — <span id="machineBet">25¢</span> Mode</div>
+        </header>
 
         <div class="win-banner" id="winBanner" aria-hidden="true"></div>
 
-        <div class="reels" aria-live="polite" aria-atomic="true">
-          <div class="reel" id="reel-1"><div class="symbol">🍋</div></div>
-          <div class="reel" id="reel-2"><div class="symbol">🍒</div></div>
-          <div class="reel" id="reel-3"><div class="symbol">🍇</div></div>
+        <!-- 3×3 reels -->
+        <div class="reels reels-3x3" aria-live="polite" aria-atomic="true">
+          <!-- each reel has 3 visible cells; we rotate symbols through them -->
+          <div class="reel" id="reel-1">
+            <div class="cell">🍋</div>
+            <div class="cell mid">🍒</div>
+            <div class="cell">🍇</div>
+          </div>
+          <div class="reel" id="reel-2">
+            <div class="cell">🍋</div>
+            <div class="cell mid">🍒</div>
+            <div class="cell">🍇</div>
+          </div>
+          <div class="reel" id="reel-3">
+            <div class="cell">🍋</div>
+            <div class="cell mid">🍒</div>
+            <div class="cell">🍇</div>
+          </div>
+          <div class="payline"></div>
         </div>
 
         <div class="controls">
@@ -52,9 +77,9 @@
       </section>
 
       <section class="paytable card">
-        <h2>Pay Table (<span id="payNote">per 25¢ bet</span>)</h2>
+        <h2>Pay Table (<span id="payNote">per 25¢ bet</span>) — Middle Row</h2>
         <div class="pt-grid" id="payRows"></div>
-        <p class="rg">Demo credits only • Base RTP ≈ 97.8% (Luck modifies actual RTP).</p>
+        <p class="rg">Demo credits only • Luck increases hit rate; payouts scale with bet.</p>
       </section>
 
       <section id="adminPanel" class="admin card hidden" aria-hidden="true">
@@ -79,17 +104,15 @@
           </div>
         </div>
 
-        <h3 style="margin-top:14px">Outcome Probabilities (est.)</h3>
-        <div id="oddsGrid" class="odds-grid">
-          <!-- filled by JS -->
-        </div>
+        <h3 style="margin-top:14px">Outcome Probabilities (est.) — Middle Row</h3>
+        <div id="oddsGrid" class="odds-grid"></div>
 
         <div class="admin-actions">
           <button id="saveAdmin" class="btn primary">Save</button>
           <button id="add10Spins" class="btn">+10 Spins</button>
           <button id="resetStats" class="btn danger">Reset User</button>
         </div>
-        <p class="muted">Passcode to open: <code>1111</code> • Odds simulate quickly in-browser.</p>
+        <p class="muted">Passcode: <code>1111</code> • Odds simulate quickly in-browser.</p>
       </section>
     </main>
 
