@@ -91,6 +91,11 @@
             <input type="number" id="adminLuck" min="0" max="100" step="1" />
             <small class="help">10¢ adds a small bonus automatically.</small>
           </div>
+          <div class="admin-item" style="grid-column:span 2">
+            <label for="adminOdds">Odds (Tight ⇄ Loose)</label>
+            <input type="range" id="adminOdds" min="0" max="200" step="1" />
+            <small class="help">Controls player-favor. 100 = neutral. Diamonds unaffected.</small>
+          </div>
         </div>
 
         <h3 class="admin-subhead">Symbol Base Chances</h3>
@@ -122,6 +127,14 @@
       <h3 id="winTitle">BIG WIN</h3>
       <div class="win-amount" id="winAmount">$0.00</div>
       <p class="win-sub">Middle row pays</p>
+    </div>
+  </div>
+
+  <!-- NO WIN (big red X) -->
+  <div id="noWinModal" class="modal no-win hidden" role="dialog" aria-modal="true">
+    <div class="modal-content no-win-box">
+      <div class="x-mark">✖</div>
+      <h3 class="no-win-title">NO WIN</h3>
     </div>
   </div>
 
