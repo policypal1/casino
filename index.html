@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Brainrot Slots — Chatcher Gamble (1 token = 1M/s)</title>
-  <link rel="stylesheet" href="style.css?v=20" />
+  <link rel="stylesheet" href="style.css?v=21" />
 </head>
 <body>
   <div class="background-rainbow"></div>
@@ -46,7 +46,6 @@
 
         <div class="win-banner" id="winBanner" aria-hidden="true"></div>
 
-        <!-- 3×3 reels -->
         <div class="reels reels-3x3" aria-live="polite" aria-atomic="true">
           <div class="reel" id="reel-1"><div class="track"></div></div>
           <div class="reel" id="reel-2"><div class="track"></div></div>
@@ -54,7 +53,6 @@
           <div class="payline"></div>
         </div>
 
-        <!-- Controls -->
         <div class="controls">
           <div class="left"><button id="depositBtn" class="btn" type="button">Deposit Chatcher (M/s → 🪙)</button></div>
           <div class="center"><button id="spinBtn" class="btn spin-btn big" type="button"><span class="label">SPIN</span></button></div>
@@ -71,88 +69,36 @@
         <p class="rg">Min. deposit: <b>5🪙</b> (i.e., 5M/s chatcher).</p>
       </section>
 
-      <!-- Admin launcher at bottom -->
+      <!-- Admin launcher -->
       <section class="admin-launch">
         <button id="adminToggle" class="btn ghost" type="button" aria-expanded="false" aria-controls="adminPanel">Admin</button>
       </section>
 
+      <!-- SIMPLE ADMIN: add coins only -->
       <section id="adminPanel" class="admin card hidden" aria-hidden="true" tabindex="-1">
-        <h2>Admin Controls</h2>
+        <h2>Admin</h2>
         <div class="admin-row"><label>Selected User: <strong id="adminUserLabel">Will</strong></label></div>
 
         <div class="admin-grid">
           <div class="admin-item">
-            <label for="adminTokens">Balance (🪙)</label>
-            <input type="number" id="adminTokens" min="0" step="1" />
+            <label for="adminAddTokens">Add Tokens (🪙)</label>
+            <input type="number" id="adminAddTokens" min="1" step="1" value="10" />
           </div>
-          <div class="admin-item">
-            <label for="adminEarned">Total Earned (🪙)</label>
-            <input type="number" id="adminEarned" min="0" step="1" />
-          </div>
-          <div class="admin-item">
-            <label for="adminSpent">Total Spent (🪙)</label>
-            <input type="number" id="adminSpent" min="0" step="1" />
-          </div>
-
-          <div class="admin-item">
-            <label for="adminLuck">Luck Bias (0–100)</label>
-            <input type="number" id="adminLuck" min="0" max="100" step="1" />
-          </div>
-          <div class="admin-item">
-            <label for="adminOdds">Odds (Tight ⇄ Loose)</label>
-            <input type="range" id="adminOdds" min="0" max="200" step="1" />
-            <small class="help">100 = neutral</small>
-          </div>
-
-          <div class="admin-item">
-            <label for="rtpTarget">RTP Target (%)</label>
-            <input type="range" id="rtpTarget" min="35" max="70" step="1" />
-          </div>
-          <div class="admin-item">
-            <label for="rtpGain">RTP Gain (0–200)</label>
-            <input type="range" id="rtpGain" min="0" max="200" step="1" />
-          </div>
-
-          <div class="admin-item">
-            <label for="diamond3Pct">Top Symbol 3× Chance %</label>
-            <input type="number" id="diamond3Pct" min="0" max="2" step="0.1" />
-          </div>
-
-          <div class="admin-item">
-            <label for="pityStart">Pity Start (dry spins)</label>
-            <input type="number" id="pityStart" min="0" max="50" step="1" />
-          </div>
-          <div class="admin-item">
-            <label for="pityStep">Pity Step (luck/extra spin)</label>
-            <input type="number" id="pityStep" min="0" max="40" step="1" />
-          </div>
-
-          <div class="admin-item">
-            <label>Dry Streak</label>
-            <div id="dryLabel" class="statbox">0</div>
-          </div>
-
           <div class="admin-item">
             <label>&nbsp;</label>
-            <button id="autoTune" class="btn primary" type="button">Auto-Tune to Target</button>
+            <button id="adminAddBtn" class="btn primary" type="button">Add to Balance</button>
+          </div>
+          <div class="admin-item">
+            <label>Current Balance</label>
+            <div id="adminBalance" class="stat v">0🪙</div>
           </div>
         </div>
 
-        <h3 class="admin-subhead">Base Appearance Chances</h3>
-        <div id="baseChances" class="odds-grid"></div>
-
-        <h3 class="admin-subhead">Outcome Probabilities (est.) — Middle Row</h3>
-        <div id="oddsGrid" class="odds-grid"></div>
-
-        <div class="admin-stats" id="rtpStats"></div>
-
         <div class="admin-actions">
-          <button id="saveAdmin" class="btn" type="button">Save</button>
-          <button id="add10Tokens" class="btn" type="button">+10🪙</button>
           <button id="resetStats" class="btn danger" type="button">Reset User</button>
           <button id="closeAdmin" class="btn ghost" type="button">Close</button>
         </div>
-        <p class="muted">Passcode: <code>1111</code>. Auto-Tune simulates locally.</p>
+        <p class="muted">Passcode: <code>1111</code>.</p>
       </section>
     </main>
 
@@ -176,6 +122,6 @@
     </div>
   </div>
 
-  <script defer src="script.js?v=20"></script>
+  <script defer src="script.js?v=21"></script>
 </body>
 </html>
