@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lucky Lemons — 3×3 Slot</title>
-  <link rel="stylesheet" href="style.css?v=18" />
+  <title>Brainrot Slots — Chatcher Gamble (1 token = 1M/s)</title>
+  <link rel="stylesheet" href="style.css?v=20" />
 </head>
 <body>
   <div class="background-rainbow"></div>
 
   <div class="app" id="appRoot">
     <header class="topbar">
-      <h1 class="brand"><span class="logo">🍀</span> Lucky Lemons — 3×3 Slot</h1>
+      <h1 class="brand"><span class="logo">🧠</span> Brainrot Slots — Chatcher Gamble</h1>
 
       <div class="hud">
         <label class="userpick">
@@ -23,15 +23,15 @@
         </label>
 
         <div class="divider"></div>
-        <div class="stat"><span class="k">Spins</span><span id="spinsLeft" class="v">—</span></div>
-        <div class="stat"><span class="k">Earned</span><span id="totalEarned" class="v">$0.00</span></div>
-        <div class="stat"><span class="k">Spent</span><span id="totalSpent" class="v">$0.00</span></div>
+        <div class="stat"><span class="k">Balance</span><span id="tokenBalance" class="v">0🪙</span></div>
+        <div class="stat"><span class="k">Earned</span><span id="totalEarned" class="v">0🪙</span></div>
+        <div class="stat"><span class="k">Spent</span><span id="totalSpent" class="v">0🪙</span></div>
 
         <div class="divider"></div>
         <div class="betgroup" role="group" aria-label="Bet amount">
           <span class="bet-label">Bet:</span>
-          <button id="bet10" class="chip" type="button">10¢</button>
-          <button id="bet25" class="chip active" type="button">25¢</button>
+          <button id="bet1"  class="chip active" type="button">1🪙</button>
+          <button id="bet5"  class="chip" type="button">5🪙</button>
         </div>
       </div>
     </header>
@@ -41,7 +41,7 @@
         <div class="rainbow-border"></div>
 
         <header class="machine-bar">
-          <div class="machine-title">Lucky Lemons — <span id="machineBet">25¢</span> Mode</div>
+          <div class="machine-title">Middle Row Pays • <span id="machineBet">1🪙</span> / spin</div>
         </header>
 
         <div class="win-banner" id="winBanner" aria-hidden="true"></div>
@@ -56,18 +56,19 @@
 
         <!-- Controls -->
         <div class="controls">
-          <div class="left"><button id="convertBtn" class="btn" type="button">Convert Cash → Spins</button></div>
+          <div class="left"><button id="depositBtn" class="btn" type="button">Deposit Chatcher (M/s → 🪙)</button></div>
           <div class="center"><button id="spinBtn" class="btn spin-btn big" type="button"><span class="label">SPIN</span></button></div>
-          <div class="right"><button id="cashoutBtn" class="btn danger" type="button">Cash Out</button></div>
+          <div class="right"><button id="cashoutBtn" class="btn danger" type="button">Cash Out → Brainrot</button></div>
         </div>
 
         <div id="message" class="message" role="status" aria-live="polite"></div>
       </section>
 
       <section class="paytable card">
-        <h2>Pay Table (<span id="payNote">per 25¢ bet</span>) — Middle Row</h2>
+        <h2>Pay Table (per 1🪙 bet) — Middle Row</h2>
         <div class="pt-grid" id="payRows"></div>
-        <p class="rg">Demo credits only • Luck/Odds affect hit rate; payouts scale with bet.</p>
+        <p class="rg">Demo tokens only • RTP governor targets ~47% for house edge ≈ 53/47.</p>
+        <p class="rg">Min. deposit: <b>5🪙</b> (i.e., 5M/s chatcher).</p>
       </section>
 
       <!-- Admin launcher at bottom -->
@@ -81,16 +82,16 @@
 
         <div class="admin-grid">
           <div class="admin-item">
-            <label for="adminSpins">Spins Left</label>
-            <input type="number" id="adminSpins" min="0" step="1" />
+            <label for="adminTokens">Balance (🪙)</label>
+            <input type="number" id="adminTokens" min="0" step="1" />
           </div>
           <div class="admin-item">
-            <label for="adminEarned">Total Earned ($)</label>
-            <input type="number" id="adminEarned" min="0" step="0.01" />
+            <label for="adminEarned">Total Earned (🪙)</label>
+            <input type="number" id="adminEarned" min="0" step="1" />
           </div>
           <div class="admin-item">
-            <label for="adminSpent">Total Spent ($)</label>
-            <input type="number" id="adminSpent" min="0" step="0.01" />
+            <label for="adminSpent">Total Spent (🪙)</label>
+            <input type="number" id="adminSpent" min="0" step="1" />
           </div>
 
           <div class="admin-item">
@@ -105,7 +106,7 @@
 
           <div class="admin-item">
             <label for="rtpTarget">RTP Target (%)</label>
-            <input type="range" id="rtpTarget" min="70" max="98" step="1" />
+            <input type="range" id="rtpTarget" min="35" max="70" step="1" />
           </div>
           <div class="admin-item">
             <label for="rtpGain">RTP Gain (0–200)</label>
@@ -113,8 +114,8 @@
           </div>
 
           <div class="admin-item">
-            <label for="diamond3Pct">Diamond 3× Chance %</label>
-            <input type="number" id="diamond3Pct" min="0" max="5" step="0.1" />
+            <label for="diamond3Pct">Top Symbol 3× Chance %</label>
+            <input type="number" id="diamond3Pct" min="0" max="2" step="0.1" />
           </div>
 
           <div class="admin-item">
@@ -137,7 +138,7 @@
           </div>
         </div>
 
-        <h3 class="admin-subhead">Symbol Base Chances</h3>
+        <h3 class="admin-subhead">Base Appearance Chances</h3>
         <div id="baseChances" class="odds-grid"></div>
 
         <h3 class="admin-subhead">Outcome Probabilities (est.) — Middle Row</h3>
@@ -147,7 +148,7 @@
 
         <div class="admin-actions">
           <button id="saveAdmin" class="btn" type="button">Save</button>
-          <button id="add10Spins" class="btn" type="button">+10 Spins</button>
+          <button id="add10Tokens" class="btn" type="button">+10🪙</button>
           <button id="resetStats" class="btn danger" type="button">Reset User</button>
           <button id="closeAdmin" class="btn ghost" type="button">Close</button>
         </div>
@@ -155,15 +156,15 @@
       </section>
     </main>
 
-    <footer class="foot"><small>© 2025 Lucky Lemons — Demo.</small></footer>
+    <footer class="foot"><small>© 2025 Brainrot Slots — Demo.</small></footer>
   </div>
 
-  <!-- WIN / NO-WIN modals + FX (null-safe) -->
+  <!-- WIN / NO-WIN modals -->
   <div id="winModal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-content" id="winBox">
       <div class="modal-shine"></div>
       <h3 id="winTitle">BIG WIN</h3>
-      <div class="win-amount" id="winAmount">$0.00</div>
+      <div class="win-amount" id="winAmount">+0🪙</div>
       <p class="win-sub">Middle row pays</p>
     </div>
   </div>
@@ -175,10 +176,6 @@
     </div>
   </div>
 
-  <div id="flashOverlay" class="flash hidden"></div>
-  <canvas id="confettiCanvas" class="confetti hidden"></canvas>
-  <div id="balloonLayer" class="balloons hidden" aria-hidden="true"></div>
-
-  <script defer src="script.js?v=18"></script>
+  <script defer src="script.js?v=20"></script>
 </body>
 </html>
