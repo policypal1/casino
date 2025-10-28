@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Brainrot Slots — Chatcher Gamble (1 token = 1M/s)</title>
-  <link rel="stylesheet" href="style.css?v=22" />
+  <title>Brainrot Slots — Character Gamble</title>
+  <link rel="stylesheet" href="style.css?v=23" />
 </head>
 <body>
   <div class="background-rainbow"></div>
@@ -25,22 +25,31 @@
         </label>
 
         <div class="divider"></div>
-        <div class="stat"><span class="k">Balance</span><span id="tokenBalance" class="v">0🪙</span></div>
+
+        <div class="stat balance">
+          <span class="k">Balance</span>
+          <span id="tokenBalance" class="v">0🪙</span>
+          <span id="balanceDelta" class="delta" aria-live="polite"></span>
+        </div>
 
         <div class="divider"></div>
-        <button id="betCycle" class="chip betcycle" type="button" title="Cycle bet">Bet: <b id="betLabel">0.50🪙</b></button>
+
+        <!-- Bet: scrollable + wheelable -->
+        <div class="betwrap" title="Scroll or drag to set bet">
+          <span class="bet-k">Bet</span>
+          <input id="betRange" type="range" min="0.01" max="5" step="0.005" value="0.50" />
+          <input id="betInput" type="number" min="0.01" step="0.005" value="0.50" />
+          <span class="coin">🪙</span>
+        </div>
       </div>
     </header>
 
     <main>
       <section class="machine card" id="machine">
-        <div class="rainbow-border"></div>
-
-        <header class="machine-bar">
+        <!-- removed rainbow border/top stripe -->
+        <header class="machine-bar flat">
           <div class="machine-title">Middle Row Pays • <span id="machineBet">0.50🪙</span> / spin</div>
         </header>
-
-        <div class="win-banner" id="winBanner" aria-hidden="true"></div>
 
         <div class="reels reels-3x3" aria-live="polite" aria-atomic="true">
           <div class="reel" id="reel-1"><div class="track"></div></div>
@@ -50,9 +59,18 @@
         </div>
 
         <div class="controls">
-          <div class="left"><button id="depositBtn" class="btn" type="button">Deposit Chatcher (M/s → 🪙)</button></div>
-          <div class="center"><button id="spinBtn" class="btn spin-btn big" type="button"><span class="label">SPIN</span></button></div>
-          <div class="right"><button id="cashoutBtn" class="btn danger" type="button">Cash Out → Brainrot</button></div>
+          <div class="left">
+            <button id="depositBtn" class="btn" type="button">Deposit Character (M/s → 🪙)</button>
+          </div>
+
+          <div class="center">
+            <button id="spinBtn" class="btn spin-btn big" type="button"><span class="label">SPIN</span></button>
+          </div>
+
+          <div class="right">
+            <button id="fastBtn" class="btn" type="button" aria-pressed="false">Fast Spin</button>
+            <button id="cashoutBtn" class="btn danger" type="button">Cash Out → Brainrot</button>
+          </div>
         </div>
 
         <div id="message" class="message" role="status" aria-live="polite"></div>
@@ -61,8 +79,7 @@
       <section class="paytable card">
         <h2>Pay Table (per 1🪙 bet) — Middle Row</h2>
         <div class="pt-grid" id="payRows"></div>
-        <p class="rg">Demo tokens only • Tight decimals enabled. RTP governor targets ~35% (house ≈ 65%).</p>
-        <p class="rg">Min. deposit: <b>5🪙</b> (i.e., 5M/s chatcher). Fractional bets & wins are supported.</p>
+        <p class="rg">Demo tokens only. Min deposit: <b>5🪙</b> (i.e., 5M/s character). Fractional bets & wins are supported.</p>
       </section>
 
       <!-- Admin launcher -->
@@ -101,23 +118,6 @@
     <footer class="foot"><small>© 2025 Brainrot Slots — Demo.</small></footer>
   </div>
 
-  <!-- WIN / NO-WIN modals -->
-  <div id="winModal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-content" id="winBox">
-      <div class="modal-shine"></div>
-      <h3 id="winTitle">BIG WIN</h3>
-      <div class="win-amount" id="winAmount">+0🪙</div>
-      <p class="win-sub">Middle row pays</p>
-    </div>
-  </div>
-
-  <div id="noWinModal" class="modal no-win hidden" role="dialog" aria-modal="true">
-    <div class="modal-content no-win-box">
-      <div class="x-mark">✖</div>
-      <h3 class="no-win-title">NO WIN</h3>
-    </div>
-  </div>
-
-  <script defer src="script.js?v=22"></script>
+  <script defer src="script.js?v=23"></script>
 </body>
 </html>
