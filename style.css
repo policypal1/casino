@@ -1,165 +1,123 @@
-/* Brainrot Slots — style.css (v22: compact HUD + bet cycler + decimal-ready) */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brainrot Slots — Character Gamble</title>
+  <link rel="stylesheet" href="style.css?v=23" />
+</head>
+<body>
+  <div class="background-rainbow"></div>
 
-* { box-sizing: border-box; }
-:root{
-  --bg:#0c1016; --ink:#e9f1ff; --muted:#9fb3c8;
-  --accent:#35d2a8; --accent-2:#ffd166; --danger:#ff5a5f;
-  --frame:#0f1729; --card:#111827; --card-border:rgba(255,255,255,.08);
-  --shadow:0 10px 25px rgba(0,0,0,.35); --radius:18px;
-  --cell-h:150px; --sym-size:92px;
-  --pt-icon:40px; --pt-icon-mobile:32px;
-}
+  <div class="app" id="appRoot">
+    <header class="topbar">
+      <h1 class="brand"><span class="logo">🧠</span> Brainrot Slots</h1>
 
-/* Background */
-.background-rainbow{
-  position:fixed; inset:0; z-index:-2; pointer-events:none; opacity:.26;
-  background: linear-gradient(90deg,#ff4d4f,#ffcd3c,#2ee59d,#40c4ff,#a78bfa,#ff4d4f);
-  background-size: 300% 100%;
-  animation: bgSlide 20s linear infinite;
-  filter:saturate(1.06) blur(.5px);
-}
-@keyframes bgSlide{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+      <div class="hud">
+        <label class="userpick">
+          <span>User</span>
+          <select id="userSelect" aria-label="Select user">
+            <option value="Will">Will</option>
+            <option value="Isaac">Isaac</option>
+            <option value="Faisal">Faisal</option>
+            <option value="Muhammed">Muhammed</option>
+          </select>
+        </label>
 
-html,body{height:100%}
-body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--ink)}
-.app{max-width:1160px;margin:0 auto;padding:22px}
+        <div class="divider"></div>
 
-/* Header / HUD */
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-.brand{margin:0;font-size:clamp(18px,2.6vw,26px);font-weight:800}
-.logo{filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
-.hud{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid var(--card-border)}
-.userpick{display:flex;align-items:center;gap:6px;color:var(--muted)}
-.userpick select{padding:6px 10px;border-radius:10px;border:1px solid var(--card-border);background:#0f1730;color:var(--ink)}
-.divider{width:1px;height:20px;background:var(--card-border)}
-.stat{display:flex;gap:6px;align-items:center;color:var(--muted);font-weight:800}
-.stat .v{color:var(--ink)}
+        <div class="stat balance">
+          <span class="k">Balance</span>
+          <span id="tokenBalance" class="v">0🪙</span>
+          <span id="balanceDelta" class="delta" aria-live="polite"></span>
+        </div>
 
-/* Bet cycler button */
-.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--card-border);background:#0e1524;color:var(--ink);font-weight:800;letter-spacing:.2px;cursor:pointer}
-.betcycle{background:linear-gradient(90deg,#1de9b6,#00bfa6);color:#001b18;border:none}
-.betcycle b{font-weight:900}
+        <div class="divider"></div>
 
-/* Buttons & cards */
-.btn{background:#1a2438;color:var(--ink);border:1px solid rgba(255,255,255,.12);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800;letter-spacing:.3px;transition:.18s;box-shadow:var(--shadow)}
-.btn.ghost{background:transparent}
-.btn.primary{background:linear-gradient(90deg, #1de9b6, #00bfa6);color:#001b18;border:none}
-.btn.big{font-size:18px;padding:12px 22px;border-radius:16px}
-.btn:hover{transform:translateY(-1px)}
-.btn:disabled{opacity:.6;cursor:not-allowed}
-.btn.danger{background:#30151a;border:1px solid rgba(255,90,95,.35);color:#ffb3b6}
+        <!-- Bet: scrollable + wheelable -->
+        <div class="betwrap" title="Scroll or drag to set bet">
+          <span class="bet-k">Bet</span>
+          <input id="betRange" type="range" min="0.01" max="5" step="0.005" value="0.50" />
+          <input id="betInput" type="number" min="0.01" step="0.005" value="0.50" />
+          <span class="coin">🪙</span>
+        </div>
+      </div>
+    </header>
 
-/* Animated SPIN button */
-.spin-btn{position:relative; overflow:hidden; border:none; background:#0b0f1a; padding:0; border-radius:18px}
-.spin-btn::before{
-  content:""; position:absolute; inset:0; border-radius:inherit; padding:2px;
-  background:linear-gradient(90deg,#ff4d4f,#ffcd3c,#2ee59d,#40c4ff,#a78bfa,#ff4d4f);
-  background-size:300% 100%; animation:btnRainbow 2.2s linear infinite;
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude;
-}
-.spin-btn .label{position:relative; display:block; padding:14px 30px; border-radius:16px; background:#0b0f1a; color:#eafff6; letter-spacing:.6px; font-weight:900; text-shadow:0 2px 0 #00120d}
-@keyframes btnRainbow{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+    <main>
+      <section class="machine card" id="machine">
+        <!-- removed rainbow border/top stripe -->
+        <header class="machine-bar flat">
+          <div class="machine-title">Middle Row Pays • <span id="machineBet">0.50🪙</span> / spin</div>
+        </header>
 
-/* Cards */
-.card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));border:1px solid var(--card-border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+        <div class="reels reels-3x3" aria-live="polite" aria-atomic="true">
+          <div class="reel" id="reel-1"><div class="track"></div></div>
+          <div class="reel" id="reel-2"><div class="track"></div></div>
+          <div class="reel" id="reel-3"><div class="track"></div></div>
+          <div class="payline"></div>
+        </div>
 
-/* MACHINE */
-.machine{padding:22px;margin-bottom:16px;position:relative;overflow:visible}
-.rainbow-border{
-  position:absolute; inset:-10px; border-radius:22px; pointer-events:none; z-index:0;
-  background: conic-gradient(#ff4d4f,#ffcd3c,#2ee59d,#40c4ff,#a78bfa,#ff4d4f);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude; padding:10px; filter:saturate(1.3);
-}
-.machine-bar{display:flex;justify-content:center;margin-bottom:10px}
-.machine-title{font-weight:900;letter-spacing:.4px;opacity:.95}
+        <div class="controls">
+          <div class="left">
+            <button id="depositBtn" class="btn" type="button">Deposit Character (M/s → 🪙)</button>
+          </div>
 
-/* 3×3 reels */
-.reels-3x3{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:26px;
-  background:var(--frame);border-radius:16px;padding:22px;border:1px solid var(--card-border);
-  position:relative;overflow:hidden; z-index:1;
-}
-.reel{height:calc(var(--cell-h) * 3);background:linear-gradient(180deg,#0b1222,#0f192d);border-radius:16px;border:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden; z-index:3;box-shadow: inset 0 10px 20px rgba(0,0,0,.25)}
-.track{position:absolute; left:10px; right:10px; top:10px}
+          <div class="center">
+            <button id="spinBtn" class="btn spin-btn big" type="button"><span class="label">SPIN</span></button>
+          </div>
 
-/* Cells support images (webp) */
-.cell{height:var(--cell-h); margin-bottom:6px; display:flex;align-items:center;justify-content:center;border-radius:12px; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06)}
-.cell img{ width: var(--sym-size); height: var(--sym-size); object-fit: contain; display:block }
-.cell.mid{background:rgba(255,255,255,.03)}
-.reel.stopped .cell.mid{background:linear-gradient(180deg, rgba(255,214,102,.28), rgba(255,214,102,.09));border-color:rgba(255,214,102,.7);transform:translateY(-2px) scale(1.02);box-shadow:0 12px 22px rgba(0,0,0,.35), 0 0 30px rgba(255,214,102,.45)}
+          <div class="right">
+            <button id="fastBtn" class="btn" type="button" aria-pressed="false">Fast Spin</button>
+            <button id="cashoutBtn" class="btn danger" type="button">Cash Out → Brainrot</button>
+          </div>
+        </div>
 
-/* payline */
-.payline{position:absolute; left:14px; right:14px; top:50%; height:0; border-top:2px dashed rgba(255,255,255,.18); transform:translateY(-50%)}
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+      </section>
 
-/* Controls layout */
-.controls{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-top:18px}
-.controls .left{display:flex;justify-content:flex-start}
-.controls .center{display:flex;justify-content:center}
-.controls .right{display:flex;justify-content:flex-end}
+      <section class="paytable card">
+        <h2>Pay Table (per 1🪙 bet) — Middle Row</h2>
+        <div class="pt-grid" id="payRows"></div>
+        <p class="rg">Demo tokens only. Min deposit: <b>5🪙</b> (i.e., 5M/s character). Fractional bets & wins are supported.</p>
+      </section>
 
-.message{margin-top:10px;min-height:24px;color:var(--accent-2);font-weight:800;letter-spacing:.3px}
-.message.win{animation:pulse 1.2s ease 1}
-@keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
+      <!-- Admin launcher -->
+      <section class="admin-launch">
+        <button id="adminToggle" class="btn ghost" type="button" aria-expanded="false" aria-controls="adminPanel">Admin</button>
+      </section>
 
-/* --- COMPACT PAY TABLE --- */
-.paytable h2{margin:0 0 10px}
-.pt-grid{display:grid;gap:8px}
-.pt-row{
-  display:grid;grid-template-columns:auto 1fr auto;align-items:center;
-  gap:10px;padding:10px 12px;border:1px solid var(--card-border);
-  border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01))
-}
-.pt-sym{display:flex;gap:6px;align-items:center}
-.pt-sym .triple{display:flex;gap:6px}
-.pt-sym img{width:var(--pt-icon);height:var(--pt-icon);object-fit:contain;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25)}
-.pt-row b{font-size:1rem}
-.pt-row.sub{opacity:.9}
-.rg{color:var(--muted);margin-top:10px}
+      <!-- SIMPLE ADMIN: add coins only -->
+      <section id="adminPanel" class="admin card hidden" aria-hidden="true" tabindex="-1">
+        <h2>Admin</h2>
+        <div class="admin-row"><label>Selected User: <strong id="adminUserLabel">Will</strong></label></div>
 
-/* Admin launcher at bottom */
-.admin-launch{display:flex;justify-content:center;margin:14px 0}
-.admin-launch .btn{padding:10px 18px;border-radius:999px}
+        <div class="admin-grid">
+          <div class="admin-item">
+            <label for="adminAddTokens">Add Tokens (🪙)</label>
+            <input type="number" id="adminAddTokens" min="0.001" step="0.001" value="10" />
+          </div>
+          <div class="admin-item">
+            <label>&nbsp;</label>
+            <button id="adminAddBtn" class="btn primary" type="button">Add to Balance</button>
+          </div>
+          <div class="admin-item">
+            <label>Current Balance</label>
+            <div id="adminBalance" class="stat v">0🪙</div>
+          </div>
+        </div>
 
-/* --- SIMPLE ADMIN --- */
-.admin{position:relative; z-index:5}
-.admin.hidden{display:none}
-.admin h2{margin:0 0 10px}
-.admin-row{margin:.25rem 0 .75rem}
-.admin-grid{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:12px}
-.admin-item{display:flex;flex-direction:column;gap:6px}
-.admin input[type="number"]{width:100%;padding:12px;border-radius:12px;border:1px solid var(--card-border);background:#0e1524;color:#0ff7d7;font-weight:700}
-.admin-actions{display:flex;gap:10px;margin-top:10px}
-.muted{color:var(--muted);font-size:.9rem}
+        <div class="admin-actions">
+          <button id="resetStats" class="btn danger" type="button">Reset User</button>
+          <button id="closeAdmin" class="btn ghost" type="button">Close</button>
+        </div>
+        <p class="muted">Passcode: <code>1111</code>.</p>
+      </section>
+    </main>
 
-/* Modals */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:10000;opacity:0;pointer-events:none;transition:opacity .25s ease}
-.modal.show{opacity:1;pointer-events:auto}
-.modal-content{position:relative;background:linear-gradient(180deg,#101a2a,#0d1526);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:30px 36px;width:min(80vw,860px);box-shadow:0 30px 80px rgba(0,0,0,.55);transform:scale(.92);animation:modalIn .28s ease forwards}
-@keyframes modalIn{to{transform:scale(1)}}
-.modal-shine{position:absolute;inset:-2px;border-radius:26px;background:conic-gradient(#ffd166,#ff8a65,#4dd0e1,#81c784,#ffd166);filter:saturate(1.3);mix-blend-mode:screen;opacity:.25;pointer-events:none}
-#winTitle{margin:0 0 8px;text-align:center;font-size:30px;letter-spacing:.5px}
-.win-amount{font-size:56px;font-weight:900;text-align:center;margin:8px 0 6px}
-.win-sub{text-align:center;color:var(--muted);margin:0}
+    <footer class="foot"><small>© 2025 Brainrot Slots — Demo.</small></footer>
+  </div>
 
-.modal.no-win{background:rgba(30,0,0,.7)}
-.no-win-box{background:linear-gradient(180deg,#2a0f14,#1a0b0d);width:min(80vw,760px);border:1px solid rgba(255,80,80,.3)}
-.no-win-title{margin:10px 0 0;text-align:center;color:#ffcdd2;font-size:36px;letter-spacing:.5px}
-.x-mark{font-size:120px;line-height:1;text-align:center;color:#ff5252;text-shadow:0 10px 30px rgba(255,82,82,.35)}
-
-/* Footer */
-.foot{display:flex;justify-content:center;opacity:.66}
-.foot small{display:block;padding:10px 0}
-
-/* Responsive tweaks */
-@media (max-width: 820px){
-  .app{padding:16px}
-  .reels-3x3{gap:12px;padding:14px}
-  :root{ --cell-h:132px; --sym-size:82px; --pt-icon:var(--pt-icon-mobile); }
-  .hud{flex-wrap:wrap;gap:8px}
-  .controls{grid-template-columns:1fr;gap:10px}
-  .controls .left,.controls .center,.controls .right{justify-content:center}
-}
+  <script defer src="script.js?v=23"></script>
+</body>
+</html>
