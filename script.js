@@ -1,4 +1,4 @@
-/* Brainrot Slots — linear payouts, fast toggle, win modal, paytable grid */
+/* Brainrot Slots — linear payouts, 53/47 edge, passcode deposit, synced paytable */
 function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
 const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
 const round3 = (n)=> Math.round((n + Number.EPSILON) * 1000) / 1000;
@@ -6,25 +6,26 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
 
 (() => {
   // ===== ECONOMY =====
-  const MIN_DEPOSIT = 5;                 // min token deposit
+  const MIN_DEPOSIT = 5;
   let fastMode = localStorage.getItem("br-fast")==="1";
 
   // Character table (best → least). value_x = payout per 1🪙 bet.
+  // NOTE: weights + values tuned to ~47% RTP (house ~53%). Keep as-is for edge.
   const ITEMS = [
-    { k:"strawberryelephant", file:"Strawberryelephant.webp",         label:"Strawberry Elephant", weight:5,  value_x:0.79 },
-    { k:"dragoncanneloni",    file:"Dragoncanneloni.webp",            label:"Dragon Canneloni",    weight:5,  value_x:0.394 },
-    { k:"garamadundung",      file:"Garamadundung.webp",              label:"Garamadundung",       weight:10, value_x:0.237 },
-    { k:"carti",              file:"Carti.webp",                      label:"Carti",               weight:12, value_x:0.158 },
-    { k:"saturnita",          file:"La_Vaccca_Saturno_Saturnita.webp",label:"Saturnita",           weight:14, value_x:0.110 },
-    { k:"tralalero",          file:"TralaleroTralala.webp",           label:"Tralalero Tralala",   weight:16, value_x:0.084 },
-    { k:"sgedrftdikou",       file:"Sgedrftdikou.webp",               label:"Sgedrftdikou",        weight:18, value_x:0.067 },
-    { k:"noobini",            file:"Noobini_Pizzanini_NEW.webp",      label:"Noobini Pizzanini",   weight:20, value_x:0.054 },
+    { k:"strawberryelephant", file:"Strawberryelephant.webp",         label:"Strawberry Elephant",  weight:5,  value_x:0.79  },
+    { k:"dragoncanneloni",    file:"Dragoncanneloni.webp",            label:"Dragon Canneloni",     weight:5,  value_x:0.394 },
+    { k:"garamadundung",      file:"Garamadundung.webp",              label:"Garamadundung",        weight:10, value_x:0.237 },
+    { k:"carti",              file:"Carti.webp",                      label:"La Grande",            weight:12, value_x:0.158 },
+    { k:"saturnita",          file:"La_Vaccca_Saturno_Saturnita.webp",label:"Saturnita",            weight:14, value_x:0.110 },
+    { k:"tralalero",          file:"TralaleroTralala.webp",           label:"Tralalero Tralala",    weight:16, value_x:0.084 },
+    { k:"sgedrftdikou",       file:"Sgedrftdikou.webp",               label:"Ballerina Cappuccino", weight:18, value_x:0.067 },
+    { k:"noobini",            file:"Noobini_Pizzanini_NEW.webp",      label:"Noobini Pizzanini",    weight:20, value_x:0.054 },
   ];
   const TOTAL_WEIGHT = ITEMS.reduce((s,x)=>s+x.weight,0);
 
   // ===== STATE =====
   const USERS = ["Will","Isaac","Faisal","Muhammed"];
-  const STORE = "brainrot-slots-linear-v3";
+  const STORE = "brainrot-slots-linear-v4";
   const baseUser = ()=>({ tokens:0, earned:0, spent:0 });
   function load(){
     try{
@@ -50,9 +51,12 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
   const userSelect= document.getElementById("userSelect");
   const tokenBalanceEl = document.getElementById("tokenBalance");
   const machineBetEl   = document.getElementById("machineBet");
+
   const betInput       = document.getElementById("betInput");
+  const betSlider      = document.getElementById("betSlider");
 
   const ptGrid   = document.getElementById("ptGrid");
+  const ptBet    = document.getElementById("ptBet");
 
   // Win modal
   const winModal = document.getElementById("winModal");
@@ -105,14 +109,6 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
     reel.classList.add("stopped");
   }
 
-  function renderBalance(){
-    const bal = stats[currentUser].tokens||0;
-    tokenBalanceEl.textContent = `${fmtTok(bal)}🪙`;
-    const max = Math.max(0.01, bal || 0.01);
-    betInput.max = String(max);
-    spinBtn.disabled = (bal + 1e-9) < getBet();
-  }
-  function setBetDisplay(){ machineBetEl.textContent = `${fmtTok(getBet())}🪙`; }
   function getBet(){
     const v = Number(betInput.value)||0.5;
     const max = Math.max(0.01, stats[currentUser].tokens||0.01);
@@ -120,25 +116,45 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
     if (cl !== v) betInput.value = String(cl);
     return cl;
   }
+  function setBetDisplay(){
+    const bet = getBet();
+    machineBetEl.textContent = `${fmtTok(bet)}🪙`;
+    ptBet.textContent = `${fmtTok(bet)}🪙`;
+    renderPaytable(); // refresh amounts
+  }
 
+  function renderBalance(){
+    const bal = stats[currentUser].tokens||0;
+    tokenBalanceEl.textContent = `${fmtTok(bal)}🪙`;
+    const max = Math.max(0.01, bal || 0.01);
+    betInput.max = String(max);
+    betSlider.max = String(Math.max(max, 1));
+    betSlider.value = String(getBet());
+    spinBtn.disabled = (bal + 1e-9) < getBet();
+  }
+
+  // paytable shows actual coin payouts at current bet (linear)
   function renderPaytable(){
     if (!ptGrid) return;
-    ptGrid.innerHTML = ITEMS.map(it=>`
-      <div class="pt-item">
-        <img src="${it.file}" alt="${it.label}">
-        <div class="nm">${it.label}</div>
-        <div class="vx">× ${it.value_x.toFixed(3)}</div>
-      </div>
-    `).join("");
+    const bet = getBet();
+    ptGrid.innerHTML = ITEMS.map(it=>{
+      const coins = round3(it.value_x * bet);
+      return `
+        <div class="pt-item">
+          <img src="${it.file}" alt="${it.label}">
+          <div class="nm">${it.label}</div>
+          <div class="vx">+ ${fmtTok(coins)} 🪙</div>
+        </div>`;
+    }).join("");
   }
 
   function showWin(win, midRow, bet){
     winAmtEl.textContent = `+${fmtTok(win)}`;
-    const parts = midRow.map(m=>`${m.label} × ${m.value_x.toFixed(3)}`).join("  •  ");
-    winLineEl.textContent = `(${parts}) × ${fmtTok(bet)}🪙`;
+    const parts = midRow.map(m=>`${m.label} (+${fmtTok(m.value_x*bet)})`).join("  •  ");
+    winLineEl.textContent = parts;
     winModal.classList.remove("hidden");
     setTimeout(()=> winModal.classList.add("show"), 10);
-    setTimeout(()=>{ winModal.classList.remove("show"); setTimeout(()=>winModal.classList.add("hidden"), 240); }, 3000);
+    setTimeout(()=>{ winModal.classList.remove("show"); setTimeout(()=>winModal.classList.add("hidden"), 220); }, 2200);
   }
 
   // ===== SPIN =====
@@ -194,17 +210,24 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
   fastChk.checked = fastMode;
   fastChk.addEventListener("change", ()=>{ fastMode = fastChk.checked; localStorage.setItem("br-fast", fastMode?"1":"0"); });
 
-  betInput.addEventListener("input", ()=>{ setBetDisplay(); renderBalance(); });
+  // bet input <-> slider sync
+  const syncFromNumber = ()=>{ betSlider.value = String(getBet()); setBetDisplay(); renderBalance(); };
+  const syncFromSlider = ()=>{ betInput.value = String(Number(betSlider.value)); setBetDisplay(); renderBalance(); };
+  betInput.addEventListener("input", syncFromNumber);
+  betSlider.addEventListener("input", syncFromSlider);
   betInput.addEventListener("wheel", (e)=>{ 
     e.preventDefault();
     const step = Number(betInput.step)||0.01;
     const newV = Number(betInput.value||"0") + (e.deltaY>0 ? -step : step);
     betInput.value = String(Math.max(0.01, round3(newV)));
-    setBetDisplay(); renderBalance();
+    syncFromNumber();
   });
 
+  // password-gated deposit
   if (depositBtn){
     depositBtn.addEventListener("click", ()=>{
+      const pass = prompt("Enter passcode to deposit:");
+      if (pass !== "1111"){ alert("Incorrect passcode."); return; }
       const s = stats[currentUser];
       const val = prompt(`Enter character production (M/s). Minimum ${MIN_DEPOSIT}. 1 M/s = 1🪙`, `${Math.max(MIN_DEPOSIT, 5)}`);
       if (val==null) return;
