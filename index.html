@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Brainrot Slots</title>
-  <link rel="stylesheet" href="style.css?v=20251027a" />
+  <link rel="stylesheet" href="style.css?v=20251027b" />
 </head>
 <body>
   <div class="bg"></div>
@@ -18,7 +18,7 @@
     </nav>
   </header>
 
-  <!-- HUD -->
+  <!-- HUD with slider -->
   <section class="hud card">
     <label class="userpick">
       <span>User</span>
@@ -35,10 +35,13 @@
       <span id="tokenBalance" class="v">0🪙</span>
     </div>
 
-    <div class="stat betwrap">
-      <span class="k">Bet</span>
-      <input id="betInput" type="number" step="0.01" min="0.01" value="0.50" />
-      <span class="unit">🪙</span>
+    <div class="bet-stack">
+      <div class="bet-row">
+        <span class="k">Bet</span>
+        <input id="betInput" type="number" step="0.01" min="0.01" value="0.50" />
+        <span class="unit">🪙</span>
+      </div>
+      <input id="betSlider" type="range" min="0.01" max="1" step="0.01" value="0.50" />
     </div>
 
     <button id="adminToggle" class="btn ghost">Admin</button>
@@ -57,7 +60,6 @@
         <div class="reel" id="reel-1"><div class="track"></div></div>
         <div class="reel" id="reel-2"><div class="track"></div></div>
         <div class="reel" id="reel-3"><div class="track"></div></div>
-        <div class="payline"></div>
       </div>
 
       <div class="controls">
@@ -84,11 +86,11 @@
       <div id="message" class="message" role="status" aria-live="polite"></div>
     </section>
 
-    <!-- Paytable -->
+    <!-- Paytable (auto-updates with bet) -->
     <section class="paytable card">
-      <h2>Pay Table (per <b>1🪙</b> bet) — Middle Row</h2>
+      <h2>Payouts for <b id="ptBet">1.00🪙</b> bet — Middle Row</h2>
       <div id="ptGrid" class="pt-grid-grid"></div>
-      <p class="rg">Values scale linearly with your bet. Fractional bets & wins supported.</p>
+      <p class="rg">Payout = (sum of the 3 middle characters). Values update with your bet.</p>
     </section>
 
     <!-- Admin (coins only) -->
@@ -105,20 +107,19 @@
       <div class="admin-actions">
         <button id="closeAdmin" class="btn ghost" type="button">Close</button>
       </div>
-      <p class="muted">This admin only adds coins—no luck/odds controls.</p>
+      <p class="muted">Coins only. Deposit is passcode-gated.</p>
     </section>
   </main>
 
-  <!-- Win Modal -->
+  <!-- Win Modal (simple) -->
   <div id="winModal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-content winbox">
-      <div class="lights"></div>
+    <div class="modal-content">
       <h3 id="winTitle">WIN</h3>
       <div class="win-amount"><span id="winAmt">+0</span> 🪙</div>
       <p class="win-line" id="winLine"></p>
     </div>
   </div>
 
-  <script defer src="script.js?v=20251027a"></script>
+  <script defer src="script.js?v=20251027b"></script>
 </body>
 </html>
