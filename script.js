@@ -1,31 +1,37 @@
-/* Brainrot Slots — linear payouts, 53/47 edge, passcode deposit, synced paytable */
+/* Brainrot Slots — linear payouts, 49% RTP (player), passcode gates, full UI lock while spinning */
 function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
 const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
 const round3 = (n)=> Math.round((n + Number.EPSILON) * 1000) / 1000;
 const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,''); };
 
 (() => {
-  // ===== ECONOMY =====
+  // ===== CONFIG =====
   const MIN_DEPOSIT = 5;
-  let fastMode = localStorage.getItem("br-fast")==="1";
+  const PASSCODE = "1111";               // for deposit & cashout
+  const TARGET_RTP = 0.49;               // player 49% / house 51%
 
-  // Character table (best → least). value_x = payout per 1🪙 bet.
-  // NOTE: weights + values tuned to ~47% RTP (house ~53%). Keep as-is for edge.
-  const ITEMS = [
+  // Items (best → least). Base values will be scaled to meet TARGET_RTP.
+  const ITEMS_BASE = [
     { k:"strawberryelephant", file:"Strawberryelephant.webp",         label:"Strawberry Elephant",  weight:5,  value_x:0.79  },
     { k:"dragoncanneloni",    file:"Dragoncanneloni.webp",            label:"Dragon Canneloni",     weight:5,  value_x:0.394 },
-    { k:"garamadundung",      file:"Garamadundung.webp",              label:"Garamadundung",        weight:10, value_x:0.237 },
+    { k:"garamadundung",      file:"Garamadundung.webp",              label:"Garama",               weight:10, value_x:0.237 },
     { k:"carti",              file:"Carti.webp",                      label:"La Grande",            weight:12, value_x:0.158 },
     { k:"saturnita",          file:"La_Vaccca_Saturno_Saturnita.webp",label:"Saturnita",            weight:14, value_x:0.110 },
     { k:"tralalero",          file:"TralaleroTralala.webp",           label:"Tralalero Tralala",    weight:16, value_x:0.084 },
     { k:"sgedrftdikou",       file:"Sgedrftdikou.webp",               label:"Ballerina Cappuccino", weight:18, value_x:0.067 },
     { k:"noobini",            file:"Noobini_Pizzanini_NEW.webp",      label:"Noobini Pizzanini",    weight:20, value_x:0.054 },
   ];
-  const TOTAL_WEIGHT = ITEMS.reduce((s,x)=>s+x.weight,0);
+
+  // Scale to hit RTP (expected payout = 3 * avg(value_x) = TARGET_RTP)
+  const TOTAL_WEIGHT = ITEMS_BASE.reduce((s,x)=>s+x.weight,0);
+  const avgBase = ITEMS_BASE.reduce((s,x)=> s + x.value_x * (x.weight/TOTAL_WEIGHT), 0);
+  const targetAvg = TARGET_RTP / 3;
+  const SCALE = targetAvg / avgBase; // <— normalized multiplier
+  const ITEMS = ITEMS_BASE.map(x => ({...x, value_x: x.value_x * SCALE}));
 
   // ===== STATE =====
   const USERS = ["Will","Isaac","Faisal","Muhammed"];
-  const STORE = "brainrot-slots-linear-v4";
+  const STORE = "brainrot-slots-linear-v5";
   const baseUser = ()=>({ tokens:0, earned:0, spent:0 });
   function load(){
     try{
@@ -38,6 +44,7 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
   function save(){ localStorage.setItem(STORE, JSON.stringify(stats)); }
 
   let currentUser = USERS.includes(localStorage.getItem("br-user")) ? localStorage.getItem("br-user") : "Will";
+  let fastMode = localStorage.getItem("br-fast")==="1";
 
   // ===== DOM =====
   const machine   = document.getElementById("machine");
@@ -58,12 +65,10 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
   const ptGrid   = document.getElementById("ptGrid");
   const ptBet    = document.getElementById("ptBet");
 
-  // Win modal
   const winModal = document.getElementById("winModal");
   const winAmtEl = document.getElementById("winAmt");
   const winLineEl= document.getElementById("winLine");
 
-  // Admin
   const adminToggle = document.getElementById("adminToggle");
   const adminPanel  = document.getElementById("adminPanel");
   const adminUserLabel = document.getElementById("adminUserLabel");
@@ -120,9 +125,8 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
     const bet = getBet();
     machineBetEl.textContent = `${fmtTok(bet)}🪙`;
     ptBet.textContent = `${fmtTok(bet)}🪙`;
-    renderPaytable(); // refresh amounts
+    renderPaytable();
   }
-
   function renderBalance(){
     const bal = stats[currentUser].tokens||0;
     tokenBalanceEl.textContent = `${fmtTok(bal)}🪙`;
@@ -132,10 +136,7 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
     betSlider.value = String(getBet());
     spinBtn.disabled = (bal + 1e-9) < getBet();
   }
-
-  // paytable shows actual coin payouts at current bet (linear)
   function renderPaytable(){
-    if (!ptGrid) return;
     const bet = getBet();
     ptGrid.innerHTML = ITEMS.map(it=>{
       const coins = round3(it.value_x * bet);
@@ -154,7 +155,20 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
     winLineEl.textContent = parts;
     winModal.classList.remove("hidden");
     setTimeout(()=> winModal.classList.add("show"), 10);
-    setTimeout(()=>{ winModal.classList.remove("show"); setTimeout(()=>winModal.classList.add("hidden"), 220); }, 2200);
+  }
+  function hideWin(){
+    winModal.classList.remove("show");
+    setTimeout(()=>winModal.classList.add("hidden"), 220);
+  }
+
+  // Lock/unlock every interactive control
+  const lockables = () => [
+    spinBtn, fastChk, depositBtn, cashoutBtn, userSelect, betInput, betSlider, adminToggle
+  ];
+  function setLocked(locked){
+    lockables().forEach(el=>{ if(el){ el.disabled = !!locked; } });
+    // prevent keyboard spin while locked
+    window.onkeydown = locked ? (e)=>{ if(e.code==="Space") e.preventDefault(); } : null;
   }
 
   // ===== SPIN =====
@@ -168,7 +182,7 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
       return;
     }
 
-    spinning=true; machine.classList.add("spinning");
+    spinning=true; setLocked(true); machine.classList.add("spinning");
     s.tokens = round3((s.tokens||0) - bet);
     s.spent  = round3((s.spent ||0) + bet);
     save(); renderBalance(); setBetDisplay();
@@ -194,8 +208,11 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
       s.earned = round3((s.earned||0) + win);
       messageEl.textContent = `+${fmtTok(win)}🪙`;
       showWin(win, midRow, bet);
+      // hold until user clicks / timeout
+      setTimeout(()=>{ hideWin(); setLocked(false); }, 2200);
     } else {
       messageEl.textContent = `—`;
+      setLocked(false);
     }
 
     save(); renderBalance(); setBetDisplay();
@@ -205,12 +222,11 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
 
   // ===== Buttons / Inputs =====
   spinBtn.addEventListener("click", doSpin);
-  window.addEventListener("keydown", (e)=>{ if(e.code==="Space"){ e.preventDefault(); doSpin(); } });
+  window.addEventListener("keydown", (e)=>{ if(e.code==="Space" && !spinBtn.disabled){ e.preventDefault(); doSpin(); } });
 
   fastChk.checked = fastMode;
   fastChk.addEventListener("change", ()=>{ fastMode = fastChk.checked; localStorage.setItem("br-fast", fastMode?"1":"0"); });
 
-  // bet input <-> slider sync
   const syncFromNumber = ()=>{ betSlider.value = String(getBet()); setBetDisplay(); renderBalance(); };
   const syncFromSlider = ()=>{ betInput.value = String(Number(betSlider.value)); setBetDisplay(); renderBalance(); };
   betInput.addEventListener("input", syncFromNumber);
@@ -223,39 +239,38 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
     syncFromNumber();
   });
 
-  // password-gated deposit
-  if (depositBtn){
-    depositBtn.addEventListener("click", ()=>{
-      const pass = prompt("Enter passcode to deposit:");
-      if (pass !== "1111"){ alert("Incorrect passcode."); return; }
-      const s = stats[currentUser];
-      const val = prompt(`Enter character production (M/s). Minimum ${MIN_DEPOSIT}. 1 M/s = 1🪙`, `${Math.max(MIN_DEPOSIT, 5)}`);
-      if (val==null) return;
-      const tokens = Number(val);
-      if (!Number.isFinite(tokens) || tokens<MIN_DEPOSIT){ alert(`Minimum deposit is ${MIN_DEPOSIT} tokens.`); return; }
-      s.tokens = round3((s.tokens||0) + tokens);
-      save(); renderBalance(); messageEl.textContent = `Deposited ${fmtTok(tokens)}🪙`;
-    });
-  }
+  // Passcode-gated deposit
+  depositBtn?.addEventListener("click", ()=>{
+    const pass = prompt("Enter passcode to deposit:");
+    if (pass !== PASSCODE){ alert("Incorrect passcode."); return; }
+    const s = stats[currentUser];
+    const val = prompt(`Enter character production (M/s). Minimum ${MIN_DEPOSIT}. 1 M/s = 1🪙`, `${Math.max(MIN_DEPOSIT, 5)}`);
+    if (val==null) return;
+    const tokens = Number(val);
+    if (!Number.isFinite(tokens) || tokens<MIN_DEPOSIT){ alert(`Minimum deposit is ${MIN_DEPOSIT} tokens.`); return; }
+    s.tokens = round3((s.tokens||0) + tokens);
+    save(); renderBalance(); messageEl.textContent = `Deposited ${fmtTok(tokens)}🪙`;
+  });
 
-  if (cashoutBtn){
-    cashoutBtn.addEventListener("click", ()=>{
-      const s=stats[currentUser]; const bal=round3(Math.max(0,s.tokens||0));
-      if(bal<=0){ alert("Nothing to cash out."); return; }
-      if(confirm(`Cash out ${fmtTok(bal)}🪙 → ${fmtTok(bal)}M/s Brainrot?`)){
-        alert(`Cashed out: ${fmtTok(bal)}M/s Brainrot`);
-        s.tokens=0; save(); renderBalance(); setBetDisplay();
-      }
-    });
-  }
+  // Passcode-gated cashout
+  cashoutBtn?.addEventListener("click", ()=>{
+    const pass = prompt("Enter passcode to cash out:");
+    if (pass !== PASSCODE){ alert("Incorrect passcode."); return; }
+    const s=stats[currentUser]; const bal=round3(Math.max(0,s.tokens||0));
+    if(bal<=0){ alert("Nothing to cash out."); return; }
+    if(confirm(`Cash out ${fmtTok(bal)}🪙 → ${fmtTok(bal)}M/s Brainrot?`)){
+      alert(`Cashed out: ${fmtTok(bal)}M/s Brainrot`);
+      s.tokens=0; save(); renderBalance(); setBetDisplay();
+    }
+  });
 
-  // Admin
-  adminToggle && adminToggle.addEventListener("click", ()=>{
+  // Admin (coins only)
+  adminToggle?.addEventListener("click", ()=>{
     adminUserLabel.textContent = currentUser;
     adminPanel.classList.remove("hidden");
   });
-  closeAdmin && closeAdmin.addEventListener("click", ()=> adminPanel.classList.add("hidden"));
-  adminGive && adminGive.addEventListener("click", ()=>{
+  closeAdmin?.addEventListener("click", ()=> adminPanel.classList.add("hidden"));
+  adminGive?.addEventListener("click", ()=>{
     const s=stats[currentUser];
     const amt = Math.max(0, Number(adminAdd.value||"0"));
     if (!Number.isFinite(amt) || amt<=0) return;
