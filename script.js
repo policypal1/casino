@@ -1,37 +1,38 @@
-/* Brainrot Slots — linear payouts, 49% RTP (player), passcode gates, full UI lock while spinning */
+/* Brainrot Slots — linear payouts, 49% RTP, per-reel win bursts, passcodes, full UI lock while spinning */
 function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
 const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
+const round2 = (n)=> Math.round((n + Number.EPSILON) * 100) / 100;
 const round3 = (n)=> Math.round((n + Number.EPSILON) * 1000) / 1000;
 const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,''); };
 
 (() => {
   // ===== CONFIG =====
   const MIN_DEPOSIT = 5;
-  const PASSCODE = "1111";               // for deposit & cashout
-  const TARGET_RTP = 0.49;               // player 49% / house 51%
+  const PASSCODE = "1111";
+  const TARGET_RTP = 0.49; // player
 
-  // Items (best → least). Base values will be scaled to meet TARGET_RTP.
+  // Items (best → least). Keep full label, plus short label for UI/paytable.
   const ITEMS_BASE = [
-    { k:"strawberryelephant", file:"Strawberryelephant.webp",         label:"Strawberry Elephant",  weight:5,  value_x:0.79  },
-    { k:"dragoncanneloni",    file:"Dragoncanneloni.webp",            label:"Dragon Canneloni",     weight:5,  value_x:0.394 },
-    { k:"garamadundung",      file:"Garamadundung.webp",              label:"Garama",               weight:10, value_x:0.237 },
-    { k:"carti",              file:"Carti.webp",                      label:"La Grande",            weight:12, value_x:0.158 },
-    { k:"saturnita",          file:"La_Vaccca_Saturno_Saturnita.webp",label:"Saturnita",            weight:14, value_x:0.110 },
-    { k:"tralalero",          file:"TralaleroTralala.webp",           label:"Tralalero Tralala",    weight:16, value_x:0.084 },
-    { k:"sgedrftdikou",       file:"Sgedrftdikou.webp",               label:"Ballerina Cappuccino", weight:18, value_x:0.067 },
-    { k:"noobini",            file:"Noobini_Pizzanini_NEW.webp",      label:"Noobini Pizzanini",    weight:20, value_x:0.054 },
+    { k:"strawberryelephant", file:"Strawberryelephant.webp",         label:"Strawberry Elephant",  short:"Elephant",   weight:5,  value_x:0.79  },
+    { k:"dragoncanneloni",    file:"Dragoncanneloni.webp",            label:"Dragon Canneloni",     short:"Dragon",     weight:5,  value_x:0.394 },
+    { k:"garamadundung",      file:"Garamadundung.webp",              label:"Garama",               short:"Garama",     weight:10, value_x:0.237 },
+    { k:"carti",              file:"Carti.webp",                      label:"La Grande",            short:"La Grande",  weight:12, value_x:0.158 },
+    { k:"saturnita",          file:"La_Vaccca_Saturno_Saturnita.webp",label:"Saturnita",            short:"Saturnita",  weight:14, value_x:0.110 },
+    { k:"tralalero",          file:"TralaleroTralala.webp",           label:"Tralalero Tralala",    short:"Tralalero",  weight:16, value_x:0.084 },
+    { k:"sgedrftdikou",       file:"Sgedrftdikou.webp",               label:"Ballerina Cappuccino", short:"Cappuccino", weight:18, value_x:0.067 },
+    { k:"noobini",            file:"Noobini_Pizzanini_NEW.webp",      label:"Noobini Pizzanini",    short:"Noobini",    weight:20, value_x:0.054 },
   ];
 
-  // Scale to hit RTP (expected payout = 3 * avg(value_x) = TARGET_RTP)
+  // Scale to hit RTP
   const TOTAL_WEIGHT = ITEMS_BASE.reduce((s,x)=>s+x.weight,0);
   const avgBase = ITEMS_BASE.reduce((s,x)=> s + x.value_x * (x.weight/TOTAL_WEIGHT), 0);
   const targetAvg = TARGET_RTP / 3;
-  const SCALE = targetAvg / avgBase; // <— normalized multiplier
+  const SCALE = targetAvg / avgBase;
   const ITEMS = ITEMS_BASE.map(x => ({...x, value_x: x.value_x * SCALE}));
 
   // ===== STATE =====
   const USERS = ["Will","Isaac","Faisal","Muhammed"];
-  const STORE = "brainrot-slots-linear-v5";
+  const STORE = "brainrot-slots-linear-v6";
   const baseUser = ()=>({ tokens:0, earned:0, spent:0 });
   function load(){
     try{
@@ -114,6 +115,18 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
     reel.classList.add("stopped");
   }
 
+  // Per-reel burst
+  function burstOnReel(reelEl, amount){
+    if (amount <= 0) return 0;
+    const b = document.createElement("div");
+    b.className = "burst";
+    b.textContent = `+${Math.round(amount)}`;
+    reelEl.appendChild(b);
+    const life = 900;
+    setTimeout(()=> b.remove(), life+30);
+    return life;
+  }
+
   function getBet(){
     const v = Number(betInput.value)||0.5;
     const max = Math.max(0.01, stats[currentUser].tokens||0.01);
@@ -143,7 +156,7 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
       return `
         <div class="pt-item">
           <img src="${it.file}" alt="${it.label}">
-          <div class="nm">${it.label}</div>
+          <div class="nm">${it.short}</div>
           <div class="vx">+ ${fmtTok(coins)} 🪙</div>
         </div>`;
     }).join("");
@@ -151,7 +164,7 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
 
   function showWin(win, midRow, bet){
     winAmtEl.textContent = `+${fmtTok(win)}`;
-    const parts = midRow.map(m=>`${m.label} (+${fmtTok(m.value_x*bet)})`).join("  •  ");
+    const parts = midRow.map(m=>`${m.short} (+${fmtTok(m.value_x*bet)})`).join("  •  ");
     winLineEl.textContent = parts;
     winModal.classList.remove("hidden");
     setTimeout(()=> winModal.classList.add("show"), 10);
@@ -161,13 +174,11 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
     setTimeout(()=>winModal.classList.add("hidden"), 220);
   }
 
-  // Lock/unlock every interactive control
   const lockables = () => [
     spinBtn, fastChk, depositBtn, cashoutBtn, userSelect, betInput, betSlider, adminToggle
   ];
   function setLocked(locked){
     lockables().forEach(el=>{ if(el){ el.disabled = !!locked; } });
-    // prevent keyboard spin while locked
     window.onkeydown = locked ? (e)=>{ if(e.code==="Space") e.preventDefault(); } : null;
   }
 
@@ -194,22 +205,35 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
       {top:randItem(), mid:midRow[2], bot:randItem()},
     ];
 
+    // Reel 1
     await scrollReelTo(reelEls[0], finals[0], 64, 1, 4200);
-    await wait(fastMode?90:240);
+    const a1 = midRow[0].value_x * bet;
+    const life1 = burstOnReel(reelEls[0], a1);
+    await wait(fastMode?60:120);
+
+    // Reel 2
     await scrollReelTo(reelEls[1], finals[1], 84, 1, 5800);
-    await wait(fastMode?110:320);
+    const a2 = midRow[1].value_x * bet;
+    const life2 = burstOnReel(reelEls[1], a2);
+    await wait(fastMode?80:160);
+
+    // Reel 3
     await scrollReelTo(reelEls[2], finals[2], 112, 2, 8200);
+    const a3 = midRow[2].value_x * bet;
+    const life3 = burstOnReel(reelEls[2], a3);
 
     const totalX = midRow[0].value_x + midRow[1].value_x + midRow[2].value_x;
     const win = round3(totalX * bet);
+
+    // Wait for last burst to finish before showing modal
+    await wait((fastMode?500:900));
 
     if (win>0){
       s.tokens = round3((s.tokens||0) + win);
       s.earned = round3((s.earned||0) + win);
       messageEl.textContent = `+${fmtTok(win)}🪙`;
       showWin(win, midRow, bet);
-      // hold until user clicks / timeout
-      setTimeout(()=>{ hideWin(); setLocked(false); }, 2200);
+      setTimeout(()=>{ hideWin(); setLocked(false); }, fastMode?1400:2200);
     } else {
       messageEl.textContent = `—`;
       setLocked(false);
