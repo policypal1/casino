@@ -5,6 +5,17 @@ const round2 = (n)=> Math.round((n + Number.EPSILON) * 100) / 100;
 const round3 = (n)=> Math.round((n + Number.EPSILON) * 1000) / 1000;
 const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,''); };
 
+// NEW: format to “up to 3 total digits”; ensure leading zero for <1
+function fmtBurst(n){
+  const v = Math.max(0, round3(n));
+  const intDigits = Math.floor(v).toString().length; // 0 => "0" => 1 digit
+  const keepDec = Math.max(0, 3 - intDigits);        // total digits <= 3
+  let s = v.toFixed(keepDec);
+  // ensure leading zero for <1 (toFixed already does, but keep this guard)
+  if (v < 1 && !s.startsWith('0')) s = '0' + s;
+  return s;
+}
+
 (() => {
   // ===== CONFIG =====
   const MIN_DEPOSIT = 5;
@@ -77,6 +88,15 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
   const adminGive   = document.getElementById("adminGive");
   const closeAdmin  = document.getElementById("closeAdmin");
 
+  // NEW: dim overlay element
+  const dimEl = document.getElementById("dim");
+  const showDim = async (ms)=> {
+    if (!dimEl) return;
+    dimEl.classList.add('show');
+    await wait(ms);
+    dimEl.classList.remove('show');
+  };
+
   // ===== helpers =====
   const CELL_H = 156;
   const imgHTML = (file, alt)=> `<img src="./${file}" alt="${alt}">`;
@@ -116,14 +136,18 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
   }
 
   // Per-reel burst
-  function burstOnReel(reelEl, amount){
+  async function burstOnReel(reelEl, amount){
     if (amount <= 0) return 0;
+    // Grey out board for readability during the popup
+    const dimTime = 1000;
+    showDim(dimTime).catch(()=>{});
+
     const b = document.createElement("div");
     b.className = "burst";
-    b.textContent = `+${Math.round(amount)}`;
+    b.textContent = `+${fmtBurst(amount)}`;
     reelEl.appendChild(b);
     const life = 900;
-    setTimeout(()=> b.remove(), life+30);
+    setTimeout(()=> b.remove(), life+40);
     return life;
   }
 
@@ -208,24 +232,24 @@ const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,
     // Reel 1
     await scrollReelTo(reelEls[0], finals[0], 64, 1, 4200);
     const a1 = midRow[0].value_x * bet;
-    const life1 = burstOnReel(reelEls[0], a1);
+    await burstOnReel(reelEls[0], a1);
     await wait(fastMode?60:120);
 
     // Reel 2
     await scrollReelTo(reelEls[1], finals[1], 84, 1, 5800);
     const a2 = midRow[1].value_x * bet;
-    const life2 = burstOnReel(reelEls[1], a2);
+    await burstOnReel(reelEls[1], a2);
     await wait(fastMode?80:160);
 
     // Reel 3
     await scrollReelTo(reelEls[2], finals[2], 112, 2, 8200);
     const a3 = midRow[2].value_x * bet;
-    const life3 = burstOnReel(reelEls[2], a3);
+    await burstOnReel(reelEls[2], a3);
 
     const totalX = midRow[0].value_x + midRow[1].value_x + midRow[2].value_x;
     const win = round3(totalX * bet);
 
-    // Wait for last burst to finish before showing modal
+    // brief pause after last burst before modal
     await wait((fastMode?500:900));
 
     if (win>0){
