@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Brainrot Slots — Chatcher Gamble (1 token = 1M/s)</title>
-  <link rel="stylesheet" href="style.css?v=21" />
+  <link rel="stylesheet" href="style.css?v=22" />
 </head>
 <body>
   <div class="background-rainbow"></div>
 
   <div class="app" id="appRoot">
     <header class="topbar">
-      <h1 class="brand"><span class="logo">🧠</span> Brainrot Slots — Chatcher Gamble</h1>
+      <h1 class="brand"><span class="logo">🧠</span> Brainrot Slots</h1>
 
       <div class="hud">
         <label class="userpick">
@@ -19,20 +19,16 @@
           <select id="userSelect" aria-label="Select user">
             <option value="Will">Will</option>
             <option value="Isaac">Isaac</option>
+            <option value="Faisal">Faisal</option>
+            <option value="Muhammed">Muhammed</option>
           </select>
         </label>
 
         <div class="divider"></div>
         <div class="stat"><span class="k">Balance</span><span id="tokenBalance" class="v">0🪙</span></div>
-        <div class="stat"><span class="k">Earned</span><span id="totalEarned" class="v">0🪙</span></div>
-        <div class="stat"><span class="k">Spent</span><span id="totalSpent" class="v">0🪙</span></div>
 
         <div class="divider"></div>
-        <div class="betgroup" role="group" aria-label="Bet amount">
-          <span class="bet-label">Bet:</span>
-          <button id="bet1"  class="chip active" type="button">1🪙</button>
-          <button id="bet5"  class="chip" type="button">5🪙</button>
-        </div>
+        <button id="betCycle" class="chip betcycle" type="button" title="Cycle bet">Bet: <b id="betLabel">0.50🪙</b></button>
       </div>
     </header>
 
@@ -41,7 +37,7 @@
         <div class="rainbow-border"></div>
 
         <header class="machine-bar">
-          <div class="machine-title">Middle Row Pays • <span id="machineBet">1🪙</span> / spin</div>
+          <div class="machine-title">Middle Row Pays • <span id="machineBet">0.50🪙</span> / spin</div>
         </header>
 
         <div class="win-banner" id="winBanner" aria-hidden="true"></div>
@@ -65,8 +61,8 @@
       <section class="paytable card">
         <h2>Pay Table (per 1🪙 bet) — Middle Row</h2>
         <div class="pt-grid" id="payRows"></div>
-        <p class="rg">Demo tokens only • RTP governor targets ~47% for house edge ≈ 53/47.</p>
-        <p class="rg">Min. deposit: <b>5🪙</b> (i.e., 5M/s chatcher).</p>
+        <p class="rg">Demo tokens only • Tight decimals enabled. RTP governor targets ~35% (house ≈ 65%).</p>
+        <p class="rg">Min. deposit: <b>5🪙</b> (i.e., 5M/s chatcher). Fractional bets & wins are supported.</p>
       </section>
 
       <!-- Admin launcher -->
@@ -82,7 +78,7 @@
         <div class="admin-grid">
           <div class="admin-item">
             <label for="adminAddTokens">Add Tokens (🪙)</label>
-            <input type="number" id="adminAddTokens" min="1" step="1" value="10" />
+            <input type="number" id="adminAddTokens" min="0.001" step="0.001" value="10" />
           </div>
           <div class="admin-item">
             <label>&nbsp;</label>
@@ -122,6 +118,6 @@
     </div>
   </div>
 
-  <script defer src="script.js?v=21"></script>
+  <script defer src="script.js?v=22"></script>
 </body>
 </html>
