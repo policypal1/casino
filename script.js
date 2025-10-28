@@ -1,26 +1,31 @@
-/* Brainrot Slots — 3×3 (v21)
-   - Compact pay table visuals
-   - Simple Admin: add tokens only
+/* Brainrot Slots — 3×3 (v22: decimal payouts + bet cycler + tight edge)
    - Economy: 1 token = 1M/s; min deposit 5 tokens
-   - RTP governor targets ~47% (≈53/47 house/player)
-   - Admin passcode 1111
+   - Bet cycler: 0.05 → 0.10 → 0.25 → 0.50 → 1 → 2 → 5 (loops)
+   - Decimal wins (down to 0.001🪙 precision)
+   - Much tighter: RTP target ~35% (≈65/35 house/player)
+   - Simple Admin: add tokens only; users include Faisal & Muhammed
 */
 
 function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
 const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
+const round3 = (n)=> Math.round((n + Number.EPSILON) * 1000) / 1000;
+const fmtTok = (n)=> {
+  const s = (round3(n)).toFixed(3);
+  return s.replace(/\.?0+$/,'');
+};
 
 (() => {
-  // ===== ECONOMY / EDGE TUNING (not exposed in UI) =====
-  const DEFAULT_RTP_TARGET = 47;     // % returned to player
-  const DEFAULT_RTP_GAIN   = 120;    // governor strength (0–200)
-  const FORCED_TOP_PCT     = 0.005;  // forced triple-top, 0–0.02
-  const PITY_START_SPINS   = 3;
-  const PITY_STEP_LUCK     = 10;
-  const DEFAULT_ODDS       = 85;     // <100 = tighter
-  const DEFAULT_LUCK       = 6;
+  // ===== INTERNAL EDGE =====
+  const DEFAULT_RTP_TARGET = 35;     // % returned to player (tight)
+  const DEFAULT_RTP_GAIN   = 120;
+  const FORCED_TOP_PCT     = 0.002;  // 0.2% forced triple-top
+  const PITY_START_SPINS   = 4;
+  const PITY_STEP_LUCK     = 8;
+  const DEFAULT_ODDS       = 70;     // <100 = tighter
+  const DEFAULT_LUCK       = 4;
   const MIN_DEPOSIT        = 5;      // tokens = M/s
 
-  // === Item set (best→least) ===
+  // === Items best→least (files at repo root) ===
   const ITEMS = [
     { k:"strawberryelephant", file:"Strawberryelephant.webp",         label:"Strawberry Elephant", weight:5,  rank:8 },
     { k:"dragoncanneloni",    file:"Dragoncanneloni.webp",            label:"Dragon Canneloni",    weight:5,  rank:7 },
@@ -34,28 +39,30 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
   const TOTAL_WEIGHT = ITEMS.reduce((s,x)=>s+x.weight,0);
   const TOP = ITEMS[0];
 
-  // Payout multipliers (per 1🪙 bet)
+  // Payout multipliers (per 1🪙 bet) — **decimals + tight**
   const PAYX_3 = {
-    strawberryelephant: 20,
-    dragoncanneloni:    12,
-    garamadundung:       8,
-    carti:               6,
-    saturnita:           5,
-    tralalero:           4,
-    sgedrftdikou:        3,
-    noobini:             2,
+    strawberryelephant: 5.0,
+    dragoncanneloni:    2.5,
+    garamadundung:      1.5,
+    carti:              1.0,
+    saturnita:          0.7,
+    tralalero:          0.5,
+    sgedrftdikou:       0.3,
+    noobini:            0.2,
   };
-  const PAYX_PAIR = 1; // any 2-of-a-kind gives 1🪙
+  // exact two-of-a-kind (any symbol)
+  const PAYX_PAIR = 0.05;
 
-  const USERS = ["Will","Isaac"];
+  const USERS = ["Will","Isaac","Faisal","Muhammed"];
   const DEFAULT_TOKENS = 0;
 
   // ----- State -----
-  const storeKey = "brainrot-slots-v21";
+  const storeKey = "brainrot-slots-v22";
   let stats = loadStats();
-  let currentUser = ["Will","Isaac"].includes(localStorage.getItem("br21-user")) ? localStorage.getItem("br21-user") : "Will";
-  let betTokens = Number(localStorage.getItem("br21-bet")) || 1;
-  if (![1,5].includes(betTokens)) betTokens = 1;
+  let currentUser = USERS.includes(localStorage.getItem("br22-user")) ? localStorage.getItem("br22-user") : "Will";
+  const BET_STEPS = [0.05, 0.10, 0.25, 0.50, 1, 2, 5];
+  let betTokens = Number(localStorage.getItem("br22-bet")) || 0.5;
+  if (!BET_STEPS.includes(betTokens)) betTokens = 0.5;
 
   function baseUser(){
     return {tokens:DEFAULT_TOKENS, earned:0, spent:0, luck:DEFAULT_LUCK, odds:DEFAULT_ODDS, rtpTarget:DEFAULT_RTP_TARGET, rtpGain:DEFAULT_RTP_GAIN, dry:0, diamond3:FORCED_TOP_PCT};
@@ -63,10 +70,7 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
   function loadStats(){
     try{
       const raw = JSON.parse(localStorage.getItem(storeKey)||"{}");
-      for (const u of USERS){
-        if (!raw[u]) raw[u] = baseUser();
-        const s = raw[u];
-      }
+      for (const u of USERS) if (!raw[u]) raw[u] = baseUser();
       return raw;
     }catch{
       return Object.fromEntries(USERS.map(u=>[u, baseUser()]));
@@ -89,9 +93,9 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
 
   const userSelect = document.getElementById("userSelect");
   const tokenBalanceEl = document.getElementById("tokenBalance");
-  const totalEarnedEl = document.getElementById("totalEarned");
-  const totalSpentEl  = document.getElementById("totalSpent");
   const machineBetEl  = document.getElementById("machineBet");
+  const betCycleBtn   = document.getElementById("betCycle");
+  const betLabel      = document.getElementById("betLabel");
 
   const adminToggle  = document.getElementById("adminToggle");
   const adminPanel   = document.getElementById("adminPanel");
@@ -101,9 +105,6 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
   const adminAddBtn    = document.getElementById("adminAddBtn");
   const adminBalance   = document.getElementById("adminBalance");
   const resetStatsBtn  = document.getElementById("resetStats");
-
-  const bet1 = document.getElementById("bet1");
-  const bet5 = document.getElementById("bet5");
 
   // ----- Helpers -----
   const CELL_H = 156;
@@ -115,7 +116,6 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
     for (let i=0;i<6;i++) track.appendChild(makeCell(imgHTML(randItem().file, "sym"), i===1));
   }
 
-  // RNG & odds (governor/luck internal only)
   function pickBase(){
     let r = Math.random() * TOTAL_WEIGHT;
     for (const s of ITEMS){ if ((r -= s.weight) <= 0) return s; }
@@ -126,11 +126,11 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
     const dry = stats[currentUser].dry || 0;
     if (dry <= PITY_START_SPINS) return 0;
     const steps = dry - PITY_START_SPINS;
-    return clamp(steps * PITY_STEP_LUCK, 0, 50);
+    return clamp(steps * PITY_STEP_LUCK, 0, 40);
   }
   function pickBiased(luck){
     const L = clamp(luck,0,100);
-    const candidates = 1 + Math.floor(L / 22);
+    const candidates = 1 + Math.floor(L / 26);
     let best = pickBase();
     for (let i=1;i<candidates;i++){ const c = pickBase(); if (c.rank > best.rank) best = c; }
     return best;
@@ -145,18 +145,18 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
     const s = stats[currentUser];
     const spent = s.spent || 0;
     const earned = s.earned || 0;
-    if (spent <= 0) return 1 + (s.rtpGain/800);
+    if (spent <= 0) return 1 + (s.rtpGain/900);
     const rtp = 100 * earned / spent;
     const diff = (s.rtpTarget) - rtp;
-    const mult = 1 + clamp(diff/100, -0.3, 0.3) * (s.rtpGain/100);
-    return clamp(mult, 0.7, 1.35);
+    const mult = 1 + clamp(diff/100, -0.35, 0.35) * (s.rtpGain/100);
+    return clamp(mult, 0.65, 1.30);
   }
   function upgradeRow(row, luck){
     const L = clamp(luck,0,100);
     const g = governorBoost();
-    let u  = 0.18 * g + (L/140) * 0.7;             // make a pair
-    let u2 = 0.09 * g + (L/320) * 0.6 * 0.9;       // pair→three
-    u = clamp(u, 0, 0.55); u2 = clamp(u2, 0, 0.42);
+    let u  = 0.12 * g + (L/180) * 0.55;             // make a pair (lower)
+    let u2 = 0.06 * g + (L/360) * 0.45 * 0.85;      // pair→three (lower)
+    u = clamp(u, 0, 0.40); u2 = clamp(u2, 0, 0.28);
 
     const k = row.map(r=>r.k);
     const counts={}; k.forEach(x=>counts[x]=(counts[x]||0)+1);
@@ -169,7 +169,7 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
       row[2] = pick;
     } else if (hasPair && !hasThree && Math.random()<u2){
       let sym = Object.entries(counts).find(([_,c])=>c===2)[0];
-      if (sym===TOP.k && Math.random()<0.6) return row;
+      if (sym===TOP.k && Math.random()<0.75) return row; // make jackpots rarer
       for (let i=0;i<3;i++) if (row[i].k!==sym) row[i]=row.find(r=>r.k===sym);
     }
     return row;
@@ -178,26 +178,23 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
   // ----- UI -----
   function renderStats(){
     const s = stats[currentUser];
-    tokenBalanceEl.textContent = `${(s.tokens||0)}🪙`;
-    totalEarnedEl.textContent  = `${(s.earned||0)}🪙`;
-    totalSpentEl.textContent   = `${(s.spent ||0)}🪙`;
+    tokenBalanceEl.textContent = `${fmtTok(s.tokens||0)}🪙`;
     adminUserLabel && (adminUserLabel.textContent = currentUser);
-    adminBalance && (adminBalance.textContent = `${s.tokens||0}🪙`);
+    adminBalance && (adminBalance.textContent = `${fmtTok(s.tokens||0)}🪙`);
     updateSpinEnabled();
   }
 
   function renderPaytable(){
     const rows = [
-      // triple icons, compact
-      [`<span class="triple">${imgHTML(TOP.file, TOP.label).repeat(3)}</span>`, `${PAYX_3[TOP.k]}🪙`],
-      [`<span class="triple">${imgHTML("Dragoncanneloni.webp","Dragon").repeat(3)}</span>`, `${PAYX_3.dragoncanneloni}🪙`],
-      [`<span class="triple">${imgHTML("Garamadundung.webp","Garamadundung").repeat(3)}</span>`, `${PAYX_3.garamadundung}🪙`],
-      [`<span class="triple">${imgHTML("Carti.webp","Carti").repeat(3)}</span>`, `${PAYX_3.carti}🪙`],
-      [`<span class="triple">${imgHTML("La_Vaccca_Saturno_Saturnita.webp","Saturnita").repeat(3)}</span>`, `${PAYX_3.saturnita}🪙`],
-      [`<span class="triple">${imgHTML("TralaleroTralala.webp","Tralalero").repeat(3)}</span>`, `${PAYX_3.tralalero}🪙`],
-      [`<span class="triple">${imgHTML("Sgedrftdikou.webp","Sgedrftdikou").repeat(3)}</span>`, `${PAYX_3.sgedrftdikou}🪙`],
-      [`<span class="triple">${imgHTML("Noobini_Pizzanini_NEW.webp","Noobini").repeat(3)}</span>`, `${PAYX_3.noobini}🪙`],
-      [`Any 2-of-a-kind`, `${PAYX_PAIR}🪙`],
+      [`<span class="triple">${imgHTML(TOP.file, TOP.label).repeat(3)}</span>`, `${fmtTok(PAYX_3[TOP.k])}🪙`],
+      [`<span class="triple">${imgHTML("Dragoncanneloni.webp","Dragon").repeat(3)}</span>`, `${fmtTok(PAYX_3.dragoncanneloni)}🪙`],
+      [`<span class="triple">${imgHTML("Garamadundung.webp","Garamadundung").repeat(3)}</span>`, `${fmtTok(PAYX_3.garamadundung)}🪙`],
+      [`<span class="triple">${imgHTML("Carti.webp","Carti").repeat(3)}</span>`, `${fmtTok(PAYX_3.carti)}🪙`],
+      [`<span class="triple">${imgHTML("La_Vaccca_Saturno_Saturnita.webp","Saturnita").repeat(3)}</span>`, `${fmtTok(PAYX_3.saturnita)}🪙`],
+      [`<span class="triple">${imgHTML("TralaleroTralala.webp","Tralalero").repeat(3)}</span>`, `${fmtTok(PAYX_3.tralalero)}🪙`],
+      [`<span class="triple">${imgHTML("Sgedrftdikou.webp","Sgedrftdikou").repeat(3)}</span>`, `${fmtTok(PAYX_3.sgedrftdikou)}🪙`],
+      [`<span class="triple">${imgHTML("Noobini_Pizzanini_NEW.webp","Noobini").repeat(3)}</span>`, `${fmtTok(PAYX_3.noobini)}🪙`],
+      [`Any 2-of-a-kind`, `${fmtTok(PAYX_PAIR)}🪙`],
     ];
     const payRows = document.getElementById("payRows");
     payRows.innerHTML = rows.map(([l,v],i) =>
@@ -210,14 +207,22 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
   }
 
   function markBet(){
-    bet1.classList.toggle("active", betTokens===1);
-    bet5.classList.toggle("active", betTokens===5);
-    machineBetEl.textContent = `${betTokens}🪙`;
+    document.getElementById("machineBet").textContent = `${fmtTok(betTokens)}🪙`;
+    document.getElementById("betLabel").textContent   = `${fmtTok(betTokens)}🪙`;
   }
   function updateSpinEnabled(){
     const s = stats[currentUser];
-    if (spinBtn) spinBtn.disabled = ((s.tokens||0) < betTokens);
+    if (spinBtn) spinBtn.disabled = ((s.tokens||0) + 1e-9) < betTokens;
   }
+
+  // Bet cycler
+  function cycleBet(){
+    const idx = BET_STEPS.indexOf(betTokens);
+    betTokens = BET_STEPS[(idx + 1) % BET_STEPS.length];
+    localStorage.setItem("br22-bet", String(betTokens));
+    markBet(); updateSpinEnabled();
+  }
+  betCycleBtn.addEventListener("click", cycleBet);
 
   // Spinning visuals
   async function scrollReelTo(reel, finalCol, totalRows, fakeHops, durationMs){
@@ -247,7 +252,7 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
   async function doSpin(){
     if (spinning) return;
     const s = stats[currentUser];
-    if ((s.tokens||0) < betTokens){
+    if ((s.tokens||0) + 1e-9 < betTokens){
       messageEl.textContent = "Insufficient tokens. Deposit a chatcher (≥ 5🪙).";
       return;
     }
@@ -255,9 +260,9 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
     spinning=true; machine.classList.add("spinning");
     reelEls.forEach(r=>r.classList.remove("stopped"));
 
-    // Take bet
-    s.tokens -= betTokens;
-    s.spent  = Math.round((s.spent||0) + betTokens);
+    // Take bet (decimals)
+    s.tokens = round3((s.tokens||0) - betTokens);
+    s.spent  = round3((s.spent ||0) + betTokens);
     saveStats(); renderStats();
 
     const luck = effectiveLuck() + pityBonusLuck();
@@ -283,10 +288,10 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
     await scrollReelTo(reelEls[2], finals[2], 112, 2, 8200);
 
     const mult = calcWinRow(midRow);
-    const win  = Math.round(mult * betTokens);
+    const win  = round3(mult * betTokens);
     if (win>0){
-      s.tokens = Math.round((s.tokens||0) + win);
-      s.earned = Math.round((s.earned||0) + win);
+      s.tokens = round3((s.tokens||0) + win);
+      s.earned = round3((s.earned||0) + win);
       s.dry = 0;
       showWin(win, midRow);
     }else{
@@ -299,11 +304,11 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
   }
 
   function showWin(win, row){
-    winAmount && (winAmount.textContent = `+${win}🪙`);
+    winAmount && (winAmount.textContent = `+${fmtTok(win)}🪙`);
     const triple = (row[0].k===row[1].k && row[1].k===row[2].k) ? row[0].k : null;
-    winTitle && (winTitle.textContent = (triple===TOP.k) ? "JACKPOT!" : (win>=8 ? "MEGA WIN!" : "BIG WIN!"));
+    winTitle && (winTitle.textContent = (triple===TOP.k) ? "JACKPOT!" : (win>=2 ? "MEGA WIN!" : "BIG WIN!"));
     if (winModal){ winModal.classList.remove("hidden"); winModal.classList.add("show"); setTimeout(()=>{ winModal.classList.remove("show"); setTimeout(()=>winModal.classList.add("hidden"), 250); }, 2200); }
-    if (winBanner){ winBanner.textContent = `✨ You won +${win}🪙 ✨`; winBanner.classList.add("show"); setTimeout(()=> winBanner.classList.remove("show"), 1800); }
+    if (winBanner){ winBanner.textContent = `✨ +${fmtTok(win)}🪙 ✨`; winBanner.classList.add("show"); setTimeout(()=> winBanner.classList.remove("show"), 1800); }
   }
   function showNoWin(){
     if (!noWinModal) return;
@@ -314,59 +319,55 @@ const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
   // Economy buttons
   depositBtn.addEventListener("click", ()=>{
     const s = stats[currentUser];
-    const val = prompt(`Enter your chatcher's production (M/s). Minimum ${MIN_DEPOSIT} (converts 1:1 to tokens).`, `${Math.max(MIN_DEPOSIT, 5)}`);
+    const val = prompt(`Enter your chatcher's production (M/s). Minimum ${MIN_DEPOSIT}. 1 M/s = 1🪙`, `${Math.max(MIN_DEPOSIT, 5)}`);
     if (val==null) return;
-    const tokens = Math.floor(Number(val) || 0);
+    const tokens = Number(val);
     if (!Number.isFinite(tokens) || tokens < MIN_DEPOSIT){
       alert(`Minimum deposit is ${MIN_DEPOSIT} tokens (i.e., ${MIN_DEPOSIT}M/s chatcher).`);
       return;
     }
-    s.tokens = Math.round((s.tokens||0) + tokens);
-    messageEl.textContent = `Deposited ${tokens}🪙 (from ${tokens}M/s chatcher).`;
+    s.tokens = round3((s.tokens||0) + tokens);
+    messageEl.textContent = `Deposited ${fmtTok(tokens)}🪙 (from ${fmtTok(tokens)}M/s chatcher).`;
     saveStats(); renderStats();
   });
 
   cashoutBtn.addEventListener("click", ()=>{
     const s = stats[currentUser];
-    const bal = Math.max(0, Math.floor(s.tokens||0));
+    const bal = round3(Math.max(0, s.tokens||0));
     if (bal <= 0){ alert("Nothing to cash out."); return; }
-    if (confirm(`Cash out ${bal}🪙 → ${bal}M/s Brainrot? Your in-game payout will be a ${bal}M/s Brainrot. Continue?`)){
-      alert(`Cashed out: ${bal}M/s Brainrot awarded!`);
+    if (confirm(`Cash out ${fmtTok(bal)}🪙 → ${fmtTok(bal)}M/s Brainrot?`)){
+      alert(`Cashed out: ${fmtTok(bal)}M/s Brainrot awarded!`);
       s.tokens = 0; saveStats(); renderStats();
     }
   });
 
   // Simple admin
-  let adminUnlocked = localStorage.getItem("br21-admin") === "1";
+  let adminUnlocked = localStorage.getItem("br22-admin") === "1";
   adminToggle?.addEventListener("click", ()=>{
     if(!adminUnlocked){
       const code = prompt("Enter admin passcode:");
-      if(code==="1111"){ adminUnlocked=true; localStorage.setItem("br21-admin","1"); showAdmin(); }
+      if(code==="1111"){ adminUnlocked=true; localStorage.setItem("br22-admin","1"); showAdmin(); }
       else alert("Incorrect passcode.");
     } else { adminPanel.classList.contains("hidden") ? showAdmin() : hideAdmin(); }
   });
-  function showAdmin(){ adminPanel.classList.remove("hidden"); adminPanel.setAttribute("aria-hidden","false"); adminBalance.textContent = `${stats[currentUser].tokens||0}🪙`; }
+  function showAdmin(){ adminPanel.classList.remove("hidden"); adminPanel.setAttribute("aria-hidden","false"); adminBalance.textContent = `${fmtTok(stats[currentUser].tokens||0)}🪙`; }
   function hideAdmin(){ adminPanel.classList.add("hidden"); adminPanel.setAttribute("aria-hidden","true"); }
   closeAdmin?.addEventListener("click", hideAdmin);
 
   adminAddBtn?.addEventListener("click", ()=>{
-    const amt = Math.max(1, Math.floor(Number(adminAddTokens.value)||0));
-    stats[currentUser].tokens = (stats[currentUser].tokens||0) + amt;
+    const amt = Math.max(0.001, Number(adminAddTokens.value)||0);
+    stats[currentUser].tokens = round3((stats[currentUser].tokens||0) + amt);
     saveStats(); renderStats();
   });
 
   resetStatsBtn?.addEventListener("click", ()=>{
     if(confirm(`Reset stats for ${currentUser}?`)){
-      stats[currentUser] = {tokens:DEFAULT_TOKENS, earned:0, spent:0, luck:DEFAULT_LUCK, odds:DEFAULT_ODDS, rtpTarget:DEFAULT_RTP_TARGET, rtpGain:DEFAULT_RTP_GAIN, dry:0, diamond3:FORCED_TOP_PCT};
+      stats[currentUser] = baseUser();
       saveStats(); renderStats();
     }
   });
 
-  userSelect.addEventListener("change", ()=>{ currentUser=userSelect.value; localStorage.setItem("br21-user", currentUser); renderStats(); hideAdmin(); });
-
-  // Bet toggle
-  bet1.addEventListener("click", ()=>{ betTokens=1; localStorage.setItem("br21-bet","1"); markBet(); updateSpinEnabled(); });
-  bet5.addEventListener("click", ()=>{ betTokens=5; localStorage.setItem("br21-bet","5"); markBet(); updateSpinEnabled(); });
+  userSelect.addEventListener("change", ()=>{ currentUser=userSelect.value; localStorage.setItem("br22-user", currentUser); renderStats(); hideAdmin(); });
 
   // Init
   userSelect.value = currentUser;
