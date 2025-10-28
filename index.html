@@ -4,12 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Brainrot Slots</title>
-  <link rel="stylesheet" href="style.css?v=20251027b" />
+  <link rel="stylesheet" href="style.css?v=20251027c" />
 </head>
 <body>
   <div class="bg"></div>
 
-  <!-- Header -->
   <header class="site-header">
     <a class="brand" href="/">🧠 Brainrot Casino</a>
     <nav class="mainnav">
@@ -18,7 +17,6 @@
     </nav>
   </header>
 
-  <!-- HUD with slider -->
   <section class="hud card">
     <label class="userpick">
       <span>User</span>
@@ -47,13 +45,10 @@
     <button id="adminToggle" class="btn ghost">Admin</button>
   </section>
 
-  <!-- Machine -->
   <main>
     <section class="machine card" id="machine">
       <header class="machine-bar">
-        <div class="machine-title">
-          Middle Row Pays • <b id="machineBet">0.50🪙</b> / spin
-        </div>
+        <div class="machine-title">Bet: <b id="machineBet">0.50🪙</b> / spin</div>
       </header>
 
       <div class="reels reels-3x3" aria-live="polite" aria-atomic="true">
@@ -86,14 +81,12 @@
       <div id="message" class="message" role="status" aria-live="polite"></div>
     </section>
 
-    <!-- Paytable (auto-updates with bet) -->
     <section class="paytable card">
       <h2>Payouts for <b id="ptBet">1.00🪙</b> bet — Middle Row</h2>
       <div id="ptGrid" class="pt-grid-grid"></div>
-      <p class="rg">Payout = (sum of the 3 middle characters). Values update with your bet.</p>
+      <p class="rg">Payout = sum of the 3 middle characters. Values update with your bet.</p>
     </section>
 
-    <!-- Admin (coins only) -->
     <section id="adminPanel" class="admin card hidden" aria-hidden="true" tabindex="-1">
       <h2>Admin</h2>
       <div class="admin-row">
@@ -107,11 +100,11 @@
       <div class="admin-actions">
         <button id="closeAdmin" class="btn ghost" type="button">Close</button>
       </div>
-      <p class="muted">Coins only. Deposit is passcode-gated.</p>
+      <p class="muted">Coins only. Deposit/Cash Out are passcode-gated.</p>
     </section>
   </main>
 
-  <!-- Win Modal (simple) -->
+  <!-- Win Modal -->
   <div id="winModal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-content">
       <h3 id="winTitle">WIN</h3>
@@ -120,6 +113,6 @@
     </div>
   </div>
 
-  <script defer src="script.js?v=20251027b"></script>
+  <script defer src="script.js?v=20251027c"></script>
 </body>
 </html>
