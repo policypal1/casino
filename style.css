@@ -1,123 +1,124 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Brainrot Slots — Character Gamble</title>
-  <link rel="stylesheet" href="style.css?v=23" />
-</head>
-<body>
-  <div class="background-rainbow"></div>
+/* Brainrot Slots — style v23
+   - Compact HUD, scrollable bet, no rainbow rim/stripe
+   - Balance delta badge beside balance
+*/
 
-  <div class="app" id="appRoot">
-    <header class="topbar">
-      <h1 class="brand"><span class="logo">🧠</span> Brainrot Slots</h1>
+*{box-sizing:border-box}
+:root{
+  --bg:#0c1016; --ink:#e9f1ff; --muted:#9fb3c8;
+  --accent:#35d2a8; --accent-2:#ffd166; --danger:#ff5a5f;
+  --frame:#0f1729; --card:#111827; --card-border:rgba(255,255,255,.08);
+  --shadow:0 10px 25px rgba(0,0,0,.35); --radius:18px;
+  --cell-h:150px; --sym-size:92px;
+  --pt-icon:40px; --pt-icon-mobile:32px;
+}
 
-      <div class="hud">
-        <label class="userpick">
-          <span>User</span>
-          <select id="userSelect" aria-label="Select user">
-            <option value="Will">Will</option>
-            <option value="Isaac">Isaac</option>
-            <option value="Faisal">Faisal</option>
-            <option value="Muhammed">Muhammed</option>
-          </select>
-        </label>
+/* Background */
+.background-rainbow{
+  position:fixed; inset:0; z-index:-2; pointer-events:none; opacity:.26;
+  background: linear-gradient(90deg,#1d1524,#2b0f1f,#102a2b,#0e2d2a);
+  background-size: 300% 100%; animation: bgSlide 28s linear infinite;
+  filter:saturate(1.02) blur(.4px);
+}
+@keyframes bgSlide{0%{background-position:0% 50%}100%{background-position:300% 50%}}
 
-        <div class="divider"></div>
+html,body{height:100%}
+body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--ink)}
+.app{max-width:1160px;margin:0 auto;padding:22px}
 
-        <div class="stat balance">
-          <span class="k">Balance</span>
-          <span id="tokenBalance" class="v">0🪙</span>
-          <span id="balanceDelta" class="delta" aria-live="polite"></span>
-        </div>
+/* Header / HUD */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.brand{margin:0;font-size:clamp(18px,2.6vw,26px);font-weight:800}
+.logo{filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
+.hud{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid var(--card-border)}
+.userpick{display:flex;align-items:center;gap:6px;color:var(--muted)}
+.userpick select{padding:6px 10px;border-radius:10px;border:1px solid var(--card-border);background:#0f1730;color:var(--ink)}
+.divider{width:1px;height:20px;background:var(--card-border)}
+.stat{display:flex;gap:6px;align-items:center;color:var(--muted);font-weight:800}
+.stat .v{color:var(--ink)}
+.balance .delta{margin-left:6px;opacity:0;transform:translateY(-6px);transition:opacity .25s, transform .25s}
+.balance .delta.show{opacity:1;transform:translateY(0)}
+.balance .delta::before{content:"✦";margin-right:6px;color:#ffd166}
 
-        <div class="divider"></div>
+/* Bet UI */
+.betwrap{display:flex;align-items:center;gap:8px;background:#0e1524;border:1px solid var(--card-border);padding:6px 10px;border-radius:999px}
+.betwrap .bet-k{color:var(--muted)}
+#betRange{width:180px;height:6px;border-radius:999px;background:rgba(255,255,255,.1);accent-color:#00bfa6}
+#betInput{width:90px;padding:6px 8px;border-radius:10px;border:1px solid var(--card-border);background:#0f1730;color:#0ff7d7;font-weight:800}
+.betwrap .coin{opacity:.85}
 
-        <!-- Bet: scrollable + wheelable -->
-        <div class="betwrap" title="Scroll or drag to set bet">
-          <span class="bet-k">Bet</span>
-          <input id="betRange" type="range" min="0.01" max="5" step="0.005" value="0.50" />
-          <input id="betInput" type="number" min="0.01" step="0.005" value="0.50" />
-          <span class="coin">🪙</span>
-        </div>
-      </div>
-    </header>
+/* Buttons & cards */
+.btn{background:#1a2438;color:var(--ink);border:1px solid rgba(255,255,255,.12);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800;letter-spacing:.3px;transition:.18s;box-shadow:var(--shadow)}
+.btn.ghost{background:transparent}
+.btn.primary{background:linear-gradient(90deg, #1de9b6, #00bfa6);color:#001b18;border:none}
+.btn.big{font-size:18px;padding:12px 22px;border-radius:16px}
+.btn:hover{transform:translateY(-1px)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn.danger{background:#30151a;border:1px solid rgba(255,90,95,.35);color:#ffb3b6}
 
-    <main>
-      <section class="machine card" id="machine">
-        <!-- removed rainbow border/top stripe -->
-        <header class="machine-bar flat">
-          <div class="machine-title">Middle Row Pays • <span id="machineBet">0.50🪙</span> / spin</div>
-        </header>
+/* Animated SPIN button */
+.spin-btn{position:relative; overflow:hidden; border:none; background:#0b0f1a; padding:0; border-radius:18px}
+.spin-btn .label{position:relative; display:block; padding:14px 30px; border-radius:16px; background:#0b0f1a; color:#eafff6; letter-spacing:.6px; font-weight:900; text-shadow:0 2px 0 #00120d}
 
-        <div class="reels reels-3x3" aria-live="polite" aria-atomic="true">
-          <div class="reel" id="reel-1"><div class="track"></div></div>
-          <div class="reel" id="reel-2"><div class="track"></div></div>
-          <div class="reel" id="reel-3"><div class="track"></div></div>
-          <div class="payline"></div>
-        </div>
+/* Cards */
+.card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));border:1px solid var(--card-border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
 
-        <div class="controls">
-          <div class="left">
-            <button id="depositBtn" class="btn" type="button">Deposit Character (M/s → 🪙)</button>
-          </div>
+/* MACHINE */
+.machine{padding:22px;margin-bottom:16px;position:relative;overflow:visible}
+.machine-bar.flat{display:flex;justify-content:center;margin-bottom:12px}
+.machine-title{font-weight:900;letter-spacing:.4px;opacity:.95}
 
-          <div class="center">
-            <button id="spinBtn" class="btn spin-btn big" type="button"><span class="label">SPIN</span></button>
-          </div>
+/* Reels */
+.reels-3x3{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;background:var(--frame);border-radius:16px;padding:22px;border:1px solid var(--card-border);position:relative;overflow:hidden; z-index:1;}
+.reel{height:calc(var(--cell-h)*3);background:linear-gradient(180deg,#0b1222,#0f192d);border-radius:16px;border:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden; z-index:3;box-shadow: inset 0 10px 20px rgba(0,0,0,.25)}
+.track{position:absolute; left:10px; right:10px; top:10px}
+.cell{height:var(--cell-h); margin-bottom:6px; display:flex;align-items:center;justify-content:center;border-radius:12px; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06)}
+.cell img{ width: var(--sym-size); height: var(--sym-size); object-fit: contain; display:block }
+.cell.mid{background:rgba(255,255,255,.03)}
+.reel.stopped .cell.mid{background:linear-gradient(180deg, rgba(255,214,102,.28), rgba(255,214,102,.09));border-color:rgba(255,214,102,.7);transform:translateY(-2px) scale(1.02);box-shadow:0 12px 22px rgba(0,0,0,.35), 0 0 30px rgba(255,214,102,.45)}
+.payline{position:absolute; left:14px; right:14px; top:50%; height:0; border-top:2px dashed rgba(255,255,255,.18); transform:translateY(-50%)}
 
-          <div class="right">
-            <button id="fastBtn" class="btn" type="button" aria-pressed="false">Fast Spin</button>
-            <button id="cashoutBtn" class="btn danger" type="button">Cash Out → Brainrot</button>
-          </div>
-        </div>
+/* Controls */
+.controls{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-top:18px}
+.controls .left{display:flex;justify-content:flex-start;gap:10px}
+.controls .center{display:flex;justify-content:center}
+.controls .right{display:flex;justify-content:flex-end;gap:10px}
 
-        <div id="message" class="message" role="status" aria-live="polite"></div>
-      </section>
+.message{margin-top:10px;min-height:24px;color:var(--accent-2);font-weight:800;letter-spacing:.3px}
 
-      <section class="paytable card">
-        <h2>Pay Table (per 1🪙 bet) — Middle Row</h2>
-        <div class="pt-grid" id="payRows"></div>
-        <p class="rg">Demo tokens only. Min deposit: <b>5🪙</b> (i.e., 5M/s character). Fractional bets & wins are supported.</p>
-      </section>
+/* Pay table */
+.paytable h2{margin:0 0 10px}
+.pt-grid{display:grid;gap:8px}
+.pt-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--card-border);border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01))}
+.pt-sym{display:flex;gap:6px;align-items:center}
+.pt-sym .triple{display:flex;gap:6px}
+.pt-sym img{width:var(--pt-icon);height:var(--pt-icon);object-fit:contain;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.pt-row b{font-size:1rem}
+.rg{color:var(--muted);margin-top:10px}
 
-      <!-- Admin launcher -->
-      <section class="admin-launch">
-        <button id="adminToggle" class="btn ghost" type="button" aria-expanded="false" aria-controls="adminPanel">Admin</button>
-      </section>
+/* Admin */
+.admin-launch{display:flex;justify-content:center;margin:14px 0}
+.admin{position:relative; z-index:5}
+.admin.hidden{display:none}
+.admin h2{margin:0 0 10px}
+.admin-row{margin:.25rem 0 .75rem}
+.admin-grid{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:12px}
+.admin-item{display:flex;flex-direction:column;gap:6px}
+.admin input[type="number"]{width:100%;padding:12px;border-radius:12px;border:1px solid var(--card-border);background:#0e1524;color:#0ff7d7;font-weight:700}
+.admin-actions{display:flex;gap:10px;margin-top:10px}
+.muted{color:var(--muted);font-size:.9rem}
 
-      <!-- SIMPLE ADMIN: add coins only -->
-      <section id="adminPanel" class="admin card hidden" aria-hidden="true" tabindex="-1">
-        <h2>Admin</h2>
-        <div class="admin-row"><label>Selected User: <strong id="adminUserLabel">Will</strong></label></div>
+/* Footer */
+.foot{display:flex;justify-content:center;opacity:.66}
+.foot small{display:block;padding:10px 0}
 
-        <div class="admin-grid">
-          <div class="admin-item">
-            <label for="adminAddTokens">Add Tokens (🪙)</label>
-            <input type="number" id="adminAddTokens" min="0.001" step="0.001" value="10" />
-          </div>
-          <div class="admin-item">
-            <label>&nbsp;</label>
-            <button id="adminAddBtn" class="btn primary" type="button">Add to Balance</button>
-          </div>
-          <div class="admin-item">
-            <label>Current Balance</label>
-            <div id="adminBalance" class="stat v">0🪙</div>
-          </div>
-        </div>
+/* Responsive */
+@media (max-width: 820px){
+  .app{padding:16px}
+  .reels-3x3{gap:12px;padding:14px}
+  :root{ --cell-h:132px; --sym-size:82px; --pt-icon:var(--pt-icon-mobile); }
+  .hud{flex-wrap:wrap;gap:8px}
+  .controls{grid-template-columns:1fr;gap:10px}
+  .controls .left,.controls .center,.controls .right{justify-content:center}
+}
 
-        <div class="admin-actions">
-          <button id="resetStats" class="btn danger" type="button">Reset User</button>
-          <button id="closeAdmin" class="btn ghost" type="button">Close</button>
-        </div>
-        <p class="muted">Passcode: <code>1111</code>.</p>
-      </section>
-    </main>
-
-    <footer class="foot"><small>© 2025 Brainrot Slots — Demo.</small></footer>
-  </div>
-
-  <script defer src="script.js?v=23"></script>
-</body>
-</html>
