@@ -1,49 +1,52 @@
-/* Brainrot Slots — linear payouts, 49% RTP, per-reel win bursts, passcodes, full UI lock while spinning */
+/* Brainrot Slots — linear payouts, ~65% RTP, per-reel win bursts, passcodes, full UI lock while spinning */
 function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
 const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
 const round2 = (n)=> Math.round((n + Number.EPSILON) * 100) / 100;
 const round3 = (n)=> Math.round((n + Number.EPSILON) * 1000) / 1000;
 const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,''); };
 
-// NEW: format to “up to 3 total digits”; ensure leading zero for <1
+// Format short popup numbers (≤3 total digits), 0.xx shows leading zero
 function fmtBurst(n){
   const v = Math.max(0, round3(n));
-  const intDigits = Math.floor(v).toString().length; // 0 => "0" => 1 digit
-  const keepDec = Math.max(0, 3 - intDigits);        // total digits <= 3
+  const intDigits = Math.floor(v).toString().length;
+  const keepDec = Math.max(0, 3 - intDigits);
   let s = v.toFixed(keepDec);
-  // ensure leading zero for <1 (toFixed already does, but keep this guard)
   if (v < 1 && !s.startsWith('0')) s = '0' + s;
   return s;
 }
 
 (() => {
-  // ===== CONFIG =====
+  // ===== CONFIG (rebalanced) =====
   const MIN_DEPOSIT = 5;
   const PASSCODE = "1111";
-  const TARGET_RTP = 0.49; // player
 
-  // Items (best → least). Keep full label, plus short label for UI/paytable.
+  // Higher RTP for fewer brutal spins (still losing over time)
+  const TARGET_RTP = 0.65; // player expectation per spin
+
+  // Items (best → least). Two bottom symbols pay 0 by request.
+  // Weights nudged toward mid-tiers to create more small returns.
   const ITEMS_BASE = [
-    { k:"strawberryelephant", file:"Strawberryelephant.webp",         label:"Strawberry Elephant",  short:"Elephant",   weight:5,  value_x:0.79  },
-    { k:"dragoncanneloni",    file:"Dragoncanneloni.webp",            label:"Dragon Canneloni",     short:"Dragon",     weight:5,  value_x:0.394 },
-    { k:"garamadundung",      file:"Garamadundung.webp",              label:"Garama",               short:"Garama",     weight:10, value_x:0.237 },
-    { k:"carti",              file:"Carti.webp",                      label:"La Grande",            short:"La Grande",  weight:12, value_x:0.158 },
-    { k:"saturnita",          file:"La_Vaccca_Saturno_Saturnita.webp",label:"Saturnita",            short:"Saturnita",  weight:14, value_x:0.110 },
-    { k:"tralalero",          file:"TralaleroTralala.webp",           label:"Tralalero Tralala",    short:"Tralalero",  weight:16, value_x:0.084 },
-    { k:"sgedrftdikou",       file:"Sgedrftdikou.webp",               label:"Ballerina Cappuccino", short:"Cappuccino", weight:18, value_x:0.067 },
-    { k:"noobini",            file:"Noobini_Pizzanini_NEW.webp",      label:"Noobini Pizzanini",    short:"Noobini",    weight:20, value_x:0.054 },
+    { k:"strawberryelephant", file:"Strawberryelephant.webp",          label:"Strawberry Elephant",  short:"Elephant",   weight:7,  value_x:0.66 },
+    { k:"dragoncanneloni",    file:"Dragoncanneloni.webp",             label:"Dragon Canneloni",     short:"Dragon",     weight:9,  value_x:0.36 },
+    { k:"garamadundung",      file:"Garamadundung.webp",               label:"Garama",               short:"Garama",     weight:14, value_x:0.24 },
+    { k:"carti",              file:"Carti.webp",                       label:"La Grande",            short:"La Grande",  weight:16, value_x:0.17 },
+    { k:"saturnita",          file:"La_Vaccca_Saturno_Saturnita.webp", label:"Saturnita",            short:"Saturnita",  weight:18, value_x:0.12 },
+    { k:"tralalero",          file:"TralaleroTralala.webp",            label:"Tralalero Tralala",    short:"Tralalero",  weight:20, value_x:0.09 },
+    { k:"sgedrftdikou",       file:"Sgedrftdikou.webp",                label:"Ballerina Cappuccino", short:"Cappuccino", weight:16, value_x:0.00 }, // 0 payout
+    { k:"noobini",            file:"Noobini_Pizzanini_NEW.webp",       label:"Noobini Pizzanini",    short:"Noobini",    weight:17, value_x:0.00 }, // 0 payout
   ];
 
-  // Scale to hit RTP
+  // Scale to hit RTP (note: 3 symbols per spin → divide target by 3 per reel)
   const TOTAL_WEIGHT = ITEMS_BASE.reduce((s,x)=>s+x.weight,0);
   const avgBase = ITEMS_BASE.reduce((s,x)=> s + x.value_x * (x.weight/TOTAL_WEIGHT), 0);
   const targetAvg = TARGET_RTP / 3;
-  const SCALE = targetAvg / avgBase;
+  const SCALE = avgBase > 0 ? (targetAvg / avgBase) : 1;
+
   const ITEMS = ITEMS_BASE.map(x => ({...x, value_x: x.value_x * SCALE}));
 
   // ===== STATE =====
   const USERS = ["Will","Isaac","Faisal","Muhammed"];
-  const STORE = "brainrot-slots-linear-v6";
+  const STORE = "brainrot-slots-linear-v7";
   const baseUser = ()=>({ tokens:0, earned:0, spent:0 });
   function load(){
     try{
@@ -88,7 +91,7 @@ function fmtBurst(n){
   const adminGive   = document.getElementById("adminGive");
   const closeAdmin  = document.getElementById("closeAdmin");
 
-  // NEW: dim overlay element
+  // Dim overlay element
   const dimEl = document.getElementById("dim");
   const showDim = async (ms)=> {
     if (!dimEl) return;
@@ -138,10 +141,8 @@ function fmtBurst(n){
   // Per-reel burst
   async function burstOnReel(reelEl, amount){
     if (amount <= 0) return 0;
-    // Grey out board for readability during the popup
     const dimTime = 1000;
     showDim(dimTime).catch(()=>{});
-
     const b = document.createElement("div");
     b.className = "burst";
     b.textContent = `+${fmtBurst(amount)}`;
@@ -222,6 +223,7 @@ function fmtBurst(n){
     s.spent  = round3((s.spent ||0) + bet);
     save(); renderBalance(); setBetDisplay();
 
+    // Roll 3 independent mids
     const midRow = [randItem(), randItem(), randItem()];
     const finals = [
       {top:randItem(), mid:midRow[0], bot:randItem()},
@@ -249,7 +251,6 @@ function fmtBurst(n){
     const totalX = midRow[0].value_x + midRow[1].value_x + midRow[2].value_x;
     const win = round3(totalX * bet);
 
-    // brief pause after last burst before modal
     await wait((fastMode?500:900));
 
     if (win>0){
@@ -288,7 +289,7 @@ function fmtBurst(n){
   });
 
   // Passcode-gated deposit
-  depositBtn?.addEventListener("click", ()=>{
+  document.getElementById("convertBtn")?.addEventListener("click", ()=>{
     const pass = prompt("Enter passcode to deposit:");
     if (pass !== PASSCODE){ alert("Incorrect passcode."); return; }
     const s = stats[currentUser];
@@ -301,7 +302,7 @@ function fmtBurst(n){
   });
 
   // Passcode-gated cashout
-  cashoutBtn?.addEventListener("click", ()=>{
+  document.getElementById("cashoutBtn")?.addEventListener("click", ()=>{
     const pass = prompt("Enter passcode to cash out:");
     if (pass !== PASSCODE){ alert("Incorrect passcode."); return; }
     const s=stats[currentUser]; const bal=round3(Math.max(0,s.tokens||0));
@@ -313,12 +314,12 @@ function fmtBurst(n){
   });
 
   // Admin (coins only)
-  adminToggle?.addEventListener("click", ()=>{
+  document.getElementById("adminToggle")?.addEventListener("click", ()=>{
     adminUserLabel.textContent = currentUser;
     adminPanel.classList.remove("hidden");
   });
-  closeAdmin?.addEventListener("click", ()=> adminPanel.classList.add("hidden"));
-  adminGive?.addEventListener("click", ()=>{
+  document.getElementById("closeAdmin")?.addEventListener("click", ()=> adminPanel.classList.add("hidden"));
+  document.getElementById("adminGive")?.addEventListener("click", ()=>{
     const s=stats[currentUser];
     const amt = Math.max(0, Number(adminAdd.value||"0"));
     if (!Number.isFinite(amt) || amt<=0) return;
