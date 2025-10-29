@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Brainrot Slots</title>
-  <link rel="stylesheet" href="style.css?v=20251028a" />
+  <link rel="stylesheet" href="style.css?v=20251028b" />
 </head>
 <body>
   <div class="bg"></div>
@@ -14,6 +14,8 @@
     <nav class="mainnav">
       <a class="active" href="/">Slots</a>
       <a href="/mines.html">Mines</a>
+      <!-- Music toggle -->
+      <button id="musicBtn" class="btn ghost" type="button" aria-pressed="false" title="Toggle music">🔊 Music</button>
     </nav>
   </header>
 
@@ -90,9 +92,7 @@
 
     <section id="adminPanel" class="admin card hidden" aria-hidden="true" tabindex="-1">
       <h2>Admin</h2>
-      <div class="admin-row">
-        <label>Selected User: <strong id="adminUserLabel">Will</strong></label>
-      </div>
+      <div class="admin-row"><label>Selected User: <strong id="adminUserLabel">Will</strong></label></div>
       <div class="admin-simple">
         <label for="adminAdd">Add Coins</label>
         <input id="adminAdd" type="number" min="0" step="0.01" />
@@ -105,6 +105,7 @@
     </section>
   </main>
 
+  <!-- Win Modal -->
   <div id="winModal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-content">
       <h3 id="winTitle">WIN</h3>
@@ -113,6 +114,9 @@
     </div>
   </div>
 
-  <script defer src="script.js?v=20251028a"></script>
+  <!-- Background music (plays on first interaction) -->
+  <audio id="bgm" src="./spaghetti Boom Boom - Brainrot Song (Brazil Phonk Cover).mp3" preload="auto" loop></audio>
+
+  <script defer src="script.js?v=20251028b"></script>
 </body>
 </html>
