@@ -1,244 +1,363 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Brainrot Slots</title>
-  <link rel="stylesheet" href="style.css?v=20251027e" />
-
-  <!-- Minimal header hardening: sticky, readable, non-overlapping -->
-  <style>
-    .site-header{
-      position: sticky; top: 0; z-index: 1000;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; padding: 10px 16px;
-      backdrop-filter: blur(8px);
-      background: rgba(20,20,24,0.65);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-    .site-header .brand{ font-weight: 800; text-decoration: none; }
-    .site-header .mainnav a{
-      padding: 8px 10px; border-radius: 8px; text-decoration: none;
-      display:inline-block;
-    }
-    .site-header .mainnav a.active{ background: rgba(255,255,255,0.08); }
-    /* keeps first section from tucking under a sticky header on some browsers */
-    body > .header-spacer{ height: 8px; }
-    /* Rules card tweaks */
-    .rules { display: grid; gap: 10px; }
-    .rules .checks { display: grid; gap: 8px; }
-    .rules .checks label { display: flex; gap: 10px; align-items: start; line-height: 1.25; }
-    .rules .agree-row{ display:flex; align-items:center; justify-content: space-between; gap: 12px; }
-    .rules .agree-row .muted{ opacity: .8; font-size: .9em; }
-    .btn[disabled] { opacity: .5; pointer-events: none; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Brainrot — Mines</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0e14; --ink:#e9f1ff; --muted:#9fb3c8;
+  --card:#0f1626; --card2:#0d1220; --border:rgba(255,255,255,.10);
+  --accent:#1de9b6; --danger:#ff5a5f; --warn:#ffd166;
+  --radius:18px; --shadow:0 10px 25px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--ink);background:var(--bg)}
+.bg{position:fixed;inset:0;z-index:-2;background:
+  radial-gradient(1200px 600px at 10% 10%, #2e1030 0%, transparent 60%),
+  radial-gradient(1200px 600px at 90% 30%, #0f3b32 0%, transparent 60%),
+  linear-gradient(120deg,#0b0e14,#0c121c)
+}
+.card{max-width:1180px;margin:12px auto;padding:18px;border-radius:var(--radius);
+  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
+  border:1px solid var(--border); box-shadow:var(--shadow)
+}
+.site-header{max-width:1180px;margin:12px auto 0;display:flex;align-items:center;gap:16px;padding:10px 12px}
+.brand{color:#fff;text-decoration:none;font-weight:900;font-size:18px}
+.mainnav{display:flex;gap:10px;align-items:center;margin-left:auto}
+.mainnav a,.btn{background:#18243a;color:#fff;border:1px solid rgba(255,255,255,.12);
+  padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:800;letter-spacing:.2px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.mainnav a.active{outline:2px solid #2ee59d}
+.btn.ghost{background:transparent}
+.btn.danger{background:#30151a;border-color:rgba(255,90,95,.35)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.hud{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.userpick{display:flex;gap:8px;align-items:center;color:var(--muted)}
+.select, .num{padding:8px 10px;border-radius:12px;border:1px solid var(--border);background:#0e1524;color:#0ff7d7;font-weight:800}
+.stat{display:flex;gap:6px;align-items:center;color:var(--muted);font-weight:800}
+.stat .v{color:#fff}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grid-wrap{display:grid;gap:10px;margin-top:12px}
+.grid{display:grid;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:12px}
+.cell{display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#0a1121,#0f1a2f); border:1px solid rgba(255,255,255,.08);
+  border-radius:12px; height:64px; font-size:24px; user-select:none; cursor:pointer;
+  transition:.15s; box-shadow:inset 0 8px 18px rgba(0,0,0,.25)}
+.cell:hover{transform:translateY(-1px)}
+.cell.revealed.safe{background:linear-gradient(180deg,rgba(29,233,182,.18),rgba(29,233,182,.06)); border-color:rgba(29,233,182,.55)}
+.cell.revealed.bomb{background:linear-gradient(180deg,rgba(255,90,95,.18),rgba(255,90,95,.06)); border-color:rgba(255,90,95,.55)}
+.meta{display:flex;flex-wrap:wrap;gap:12px;align-items:center;color:var(--muted);margin-top:6px}
+.meta b{color:#fff}
+.message{margin-top:8px;min-height:22px;color:var(--warn);font-weight:800}
+.payout{font-weight:900;color:#b9ffd7}
+hr.sep{border:none;height:1px;background:var(--border);margin:10px 0}
+.kv{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kv .k{color:var(--muted)} .kv .v{font-weight:900}
+.small{font-size:.9rem;color:var(--muted)}
+</style>
 </head>
 <body>
-  <div class="bg"></div>
+<div class="bg"></div>
 
-  <header class="site-header">
-    <a class="brand" href="/">🧠 Brainrot Casino</a>
-    <nav class="mainnav" aria-label="Primary">
-      <a class="active" href="/">Slots</a>
-      <a href="/mines.html">Mines</a>
-    </nav>
-  </header>
-  <div class="header-spacer" aria-hidden="true"></div>
+<header class="site-header">
+  <a class="brand" href="/">🧠 Brainrot Casino</a>
+  <nav class="mainnav">
+    <a href="/" class="">Slots</a>
+    <a href="/mines.html" class="active">Mines</a>
+  </nav>
+</header>
 
-  <section class="hud card">
-    <label class="userpick">
-      <span>User</span>
-      <select id="userSelect" aria-label="Select user">
-        <option>Will</option>
-        <option>Isaac</option>
-        <option>Faisal</option>
-        <option>Muhammed</option>
+<section class="card hud" id="hud">
+  <div class="userpick">
+    <span>User</span>
+    <select id="userSelect" class="select" aria-label="Select user">
+      <option>Will</option>
+      <option>Isaac</option>
+      <option>Faisal</option>
+      <option>Muhammed</option>
+    </select>
+  </div>
+
+  <div class="stat"><span class="k">Balance</span> <span id="bal" class="v">0🪙</span></div>
+
+  <div class="controls" style="margin-left:auto">
+    <label class="small">Grid
+      <select id="gridSize" class="select">
+        <option value="5">5×5</option>
+        <option value="6">6×6</option>
+        <option value="7">7×7</option>
+        <option value="8">8×8</option>
       </select>
     </label>
 
-    <div class="stat">
-      <span class="k">Balance</span>
-      <span id="tokenBalance" class="v">0🪙</span>
-    </div>
+    <label class="small">Mines
+      <input id="mineCount" type="number" class="num" value="5" min="1" max="20" step="1" style="width:96px">
+    </label>
 
-    <div class="bet-stack">
-      <div class="bet-row">
-        <span class="k">Bet</span>
-        <input id="betInput" type="number" step="0.01" min="0.01" value="0.50" />
-        <span class="unit">🪙</span>
-      </div>
-      <input id="betSlider" type="range" min="0.01" max="1" step="0.01" value="0.50" />
-    </div>
+    <label class="small">Bet (🪙)
+      <input id="bet" type="number" class="num" value="0.50" step="0.01" min="0.01" style="width:110px">
+    </label>
 
-    <button id="adminToggle" class="btn ghost">Admin</button>
-  </section>
-
-  <!-- Rules & Cashout Policy (must be checked to enable Cash Out) -->
-  <section class="rules card" id="rulesCard" aria-labelledby="rulesTitle">
-    <h2 id="rulesTitle">Rules & Cashout Policy</h2>
-    <div class="checks">
-      <label>
-        <input type="checkbox" class="rule-check" id="ruleMin5">
-        <span>Cashout allowed only at a minimum of <strong>5🪙</strong>.</span>
-      </label>
-      <label>
-        <input type="checkbox" class="rule-check" id="ruleFloor">
-        <span>All cashouts are <strong>rounded down</strong> to the nearest whole coin (e.g., <em>4.9 → 4</em>, <em>9.9 → 9</em>).</span>
-      </label>
-      <label>
-        <input type="checkbox" class="rule-check" id="ruleNoRefund">
-        <span><strong>No refunds.</strong></span>
-      </label>
-    </div>
-    <div class="agree-row">
-      <label style="display:flex;align-items:center;gap:10px;">
-        <input type="checkbox" id="agreeRules">
-        <span>I have read and agree to the Rules & Cashout Policy.</span>
-      </label>
-      <div class="muted" id="rulesStatus" aria-live="polite">Cash Out locked</div>
-    </div>
-  </section>
-
-  <main>
-    <section class="machine card" id="machine">
-      <header class="machine-bar">
-        <div class="machine-title">Bet: <b id="machineBet">0.50🪙</b> / spin</div>
-      </header>
-
-      <div class="reels reels-3x3" aria-live="polite" aria-atomic="true">
-        <div class="reel" id="reel-1"><div class="track"></div></div>
-        <div class="reel" id="reel-2"><div class="track"></div></div>
-        <div class="reel" id="reel-3"><div class="track"></div></div>
-
-        <!-- one-second grey-out overlay during burst -->
-        <div class="dim" id="dim"></div>
-      </div>
-
-      <div class="controls">
-        <div class="left">
-          <button id="convertBtn" class="btn" type="button">Deposit Character (M/s → 🪙)</button>
-        </div>
-
-        <div class="center">
-          <label class="fast-toggle" title="Faster spins">
-            <input type="checkbox" id="fastChk" />
-            <span>Fast</span>
-          </label>
-
-          <button id="spinBtn" class="btn spin-btn big" type="button">
-            <span class="label">SPIN</span>
-          </button>
-        </div>
-
-        <div class="right">
-          <button id="cashoutBtn" class="btn danger" type="button" disabled>Cash Out → Brainrot</button>
-        </div>
-      </div>
-
-      <div id="message" class="message" role="status" aria-live="polite"></div>
-    </section>
-
-    <section class="paytable card">
-      <h2>Payouts for <b id="ptBet">1.00🪙</b> bet — Middle Row</h2>
-      <div id="ptGrid" class="pt-grid-grid"></div>
-      <p class="rg">Payout = sum of the 3 middle characters. Values update with your bet.</p>
-    </section>
-
-    <section id="adminPanel" class="admin card hidden" aria-hidden="true" tabindex="-1">
-      <h2>Admin</h2>
-      <div class="admin-row">
-        <label>Selected User: <strong id="adminUserLabel">Will</strong></label>
-      </div>
-      <div class="admin-simple">
-        <label for="adminAdd">Add Coins</label>
-        <input id="adminAdd" type="number" min="0" step="0.01" />
-        <button id="adminGive" class="btn" type="button">Give</button>
-      </div>
-      <div class="admin-actions">
-        <button id="closeAdmin" class="btn ghost" type="button">Close</button>
-      </div>
-      <p class="muted">Coins only. Deposit/Cash Out are passcode-gated.</p>
-    </section>
-  </main>
-
-  <!-- Win Modal -->
-  <div id="winModal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-content">
-      <h3 id="winTitle">WIN</h3>
-      <div class="win-amount"><span id="winAmt">+0</span> 🪙</div>
-      <p class="win-line" id="winLine"></p>
-    </div>
+    <button id="startBtn" class="btn">Start</button>
+    <button id="cashoutBtn" class="btn danger" disabled>Cash Out</button>
   </div>
+</section>
 
-  <script defer src="script.js?v=20251027e"></script>
+<section class="card">
+  <div class="kv">
+    <span class="k">Revealed</span><span class="v" id="revealed">0</span>
+    <span class="k">Mines</span><span class="v" id="minesLabel">5</span>
+    <span class="k">Current Mult</span><span class="v payout" id="mult">1.00×</span>
+    <span class="k">Cashout</span><span class="v payout" id="cashVal">0🪙</span>
+  </div>
+  <hr class="sep">
+  <div id="grid" class="grid" aria-label="Mines grid"></div>
+  <div id="message" class="message" role="status" aria-live="polite"></div>
+</section>
 
-  <!-- Policy gating + cashout enforcement (floor + min 5) -->
-  <script>
-    (function () {
-      const $ = (s, r = document) => r.querySelector(s);
-      const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+<script>
+/* === Shared balance with Slots (brainrot-slots-binary-v1) === */
+const STORE = "brainrot-slots-binary-v1";
+const USERS = ["Will","Isaac","Faisal","Muhammed"];
+const baseUser = ()=>({ tokens:0, earned:0, spent:0, spinCount:0 });
+function loadAll(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(STORE)||"{}");
+    for(const u of USERS) if(!raw[u]) raw[u]=baseUser();
+    return raw;
+  }catch{
+    return Object.fromEntries(USERS.map(u=>[u,baseUser()]));
+  }
+}
+let stats = loadAll();
+function saveAll(){ localStorage.setItem(STORE, JSON.stringify(stats)); }
 
-      const cashoutBtn = $('#cashoutBtn');
-      const tokenBalanceEl = $('#tokenBalance');
-      const agree = $('#agreeRules');
-      const checks = $$('.rule-check');
-      const rulesStatus = $('#rulesStatus');
+let currentUser = USERS.includes(localStorage.getItem("br-user")) ? localStorage.getItem("br-user") : "Will";
+const userSel   = document.getElementById('userSelect');
+userSel.value = currentUser;
+userSel.addEventListener('change', ()=>{
+  currentUser = userSel.value;
+  localStorage.setItem("br-user", currentUser);
+  renderBalance();
+});
 
-      // Enable Cash Out only when all rules + agree are checked
-      function updateGate() {
-        const allChecked = checks.every(c => c.checked);
-        const canCash = allChecked && agree.checked;
-        cashoutBtn.disabled = !canCash;
-        rulesStatus.textContent = canCash ? 'Cash Out unlocked' : 'Cash Out locked';
+/* === UI refs === */
+const balEl   = document.getElementById('bal');
+const gridEl  = document.getElementById('grid');
+const startBtn= document.getElementById('startBtn');
+const cashBtn = document.getElementById('cashoutBtn');
+const betEl   = document.getElementById('bet');
+const gridSizeEl = document.getElementById('gridSize');
+const mineCountEl= document.getElementById('mineCount');
+const msgEl   = document.getElementById('message');
+const multEl  = document.getElementById('mult');
+const cashValEl= document.getElementById('cashVal');
+const revealedEl= document.getElementById('revealed');
+const minesLabel= document.getElementById('minesLabel');
+
+/* === Helpers === */
+const r2 = (n)=> Math.round((n + Number.EPSILON) * 100) / 100;
+const fmtTok = (n)=> (Math.round((n+1e-9)*100)/100).toFixed(2).replace(/\.00$/,'') + '🪙';
+
+function renderBalance(){
+  const s = stats[currentUser]||baseUser();
+  balEl.textContent = fmtTok(s.tokens||0);
+}
+renderBalance();
+
+/* === Mines game state === */
+const HOUSE_EDGE = 0.04; // 4% edge baked into each step multiplier
+let rows=5, cols=5, cells=25, mines=5;
+let board = [];           // array of {bomb:boolean, revealed:boolean, idx:number}
+let inRound=false, busted=false;
+let bet=0, revealed=0, safeTotal=0, currentMult=1.0;
+
+function resetBoard(){
+  gridEl.innerHTML = '';
+  gridEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  board = Array.from({length:cells}, (_,i)=>({bomb:false, revealed:false, idx:i}));
+  revealed = 0; busted=false; currentMult = 1.0;
+  updateHUD();
+}
+
+function updateHUD(){
+  revealedEl.textContent = String(revealed);
+  minesLabel.textContent = String(mines);
+  multEl.textContent = `${currentMult.toFixed(2)}×`;
+  const cash = r2(bet * currentMult);
+  cashValEl.textContent = fmtTok(revealed>0 && !busted ? cash : 0);
+}
+
+function setMessage(t, kind='info'){
+  msgEl.style.color = (kind==='bad') ? '#ffcdcd' : (kind==='good' ? '#b9ffd7' : '#ffd166');
+  msgEl.textContent = t;
+}
+
+/* Fair-ish step multiplier with house edge:
+   stepMult = (safeRemaining / totalRemaining) * (1 - HOUSE_EDGE)
+*/
+function stepMultiplier(){
+  const totalRemaining = cells - revealed;
+  const bombsRemaining = mines - countRevealedBombs();
+  const safeRemaining  = totalRemaining - bombsRemaining;
+  if (totalRemaining<=0 || safeRemaining<=0) return 1;
+  return (safeRemaining / totalRemaining) * (1 - HOUSE_EDGE);
+}
+
+function countRevealedBombs(){ return board.filter(c=>c.revealed && c.bomb).length; }
+
+/* Place bombs uniformly at random */
+function placeBombs(){
+  const idxs = [...Array(cells).keys()];
+  for (let i=idxs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idxs[i],idxs[j]]=[idxs[j],idxs[i]]; }
+  const bombs = new Set(idxs.slice(0, mines));
+  for (const c of board) c.bomb = bombs.has(c.idx);
+}
+
+/* Build grid UI */
+function drawGrid(){
+  gridEl.innerHTML = '';
+  for (const cell of board){
+    const d = document.createElement('button');
+    d.className='cell'; d.type='button';
+    d.setAttribute('aria-label', 'Hidden cell');
+    d.addEventListener('click', ()=> onReveal(cell, d));
+    d.addEventListener('contextmenu', (e)=>{ e.preventDefault(); /* reserved for flags later */ });
+    gridEl.appendChild(d);
+  }
+}
+
+/* Reveal logic */
+function onReveal(cell, el){
+  if (!inRound || cell.revealed) return;
+  cell.revealed = true;
+
+  if (cell.bomb){
+    // Bust
+    busted = true;
+    el.classList.add('revealed','bomb');
+    el.textContent = '💣';
+    revealAllBombs();
+    endRound(false);
+    return;
+  }
+
+  // Safe
+  el.classList.add('revealed','safe');
+  el.textContent = '🍓🐘'; // Strawberry Elephant
+  revealed++;
+  const multStep = stepMultiplier();
+  currentMult = Math.max(1, currentMult * multStep);
+  updateHUD();
+  setMessage('Safe! Cash out or keep going…','good');
+  cashBtn.disabled = false;
+
+  // Optional: auto-win if all safes opened
+  if (revealed === safeTotal){
+    endRound(true);
+  }
+}
+
+function revealAllBombs(){
+  const kids = gridEl.children;
+  for (const c of board){
+    if (c.bomb){
+      const el = kids[c.idx];
+      if (!el.classList.contains('revealed')){
+        el.classList.add('revealed','bomb'); el.textContent='💣';
       }
-      checks.forEach(c => c.addEventListener('change', updateGate));
-      agree.addEventListener('change', updateGate);
-      updateGate();
+    }
+  }
+}
 
-      function parseBalance() {
-        // expects like "12.34🪙"
-        const raw = (tokenBalanceEl.textContent || '').replace(/[^\d.]/g, '');
-        const n = Number.parseFloat(raw);
-        return Number.isFinite(n) ? n : 0;
-      }
-      function setBalance(n) {
-        tokenBalanceEl.textContent = (Math.max(0, n).toFixed(2).replace(/\.00$/, '')) + '🪙';
-      }
-      function showMsg(txt) {
-        const m = $('#message');
-        if (!m) return;
-        m.textContent = txt;
-        m.classList.add('show');
-        // fade after 2.5s if your CSS supports it; otherwise it just stays visible
-        setTimeout(() => m.classList.remove('show'), 2500);
-      }
+/* Start / Cashout */
+function startRound(){
+  // read config
+  rows = Math.max(2, Math.min(12, Number(gridSizeEl.value)||5));
+  cols = rows;
+  cells = rows*cols;
+  const maxMines = Math.max(1, cells-1);
+  mines = Math.max(1, Math.min(maxMines, Number(mineCountEl.value)||5));
+  mineCountEl.max = String(maxMines);
 
-      // Intercept cashout to enforce floor rounding + minimum 5🪙
-      cashoutBtn.addEventListener('click', function (ev) {
-        const bal = parseBalance();
-        const floorAmt = Math.floor(bal); // rounded down to whole coin
+  bet = Number(betEl.value||'0.01');
+  if (!Number.isFinite(bet) || bet<=0.009){ setMessage('Enter a valid bet ≥ 0.01🪙','bad'); return; }
 
-        if (floorAmt < 5) {
-          ev.stopImmediatePropagation();
-          ev.preventDefault();
-          showMsg('Minimum 5🪙 required to cash out.');
-          return;
-        }
+  const s = stats[currentUser] || baseUser();
+  if ((s.tokens||0) + 1e-9 < bet){ setMessage('Insufficient balance.','bad'); return; }
 
-        // If your existing script handles cashout, let it continue.
-        // Otherwise, we do a safe default: deduct the floored amount and show a status.
-        // Detect if a handler has already updated balance within a tick; if not, update ourselves.
-        const before = parseBalance();
-        setTimeout(() => {
-          const after = parseBalance();
-          const unchanged = Math.abs(after - before) < 0.0001;
-          if (unchanged) {
-            setBalance(before - floorAmt);
-            showMsg(`Cashed out ${floorAmt}🪙 (rounded down). No refunds.`);
-          }
-        }, 0);
-      }, { capture: true });
-    })();
-  </script>
+  // take bet
+  s.tokens = r2((s.tokens||0) - bet);
+  s.spent  = r2((s.spent ||0) + bet);
+  stats[currentUser]=s; saveAll(); renderBalance();
+
+  // init round
+  inRound=true; busted=false; revealed=0; currentMult=1.0; safeTotal = cells - mines;
+  setMessage('Round started. Good luck!');
+  resetBoard(); placeBombs(); drawGrid(); updateHUD();
+
+  // lock controls
+  startBtn.disabled = true; gridSizeEl.disabled = true; mineCountEl.disabled = true; betEl.disabled = true;
+  cashBtn.disabled  = true;
+}
+
+function endRound(wonAllSafes){
+  if (!inRound) return;
+  inRound=false;
+
+  const s = stats[currentUser] || baseUser();
+  let payout = 0;
+  if (!busted){
+    if (wonAllSafes){
+      // If all safes revealed, pay full current multiplier
+      payout = r2(bet * currentMult);
+      setMessage(`Flawless! You cleared the board. +${fmtTok(payout)}`,'good');
+    } else if (revealed>0){
+      payout = r2(bet * currentMult);
+      setMessage(`Cashed out +${fmtTok(payout)}`,'good');
+    }
+  } else {
+    setMessage('Boom. You hit a bomb — bet lost.','bad');
+  }
+
+  if (payout>0){
+    s.tokens = r2((s.tokens||0) + payout);
+    s.earned = r2((s.earned||0) + payout);
+  }
+  stats[currentUser]=s; saveAll(); renderBalance(); updateHUD();
+
+  // unlock controls
+  startBtn.disabled = false; gridSizeEl.disabled = false; mineCountEl.disabled = false; betEl.disabled = false;
+  cashBtn.disabled  = true;
+}
+
+/* Cashout button */
+cashBtn.addEventListener('click', ()=>{
+  if (!inRound || busted || revealed<=0) return;
+  endRound(false); // standard cashout
+});
+
+/* Start button */
+startBtn.addEventListener('click', startRound);
+
+/* Keep mines in a sensible range when grid changes */
+gridSizeEl.addEventListener('change', ()=>{
+  const r = Number(gridSizeEl.value||'5'); const maxM = r*r - 1;
+  if (Number(mineCountEl.value) > maxM) mineCountEl.value = String(maxM);
+});
+
+/* Keyboard: Space toggles “safe reveal mode” (focus keeps clicking), Enter cashouts */
+window.addEventListener('keydown', (e)=>{
+  if (e.code === 'Enter'){
+    if (!cashBtn.disabled) cashBtn.click();
+  }
+});
+
+/* Initial board (no active round) */
+rows=5; cols=5; cells=25; mines=5; resetBoard(); drawGrid(); setMessage('Set your grid, mines, and bet. Press Start to play.');
+</script>
 </body>
 </html>
