@@ -1,11 +1,10 @@
-/* Brainrot Slots — linear payouts, ~65% RTP, per-reel win bursts, passcodes, full UI lock while spinning */
+/* Brainrot Slots — linear payouts, ~65% base RTP, early hot streak, per-reel bursts always on */
 function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
 const wait = (ms)=> new Promise(r=>setTimeout(r, ms));
-const round2 = (n)=> Math.round((n + Number.EPSILON) * 100) / 100;
 const round3 = (n)=> Math.round((n + Number.EPSILON) * 1000) / 1000;
 const fmtTok = (n)=>{ const s=(round3(n)).toFixed(3); return s.replace(/\.?0+$/,''); };
 
-// Format short popup numbers (≤3 total digits), 0.xx shows leading zero
+// Short popup numbers (≤3 total digits) with leading zero under 1
 function fmtBurst(n){
   const v = Math.max(0, round3(n));
   const intDigits = Math.floor(v).toString().length;
@@ -16,15 +15,14 @@ function fmtBurst(n){
 }
 
 (() => {
-  // ===== CONFIG (rebalanced) =====
+  // ===== CONFIG =====
   const MIN_DEPOSIT = 5;
   const PASSCODE = "1111";
 
-  // Higher RTP for fewer brutal spins (still losing over time)
-  const TARGET_RTP = 0.65; // player expectation per spin
+  // Base target expectation (player); we’ll bias only the symbol frequency via weights
+  const TARGET_RTP = 0.65;
 
-  // Items (best → least). Two bottom symbols pay 0 by request.
-  // Weights nudged toward mid-tiers to create more small returns.
+  // Items (best → least). NOTE: Cappuccino & Noobini pay 0 by request.
   const ITEMS_BASE = [
     { k:"strawberryelephant", file:"Strawberryelephant.webp",          label:"Strawberry Elephant",  short:"Elephant",   weight:7,  value_x:0.66 },
     { k:"dragoncanneloni",    file:"Dragoncanneloni.webp",             label:"Dragon Canneloni",     short:"Dragon",     weight:9,  value_x:0.36 },
@@ -32,28 +30,98 @@ function fmtBurst(n){
     { k:"carti",              file:"Carti.webp",                       label:"La Grande",            short:"La Grande",  weight:16, value_x:0.17 },
     { k:"saturnita",          file:"La_Vaccca_Saturno_Saturnita.webp", label:"Saturnita",            short:"Saturnita",  weight:18, value_x:0.12 },
     { k:"tralalero",          file:"TralaleroTralala.webp",            label:"Tralalero Tralala",    short:"Tralalero",  weight:20, value_x:0.09 },
-    { k:"sgedrftdikou",       file:"Sgedrftdikou.webp",                label:"Ballerina Cappuccino", short:"Cappuccino", weight:16, value_x:0.00 }, // 0 payout
-    { k:"noobini",            file:"Noobini_Pizzanini_NEW.webp",       label:"Noobini Pizzanini",    short:"Noobini",    weight:17, value_x:0.00 }, // 0 payout
+    { k:"sgedrftdikou",       file:"Sgedrftdikou.webp",                label:"Ballerina Cappuccino", short:"Cappuccino", weight:16, value_x:0.00 },
+    { k:"noobini",            file:"Noobini_Pizzanini_NEW.webp",       label:"Noobini Pizzanini",    short:"Noobini",    weight:17, value_x:0.00 },
   ];
 
-  // Scale to hit RTP (note: 3 symbols per spin → divide target by 3 per reel)
-  const TOTAL_WEIGHT = ITEMS_BASE.reduce((s,x)=>s+x.weight,0);
-  const avgBase = ITEMS_BASE.reduce((s,x)=> s + x.value_x * (x.weight/TOTAL_WEIGHT), 0);
-  const targetAvg = TARGET_RTP / 3;
-  const SCALE = avgBase > 0 ? (targetAvg / avgBase) : 1;
+  // Scale values to meet base RTP (per-reel expected value is TARGET_RTP/3)
+  const TOTAL_WEIGHT_BASE = ITEMS_BASE.reduce((s,x)=>s+x.weight,0);
+  const avgBase = ITEMS_BASE.reduce((s,x)=> s + x.value_x * (x.weight/TOTAL_WEIGHT_BASE), 0);
+  const SCALE = avgBase > 0 ? ((TARGET_RTP/3) / avgBase) : 1;
+  const ITEMS_VALS = ITEMS_BASE.map(x => ({...x, value_x: x.value_x * SCALE}));
 
-  const ITEMS = ITEMS_BASE.map(x => ({...x, value_x: x.value_x * SCALE}));
+  // ===== “Hot start → decay” weight system =====
+  // Multipliers per symbol for three phases:
+  //  - BOOST: very lucky (first 3–10 spins)
+  //  - BASE: normal (our ITEMS_BASE weights)
+  //  - BAD : unlucky (after decay window)
+  const MULT_BOOST = {
+    strawberryelephant: 3.6,  // big wins
+    dragoncanneloni:    2.2,
+    garamadundung:      1.6,
+    carti:              1.4,
+    saturnita:          1.1,
+    tralalero:          1.0,
+    sgedrftdikou:       0.7,  // 0-pay
+    noobini:            0.7   // 0-pay
+  };
+  const MULT_BASE = {
+    strawberryelephant: 1, dragoncanneloni:1, garamadundung:1, carti:1,
+    saturnita:1, tralalero:1, sgedrftdikou:1, noobini:1
+  };
+  const MULT_BAD = {
+    strawberryelephant: 0.55,
+    dragoncanneloni:    0.75,
+    garamadundung:      0.9,
+    carti:              1.0,
+    saturnita:          1.25,
+    tralalero:          1.45,
+    sgedrftdikou:       2.1,   // flood 0-pay low symbols
+    noobini:            2.1
+  };
+
+  const DECAY_SPINS = 60; // spins to fade from BASE into BAD
+
+  function lerp(a,b,t){ return a + (b-a)*t; }
+
+  function buildPhaseMultipliers(spinIndex, boostSpins){
+    if (spinIndex < boostSpins) return MULT_BOOST; // pure boost
+    // After boost → BASE for a moment, then fade toward BAD over DECAY_SPINS
+    const post = spinIndex - boostSpins;
+    if (post <= 0) return MULT_BASE;
+    if (post >= DECAY_SPINS) return MULT_BAD;
+    // interpolate between BASE and BAD
+    const t = post / DECAY_SPINS;
+    const out = {};
+    for (const it of ITEMS_VALS){
+      const k = it.k;
+      out[k] = lerp(MULT_BASE[k], MULT_BAD[k], t);
+    }
+    return out;
+  }
+
+  function buildWeightedItems(spinIndex, boostSpins){
+    const mult = buildPhaseMultipliers(spinIndex, boostSpins);
+    const items = ITEMS_VALS.map(it => ({...it, weight: it.weight * (mult[it.k] || 1)}));
+    const totalWeight = items.reduce((s,x)=>s+x.weight,0);
+    return { items, totalWeight };
+  }
+
+  function randItemWeighted(items, total){
+    let r = Math.random()*total;
+    for (const s of items){ if((r -= s.weight) <= 0) return s; }
+    return items[items.length-1];
+  }
 
   // ===== STATE =====
   const USERS = ["Will","Isaac","Faisal","Muhammed"];
-  const STORE = "brainrot-slots-linear-v7";
-  const baseUser = ()=>({ tokens:0, earned:0, spent:0 });
+  const STORE = "brainrot-slots-linear-v8";
+  const baseUser = ()=>({ tokens:0, earned:0, spent:0, spinCount:0, boostSpins:0 });
   function load(){
     try{
       const raw = JSON.parse(localStorage.getItem(STORE)||"{}");
-      for(const u of USERS) if(!raw[u]) raw[u]=baseUser();
+      for(const u of USERS){
+        if(!raw[u]) raw[u]=baseUser();
+        if(!raw[u].boostSpins || raw[u].boostSpins<3 || raw[u].boostSpins>10){
+          raw[u].boostSpins = Math.floor(Math.random()*8)+3; // 3..10
+        }
+      }
       return raw;
-    }catch{ return Object.fromEntries(USERS.map(u=>[u,baseUser()])); }
+    }catch{
+      const init = Object.fromEntries(USERS.map(u=>[u,baseUser()]));
+      for(const u of USERS) init[u].boostSpins = Math.floor(Math.random()*8)+3;
+      return init;
+    }
   }
   let stats = load();
   function save(){ localStorage.setItem(STORE, JSON.stringify(stats)); }
@@ -91,7 +159,6 @@ function fmtBurst(n){
   const adminGive   = document.getElementById("adminGive");
   const closeAdmin  = document.getElementById("closeAdmin");
 
-  // Dim overlay element
   const dimEl = document.getElementById("dim");
   const showDim = async (ms)=> {
     if (!dimEl) return;
@@ -104,11 +171,10 @@ function fmtBurst(n){
   const CELL_H = 156;
   const imgHTML = (file, alt)=> `<img src="./${file}" alt="${alt}">`;
   function makeCell(inner,isMid=false){ const d=document.createElement("div"); d.className="cell"+(isMid?" mid":""); d.innerHTML=inner; return d; }
-  function randItem(){ let r=Math.random()*TOTAL_WEIGHT; for(const s of ITEMS){ if((r-=s.weight)<=0) return s; } return ITEMS[ITEMS.length-1]; }
 
   function initReelTrack(reel){
     const t=reel.querySelector(".track"); t.innerHTML="";
-    for(let i=0;i<6;i++){ t.appendChild(makeCell(imgHTML(randItem().file,"sym"), i===1)); }
+    for(let i=0;i<6;i++){ t.appendChild(makeCell(imgHTML(ITEMS_VALS[i%ITEMS_VALS.length].file,"sym"), i===1)); }
   }
 
   async function scrollReelTo(reel, finalCol, totalRows, fakeHops, durationMs){
@@ -121,7 +187,7 @@ function fmtBurst(n){
     reel.classList.remove("stopped");
     track.innerHTML="";
     const filler=Math.max(3, rows-3);
-    for(let i=0;i<filler;i++) track.appendChild(makeCell(imgHTML(randItem().file,"sym")));
+    for(let i=0;i<filler;i++) track.appendChild(makeCell(imgHTML(ITEMS_VALS[i%ITEMS_VALS.length].file,"sym")));
     track.appendChild(makeCell(imgHTML(finalCol.top.file, finalCol.top.label)));
     track.appendChild(makeCell(imgHTML(finalCol.mid.file, finalCol.mid.label), true));
     track.appendChild(makeCell(imgHTML(finalCol.bot.file, finalCol.bot.label)));
@@ -138,14 +204,13 @@ function fmtBurst(n){
     reel.classList.add("stopped");
   }
 
-  // Per-reel burst
+  // Per-reel burst — ALWAYS show (even for 0) and grey-out briefly for readability
   async function burstOnReel(reelEl, amount){
-    if (amount <= 0) return 0;
     const dimTime = 1000;
     showDim(dimTime).catch(()=>{});
     const b = document.createElement("div");
     b.className = "burst";
-    b.textContent = `+${fmtBurst(amount)}`;
+    b.textContent = `+${fmtBurst(Math.max(0, amount))}`;
     reelEl.appendChild(b);
     const life = 900;
     setTimeout(()=> b.remove(), life+40);
@@ -155,7 +220,7 @@ function fmtBurst(n){
   function getBet(){
     const v = Number(betInput.value)||0.5;
     const max = Math.max(0.01, stats[currentUser].tokens||0.01);
-    const cl = clamp(v, 0.01, max);
+    const cl = Math.min(Math.max(v,0.01), max);
     if (cl !== v) betInput.value = String(cl);
     return cl;
   }
@@ -176,7 +241,7 @@ function fmtBurst(n){
   }
   function renderPaytable(){
     const bet = getBet();
-    ptGrid.innerHTML = ITEMS.map(it=>{
+    ptGrid.innerHTML = ITEMS_VALS.map(it=>{
       const coins = round3(it.value_x * bet);
       return `
         <div class="pt-item">
@@ -218,35 +283,39 @@ function fmtBurst(n){
       return;
     }
 
+    // Build dynamic weights for this spin
+    const { items: WITEMS, totalWeight } = buildWeightedItems(s.spinCount, s.boostSpins);
+
     spinning=true; setLocked(true); machine.classList.add("spinning");
     s.tokens = round3((s.tokens||0) - bet);
     s.spent  = round3((s.spent ||0) + bet);
     save(); renderBalance(); setBetDisplay();
 
-    // Roll 3 independent mids
-    const midRow = [randItem(), randItem(), randItem()];
+    // Roll 3 independent mids with dynamic weights
+    const midRow = [
+      randItemWeighted(WITEMS, totalWeight),
+      randItemWeighted(WITEMS, totalWeight),
+      randItemWeighted(WITEMS, totalWeight)
+    ];
     const finals = [
-      {top:randItem(), mid:midRow[0], bot:randItem()},
-      {top:randItem(), mid:midRow[1], bot:randItem()},
-      {top:randItem(), mid:midRow[2], bot:randItem()},
+      {top:randItemWeighted(WITEMS,totalWeight), mid:midRow[0], bot:randItemWeighted(WITEMS,totalWeight)},
+      {top:randItemWeighted(WITEMS,totalWeight), mid:midRow[1], bot:randItemWeighted(WITEMS,totalWeight)},
+      {top:randItemWeighted(WITEMS,totalWeight), mid:midRow[2], bot:randItemWeighted(WITEMS,totalWeight)},
     ];
 
     // Reel 1
     await scrollReelTo(reelEls[0], finals[0], 64, 1, 4200);
-    const a1 = midRow[0].value_x * bet;
-    await burstOnReel(reelEls[0], a1);
+    await burstOnReel(reelEls[0], midRow[0].value_x * bet);
     await wait(fastMode?60:120);
 
     // Reel 2
     await scrollReelTo(reelEls[1], finals[1], 84, 1, 5800);
-    const a2 = midRow[1].value_x * bet;
-    await burstOnReel(reelEls[1], a2);
+    await burstOnReel(reelEls[1], midRow[1].value_x * bet);
     await wait(fastMode?80:160);
 
     // Reel 3
     await scrollReelTo(reelEls[2], finals[2], 112, 2, 8200);
-    const a3 = midRow[2].value_x * bet;
-    await burstOnReel(reelEls[2], a3);
+    await burstOnReel(reelEls[2], midRow[2].value_x * bet);
 
     const totalX = midRow[0].value_x + midRow[1].value_x + midRow[2].value_x;
     const win = round3(totalX * bet);
@@ -264,13 +333,14 @@ function fmtBurst(n){
       setLocked(false);
     }
 
+    s.spinCount = (s.spinCount||0) + 1; // advance decay
     save(); renderBalance(); setBetDisplay();
     machine.classList.remove("spinning");
     spinning=false;
   }
 
   // ===== Buttons / Inputs =====
-  spinBtn.addEventListener("click", doSpin);
+  document.getElementById("spinBtn").addEventListener("click", doSpin);
   window.addEventListener("keydown", (e)=>{ if(e.code==="Space" && !spinBtn.disabled){ e.preventDefault(); doSpin(); } });
 
   fastChk.checked = fastMode;
@@ -289,7 +359,7 @@ function fmtBurst(n){
   });
 
   // Passcode-gated deposit
-  document.getElementById("convertBtn")?.addEventListener("click", ()=>{
+  depositBtn?.addEventListener("click", ()=>{
     const pass = prompt("Enter passcode to deposit:");
     if (pass !== PASSCODE){ alert("Incorrect passcode."); return; }
     const s = stats[currentUser];
@@ -301,8 +371,8 @@ function fmtBurst(n){
     save(); renderBalance(); messageEl.textContent = `Deposited ${fmtTok(tokens)}🪙`;
   });
 
-  // Passcode-gated cashout
-  document.getElementById("cashoutBtn")?.addEventListener("click", ()=>{
+  // Passcode-gated cashout (unchanged)
+  cashoutBtn?.addEventListener("click", ()=>{
     const pass = prompt("Enter passcode to cash out:");
     if (pass !== PASSCODE){ alert("Incorrect passcode."); return; }
     const s=stats[currentUser]; const bal=round3(Math.max(0,s.tokens||0));
@@ -314,12 +384,12 @@ function fmtBurst(n){
   });
 
   // Admin (coins only)
-  document.getElementById("adminToggle")?.addEventListener("click", ()=>{
+  adminToggle?.addEventListener("click", ()=>{
     adminUserLabel.textContent = currentUser;
     adminPanel.classList.remove("hidden");
   });
-  document.getElementById("closeAdmin")?.addEventListener("click", ()=> adminPanel.classList.add("hidden"));
-  document.getElementById("adminGive")?.addEventListener("click", ()=>{
+  closeAdmin?.addEventListener("click", ()=> adminPanel.classList.add("hidden"));
+  adminGive?.addEventListener("click", ()=>{
     const s=stats[currentUser];
     const amt = Math.max(0, Number(adminAdd.value||"0"));
     if (!Number.isFinite(amt) || amt<=0) return;
