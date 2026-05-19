@@ -357,6 +357,265 @@ body {
 .mp-mult { font-family: 'Bebas Neue', sans-serif; color: #ffd700; font-size: 14px; }
 .mines-paytable-row.current .mp-mult { color: #00ff96; }
 
+/* ===== HORSE RACING ===== */
+.horses-section { display: flex; justify-content: center; }
+.horses-machine {
+  width: 100%; max-width: 560px;
+  background: linear-gradient(180deg, #2e1a0d 0%, #200d08 100%);
+  border: 2px solid rgba(255, 170, 0, 0.3);
+  border-radius: 20px; padding: 22px;
+  box-shadow: 0 0 40px rgba(255, 170, 0, 0.2), inset 0 0 40px rgba(0,0,0,0.5);
+  position: relative;
+}
+.horses-machine::before {
+  content: ''; position: absolute; inset: -2px;
+  border-radius: 20px; padding: 2px;
+  background: linear-gradient(135deg, #ffaa00, #ff6b00, #ffd700, #ffaa00);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: borderShift 4s linear infinite; pointer-events: none;
+}
+
+.race-track {
+  background: linear-gradient(180deg, #87ceeb 0%, #b8e0f0 50%, #6b9b3e 50%, #4a7028 100%);
+  border-radius: 12px;
+  padding: 8px 0;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(255, 170, 0, 0.3);
+}
+.race-track::before {
+  content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 50%;
+  background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0 30px, transparent 30px 60px);
+}
+.horse-lane {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px;
+  position: relative;
+  height: 38px;
+  border-bottom: 1px dashed rgba(0,0,0,0.15);
+}
+.horse-lane:last-child { border-bottom: none; }
+.horse-name {
+  font-size: 11px; font-weight: 700;
+  width: 70px; flex-shrink: 0;
+  color: #1a0d2e;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+  z-index: 2;
+}
+.horse-track-area {
+  flex: 1; position: relative; height: 100%;
+}
+.horse-emoji {
+  position: absolute;
+  top: 50%; left: 0;
+  transform: translateY(-50%);
+  font-size: 28px;
+  transition: left 0.1s linear;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  z-index: 3;
+}
+.horse-emoji.running { animation: horseBob 0.2s ease-in-out infinite; }
+@keyframes horseBob { 0%,100% { transform: translateY(-50%) translateY(-2px);} 50% { transform: translateY(-50%) translateY(2px);} }
+.horse-emoji.winner { animation: winnerCelebrate 0.5s ease-in-out infinite; }
+@keyframes winnerCelebrate {
+  0%,100% { transform: translateY(-50%) scale(1.4) rotate(-10deg);}
+  50% { transform: translateY(-50%) scale(1.5) rotate(10deg);}
+}
+.finish-line {
+  position: absolute; top: 0; bottom: 0; right: 4px; width: 6px;
+  background: repeating-linear-gradient(0deg, #000 0 6px, #fff 6px 12px);
+  z-index: 2;
+  border-radius: 2px;
+}
+
+.horse-pick-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.horse-pick {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.3);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.horse-pick:hover { background: rgba(255, 170, 0, 0.15); border-color: rgba(255, 170, 0, 0.4); transform: translateX(4px); }
+.horse-pick.selected {
+  background: linear-gradient(90deg, rgba(255, 170, 0, 0.25), rgba(255, 100, 0, 0.15));
+  border-color: #ffaa00;
+  box-shadow: 0 0 20px rgba(255, 170, 0, 0.4);
+}
+.horse-pick.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+.horse-pick-emoji { font-size: 28px; }
+.horse-pick-info { flex: 1; }
+.horse-pick-name { font-weight: 700; font-size: 14px; }
+.horse-pick-stats { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+.horse-pick-odds {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.horse-result-display {
+  text-align: center;
+  padding: 12px; margin-bottom: 14px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255, 170, 0, 0.3);
+  border-radius: 10px;
+  min-height: 50px;
+  display: flex; align-items: center; justify-content: center;
+}
+.horse-result-display.win {
+  background: rgba(0, 200, 100, 0.15);
+  border-color: rgba(0, 255, 150, 0.5);
+}
+.horse-result-display.lose {
+  background: rgba(120, 30, 30, 0.15);
+}
+.horse-result-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; letter-spacing: 2px;
+}
+.horse-result-display.win .horse-result-text { color: #00ff96; text-shadow: 0 0 12px rgba(0, 255, 150, 0.6); }
+.horse-result-display.lose .horse-result-text { color: rgba(255, 100, 100, 0.8); }
+
+.btn-race-start {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #ffaa00, #ff6b00);
+  border: none; color: #000;
+  border-radius: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px; letter-spacing: 3px; font-weight: 900;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 0 20px rgba(255, 170, 0, 0.5);
+  margin-top: 10px;
+}
+.btn-race-start:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(255, 170, 0, 0.8); }
+.btn-race-start:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ===== PLINKO ===== */
+.plinko-section { display: flex; justify-content: center; }
+.plinko-machine {
+  width: 100%; max-width: 560px;
+  background: linear-gradient(180deg, #1a0d2e 0%, #0d0820 100%);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 20px; padding: 22px;
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.2), inset 0 0 40px rgba(0,0,0,0.5);
+  position: relative;
+}
+.plinko-machine::before {
+  content: ''; position: absolute; inset: -2px;
+  border-radius: 20px; padding: 2px;
+  background: linear-gradient(135deg, #ffd700, #ff00aa, #00d4ff, #ffd700);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: borderShift 4s linear infinite; pointer-events: none;
+}
+
+.plinko-board-wrap {
+  background: #000;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  padding: 12px;
+  margin-bottom: 14px;
+  position: relative;
+}
+#plinkoCanvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #0a0518 0%, #1a0d2e 100%);
+}
+
+.plinko-slots {
+  display: grid;
+  gap: 3px;
+  margin-top: 6px;
+}
+.plinko-slot {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 12px;
+  text-align: center;
+  padding: 6px 2px;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+}
+.plinko-slot.hit {
+  animation: slotHit 0.6s ease;
+  box-shadow: 0 0 20px currentColor;
+}
+@keyframes slotHit {
+  0% { transform: scale(1);}
+  30% { transform: scale(1.3);}
+  100% { transform: scale(1);}
+}
+
+.plinko-risk-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.plinko-risk {
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  border-radius: 8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.plinko-risk:hover { background: rgba(255, 215, 0, 0.15); }
+.plinko-risk.active {
+  border-color: #ffd700;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 100, 0, 0.15));
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.4);
+}
+
+.btn-plinko-drop {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #ffd700, #ff6b00);
+  border: none; color: #000;
+  border-radius: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px; letter-spacing: 3px; font-weight: 900;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+.btn-plinko-drop:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(255, 215, 0, 0.8); }
+.btn-plinko-drop:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.plinko-drops-count {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  margin-bottom: 10px;
+}
+.drop-count-btn {
+  padding: 8px 4px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.drop-count-btn.active {
+  background: rgba(255, 215, 0, 0.2);
+  border-color: #ffd700;
+}
+
 /* ===== USER BAR ===== */
 .user-tab {
   flex-shrink: 0; display: flex; align-items: center; gap: 10px;
@@ -790,230 +1049,6 @@ body {
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
-
-/* ===== HORSE RACING ===== */
-.horse-section, .plinko-section { display: flex; justify-content: center; }
-.horse-machine, .plinko-machine {
-  width: 100%; max-width: 700px;
-  background: linear-gradient(180deg, #1a0d2e 0%, #0d0820 100%);
-  border: 2px solid rgba(255, 170, 0, 0.35);
-  border-radius: 20px; padding: 22px;
-  box-shadow: 0 0 40px rgba(255, 170, 0, 0.18), inset 0 0 40px rgba(0,0,0,0.5);
-  position: relative;
-}
-.horse-machine::before, .plinko-machine::before {
-  content: ''; position: absolute; inset: -2px; border-radius: 20px; padding: 2px;
-  background: linear-gradient(135deg, #ffaa00, #ff00aa, #00d4ff, #ffaa00);
-  background-size: 300% 300%;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
-  animation: borderShift 4s linear infinite; pointer-events: none;
-}
-.horse-header, .plinko-header {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  margin-bottom: 14px;
-}
-.horse-title, .plinko-title {
-  font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 3px;
-  background: linear-gradient(90deg, #ffd700, #ff00aa);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.horse-subtitle, .plinko-subtitle { font-size: 12px; color: rgba(255,255,255,0.55); }
-.race-badge, .plinko-badge {
-  padding: 8px 14px; border-radius: 999px;
-  background: rgba(255, 215, 0, 0.12);
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; color: #ffd700;
-  white-space: nowrap;
-}
-.race-track {
-  background: linear-gradient(180deg, rgba(20,10,35,0.98), rgba(5,3,10,0.98));
-  border: 2px solid rgba(255, 215, 0, 0.35);
-  border-radius: 14px;
-  padding: 12px;
-  margin-bottom: 14px;
-  overflow: hidden;
-}
-.race-lane {
-  position: relative;
-  height: 48px;
-  background: rgba(255,255,255,0.035);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  margin-bottom: 8px;
-  overflow: hidden;
-}
-.race-lane:last-child { margin-bottom: 0; }
-.race-lane::after {
-  content: '';
-  position: absolute; top: 0; bottom: 0; right: 18px; width: 2px;
-  background: repeating-linear-gradient(0deg, #fff 0 5px, #000 5px 10px);
-  opacity: 0.45;
-}
-.race-fill {
-  position: absolute; inset: 0 auto 0 0;
-  width: 0%;
-  background: linear-gradient(90deg, rgba(255, 215, 0, 0.12), rgba(0, 212, 255, 0.16));
-  transition: width 0.08s linear;
-}
-.race-runner {
-  position: absolute; left: 0%; top: 50%;
-  transform: translate(-2px, -50%);
-  font-size: 28px;
-  filter: drop-shadow(0 0 10px rgba(255,255,255,0.45));
-  transition: left 0.08s linear;
-  z-index: 2;
-}
-.race-name {
-  position: absolute; left: 42px; top: 50%; transform: translateY(-50%);
-  font-size: 12px; font-weight: 800; letter-spacing: 0.5px;
-  color: rgba(255,255,255,0.72); z-index: 1;
-}
-.race-odds {
-  position: absolute; right: 34px; top: 50%; transform: translateY(-50%);
-  font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: #ffd700; z-index: 1;
-}
-.horse-message {
-  min-height: 42px;
-  display: flex; align-items: center; justify-content: center;
-  text-align: center;
-  background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.75);
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-family: 'Bebas Neue', sans-serif;
-  letter-spacing: 1.5px;
-  margin-bottom: 14px;
-}
-.horse-message.win { color: #00ff96; border-color: rgba(0,255,150,0.4); background: rgba(0,200,100,0.12); }
-.horse-message.lose { color: #ff8a8a; border-color: rgba(255,80,80,0.35); background: rgba(120,30,30,0.12); }
-.horse-card-grid {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
-  margin-bottom: 12px;
-}
-.horse-card {
-  padding: 10px 8px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.15s;
-  text-align: center;
-}
-.horse-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.08); }
-.horse-card.active {
-  border-color: #ffd700;
-  background: rgba(255, 215, 0, 0.14);
-  box-shadow: 0 0 16px rgba(255, 215, 0, 0.25);
-}
-.horse-emoji { font-size: 28px; line-height: 1; }
-.horse-card-name { margin-top: 5px; font-size: 11px; font-weight: 800; }
-.horse-card-odds { margin-top: 2px; font-family: 'Bebas Neue', sans-serif; color: #ffd700; letter-spacing: 1px; }
-.horse-action-row {
-  display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 10px; margin-bottom: 12px;
-}
-.btn-horse-add, .btn-race-start, .btn-clear-bets, .btn-plinko-drop {
-  padding: 14px 12px;
-  border: none; border-radius: 12px;
-  font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; font-weight: 900;
-  cursor: pointer; transition: all 0.2s;
-}
-.btn-horse-add { background: linear-gradient(135deg, #00d4ff, #00ff96); color: #000; box-shadow: 0 0 18px rgba(0,212,255,0.4); }
-.btn-race-start { background: linear-gradient(135deg, #ffd700, #ff6b00); color: #000; box-shadow: 0 0 18px rgba(255,215,0,0.4); }
-.btn-clear-bets { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; }
-.btn-horse-add:hover:not(:disabled), .btn-race-start:hover:not(:disabled), .btn-clear-bets:hover:not(:disabled), .btn-plinko-drop:hover:not(:disabled) { transform: translateY(-2px); }
-.btn-horse-add:disabled, .btn-race-start:disabled, .btn-clear-bets:disabled, .btn-plinko-drop:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-.horse-bet-board {
-  display: flex; flex-direction: column; gap: 6px;
-  max-height: 160px; overflow-y: auto;
-}
-.horse-ticket {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.035);
-  border: 1px solid rgba(255,255,255,0.08);
-  font-size: 12px;
-}
-.ticket-player { font-weight: 800; }
-.ticket-horse { color: #ffd700; }
-.ticket-payout { color: rgba(0,255,150,0.8); font-variant-numeric: tabular-nums; }
-
-/* ===== PLINKO ===== */
-.plinko-board {
-  position: relative;
-  height: 360px;
-  background: radial-gradient(circle at 50% 0%, rgba(255,215,0,0.12), rgba(0,0,0,0.6) 45%), #05030a;
-  border: 2px solid rgba(255, 215, 0, 0.35);
-  border-radius: 14px;
-  overflow: hidden;
-  margin-bottom: 14px;
-}
-.plinko-pegs {
-  position: absolute; inset: 18px 18px 58px 18px;
-}
-.peg {
-  position: absolute; width: 8px; height: 8px; border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
-  opacity: 0.9;
-}
-.plinko-ball {
-  position: absolute; top: 12px; left: 50%;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #fff, #ffd700 35%, #ff6b00 100%);
-  box-shadow: 0 0 18px rgba(255, 215, 0, 0.9);
-  transform: translate(-50%, -50%);
-  z-index: 5;
-  transition: left 0.18s ease, top 0.18s ease;
-}
-.plinko-ball.hidden { opacity: 0; }
-.plinko-slots {
-  position: absolute; left: 10px; right: 10px; bottom: 10px;
-  display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px;
-}
-.plinko-slot {
-  min-height: 42px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.12);
-  font-family: 'Bebas Neue', sans-serif; color: #ffd700; letter-spacing: 1px;
-}
-.plinko-slot.hit {
-  background: rgba(0, 255, 150, 0.18);
-  border-color: rgba(0, 255, 150, 0.55);
-  color: #00ff96;
-  animation: slotHit 0.7s ease;
-}
-@keyframes slotHit { 50% { transform: scale(1.08); box-shadow: 0 0 24px rgba(0,255,150,0.45); } }
-.risk-row {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;
-}
-.risk-btn {
-  padding: 10px;
-  background: rgba(255,255,255,0.05);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 8px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 16px;
-  letter-spacing: 2px;
-  cursor: pointer;
-}
-.risk-btn.active {
-  background: rgba(255, 215, 0, 0.18);
-  border-color: rgba(255, 215, 0, 0.55);
-  color: #ffd700;
-}
-.btn-plinko-drop {
-  width: 100%;
-  background: linear-gradient(135deg, #ff00aa, #ff6b00);
-  color: #fff;
-  box-shadow: 0 0 18px rgba(255,0,170,0.4);
-}
-
 /* Responsive */
 @media (max-width: 1100px) {
   .main-content { grid-template-columns: 1fr; }
@@ -1033,15 +1068,6 @@ body {
   .win-title { font-size: 52px; letter-spacing: 3px; }
   .win-amount { font-size: 42px; }
   .quick-bets { grid-template-columns: repeat(3, 1fr); }
-  .game-tabs { overflow-x: auto; padding-left: 12px; padding-right: 12px; }
-  .game-tab { padding: 10px 18px; font-size: 16px; }
-  .horse-machine, .plinko-machine { padding: 14px; }
-  .horse-header, .plinko-header { align-items: flex-start; flex-direction: column; }
-  .horse-card-grid { grid-template-columns: repeat(2, 1fr); }
-  .horse-action-row { grid-template-columns: 1fr; }
-  .race-odds { display: none; }
-  .plinko-board { height: 330px; }
-  .plinko-slot { font-size: 12px; min-height: 36px; }
   .admin-panel { width: 100%; }
 }
 </style>
@@ -1075,7 +1101,7 @@ body {
   <div class="game-tabs">
     <button class="game-tab active" data-game="slots">🎰 SLOTS</button>
     <button class="game-tab" data-game="mines">💣 MINES</button>
-    <button class="game-tab" data-game="horse">🏇 HORSE RACING</button>
+    <button class="game-tab" data-game="horses">🐎 HORSES</button>
     <button class="game-tab" data-game="plinko">🟡 PLINKO</button>
   </div>
 
@@ -1222,74 +1248,65 @@ body {
       </div>
     </section>
 
+    <section class="horses-section" id="horsesView" style="display:none;">
+      <div class="horses-machine">
+        <div class="race-track" id="raceTrack"></div>
 
-    <section class="horse-section" id="horseView" style="display:none;">
-      <div class="horse-machine">
-        <div class="horse-header">
-          <div>
-            <div class="horse-title">🏇 KUMPULA DERBY</div>
-            <div class="horse-subtitle" id="horseSubtitle">Multiple players can bet before each race.</div>
-          </div>
-          <div class="race-badge">RACE <span id="horseRaceNo">1</span></div>
+        <div class="horse-result-display" id="horseResultDisplay">
+          <div class="horse-result-text">PICK YOUR HORSE</div>
         </div>
 
-        <div class="race-track" id="horseTrack"></div>
+        <div class="horse-pick-list" id="horsePickList"></div>
 
-        <div class="horse-message" id="horseMessage">Pick a horse, add bets from each player, then start the race.</div>
-
-        <div class="horse-controls">
+        <div class="bet-controls">
           <div class="bet-amount-display">
-            <span class="bet-label">ACTIVE PLAYER BET</span>
-            <span class="bet-value" id="horseBetDisplay">$0.10</span>
+            <span class="bet-label">BET</span>
+            <span class="bet-value" id="horsesBetDisplay">$0.25</span>
           </div>
-          <input type="range" id="horseBetSlider" min="1" max="100" value="10" step="1" class="bet-slider" />
-
-          <div class="horse-card-grid" id="horseCards"></div>
-
-          <div class="horse-action-row">
-            <button class="btn-horse-add" id="btnAddHorseBet">ADD BET FOR ACTIVE PLAYER</button>
-            <button class="btn-race-start" id="btnStartRace">START RACE</button>
-            <button class="btn-clear-bets" id="btnClearHorseBets">CLEAR / REFUND BETS</button>
+          <input type="range" id="horsesBetSlider" min="1" max="100" value="25" step="1" class="bet-slider" />
+          <div class="quick-bets" style="grid-template-columns: repeat(5, 1fr);">
+            <button class="quick-bet horses-qb" data-bet="0.05">5¢</button>
+            <button class="quick-bet horses-qb" data-bet="0.10">10¢</button>
+            <button class="quick-bet horses-qb" data-bet="0.25">25¢</button>
+            <button class="quick-bet horses-qb" data-bet="0.50">50¢</button>
+            <button class="quick-bet horses-qb" data-bet="1.00">$1</button>
           </div>
-
-          <div class="horse-bet-board" id="horseBetBoard"></div>
         </div>
+
+        <button class="btn-race-start" id="btnRaceStart" disabled>🏁 START THE RACE</button>
       </div>
     </section>
 
     <section class="plinko-section" id="plinkoView" style="display:none;">
       <div class="plinko-machine">
-        <div class="plinko-header">
-          <div>
-            <div class="plinko-title">🟡 PLINKO DROP</div>
-            <div class="plinko-subtitle">Choose a risk level, drop the ball, and hope it lands big.</div>
-          </div>
-          <div class="plinko-badge" id="plinkoRiskBadge">MEDIUM RISK</div>
-        </div>
-
-        <div class="plinko-board" id="plinkoBoard">
-          <div class="plinko-ball" id="plinkoBall"></div>
-          <div class="plinko-pegs" id="plinkoPegs"></div>
+        <div class="plinko-board-wrap">
+          <canvas id="plinkoCanvas" width="500" height="480"></canvas>
           <div class="plinko-slots" id="plinkoSlots"></div>
         </div>
 
-        <div class="horse-message" id="plinkoMessage">Set your bet and drop the ball.</div>
+        <div class="plinko-risk-selector">
+          <button class="plinko-risk active" data-risk="low">LOW RISK</button>
+          <button class="plinko-risk" data-risk="medium">MEDIUM</button>
+          <button class="plinko-risk" data-risk="high">HIGH RISK</button>
+        </div>
 
-        <div class="plinko-controls">
+        <div class="bet-controls">
           <div class="bet-amount-display">
             <span class="bet-label">BET</span>
             <span class="bet-value" id="plinkoBetDisplay">$0.10</span>
           </div>
           <input type="range" id="plinkoBetSlider" min="1" max="100" value="10" step="1" class="bet-slider" />
-
-          <div class="risk-row">
-            <button class="risk-btn" data-risk="low">LOW</button>
-            <button class="risk-btn active" data-risk="medium">MEDIUM</button>
-            <button class="risk-btn" data-risk="high">HIGH</button>
+          <div class="quick-bets">
+            <button class="quick-bet plinko-qb" data-bet="0.01">1¢</button>
+            <button class="quick-bet plinko-qb" data-bet="0.05">5¢</button>
+            <button class="quick-bet plinko-qb" data-bet="0.10">10¢</button>
+            <button class="quick-bet plinko-qb" data-bet="0.25">25¢</button>
+            <button class="quick-bet plinko-qb" data-bet="0.50">50¢</button>
+            <button class="quick-bet plinko-qb" data-bet="1.00">$1</button>
           </div>
-
-          <button class="btn-plinko-drop" id="btnDropPlinko">DROP BALL</button>
         </div>
+
+        <button class="btn-plinko-drop" id="btnPlinkoDrop">🟡 DROP BALL</button>
       </div>
     </section>
 
@@ -1297,7 +1314,7 @@ body {
       <h3 class="panel-title" id="rightPanelTitle">PAYOUTS</h3>
       <div class="paytable" id="paytable"></div>
       <div class="paytable" id="minesPaytable" style="display:none;"></div>
-      <div class="paytable" id="horsePaytable" style="display:none;"></div>
+      <div class="paytable" id="horsesPaytable" style="display:none;"></div>
       <div class="paytable" id="plinkoPaytable" style="display:none;"></div>
       <h3 class="panel-title mt-large" id="recentTitle">RECENT SPINS</h3>
       <div class="recent-spins" id="recentSpins"></div>
@@ -1382,7 +1399,7 @@ body {
 
 <script>
 // ============ STATE ============
-const STORAGE_KEY = 'kumpulaCasino_v6';
+const STORAGE_KEY = 'kumpulaCasino_v5';
 
 const DEFAULT_SYMBOLS = [
   { id: 'cherry',  emoji: '🍒',  weight: 14, mult: 3 },
@@ -1628,14 +1645,9 @@ function renderAll() {
   renderBalance();
   renderStats();
   renderPaytable();
-  renderHorsePaytable();
-  renderPlinkoPaytable();
   renderRecentSpins();
   renderBet();
   buildInitialReels();
-  buildHorseTrack();
-  buildHorseCards();
-  buildPlinkoBoard();
 }
 
 // ============ REELS ============
@@ -2221,9 +2233,6 @@ function updateEdgeDisplay(val) {
 document.getElementById('adminEdge').oninput = (e) => {
   state.houseEdge = parseInt(e.target.value) || 0;
   updateEdgeDisplay(state.houseEdge);
-  renderPaytable();
-  renderMinesPaytable();
-  renderPlinkoPaytable();
 };
 document.getElementById('adminEdge').onchange = () => {
   saveState();
@@ -2259,7 +2268,7 @@ document.getElementById('resetAllBtn').onclick = () => {
   saveState();
   renderAdmin();
   renderAll();
-  toast('Everyone reset to $0');
+  toast('Everyone reset to $100');
 };
 
 document.getElementById('exportBtn').onclick = () => {
@@ -2721,577 +2730,9 @@ document.querySelectorAll('.mines-qb').forEach(b => {
 
 document.getElementById('btnMinesStart').onclick = startMinesGame;
 
-
-// ============ HORSE RACING ============
-const HORSES = [
-  { id: 'blaze',   name: 'Blaze',        emoji: '🏇', odds: 1.60, weight: 44 },
-  { id: 'storm',   name: 'Storm',        emoji: '🏇', odds: 2.10, weight: 26 },
-  { id: 'midnight',name: 'Midnight',     emoji: '🏇', odds: 3.00, weight: 16 },
-  { id: 'rocket',  name: 'Rocket',       emoji: '🏇', odds: 5.00, weight: 9 },
-  { id: 'phantom', name: 'Phantom',      emoji: '🏇', odds: 8.00, weight: 5 }
-];
-
-const horseState = {
-  bet: 0.10,
-  selectedHorseId: 'blaze',
-  bets: [],
-  inRace: false,
-  raceNo: 1,
-  progress: {}
-};
-
-function weightedHorseWinner() {
-  const total = HORSES.reduce((a, h) => a + h.weight, 0);
-  let r = Math.random() * total;
-  for (const h of HORSES) {
-    if (r < h.weight) return h;
-    r -= h.weight;
-  }
-  return HORSES[0];
-}
-
-function buildHorseTrack() {
-  const track = document.getElementById('horseTrack');
-  if (!track || track.children.length > 0) return;
-  track.innerHTML = HORSES.map(h => `
-    <div class="race-lane" data-horse="${h.id}">
-      <div class="race-fill" id="raceFill-${h.id}"></div>
-      <div class="race-runner" id="raceRunner-${h.id}">${h.emoji}</div>
-      <div class="race-name">${escapeHtml(h.name)}</div>
-      <div class="race-odds">${h.odds.toFixed(2)}×</div>
-    </div>
-  `).join('');
-}
-
-function buildHorseCards() {
-  const cards = document.getElementById('horseCards');
-  if (!cards) return;
-  cards.innerHTML = HORSES.map(h => `
-    <div class="horse-card ${h.id === horseState.selectedHorseId ? 'active' : ''}" data-horse-id="${h.id}">
-      <div class="horse-emoji">${h.emoji}</div>
-      <div class="horse-card-name">${escapeHtml(h.name)}</div>
-      <div class="horse-card-odds">${h.odds.toFixed(2)}×</div>
-    </div>
-  `).join('');
-  cards.querySelectorAll('.horse-card').forEach(card => {
-    card.onclick = () => {
-      if (horseState.inRace) return;
-      sfxClick();
-      horseState.selectedHorseId = card.dataset.horseId;
-      buildHorseCards();
-    };
-  });
-}
-
-function setHorseMessage(text, cls) {
-  const msg = document.getElementById('horseMessage');
-  if (!msg) return;
-  msg.className = 'horse-message' + (cls ? ' ' + cls : '');
-  msg.textContent = text;
-}
-
-function renderHorseBetControls() {
-  const betDisplay = document.getElementById('horseBetDisplay');
-  const slider = document.getElementById('horseBetSlider');
-  const raceNo = document.getElementById('horseRaceNo');
-  if (betDisplay) betDisplay.textContent = fmt(horseState.bet);
-  if (slider) slider.value = sliderFromBet(horseState.bet);
-  if (raceNo) raceNo.textContent = horseState.raceNo;
-
-  const board = document.getElementById('horseBetBoard');
-  if (board) {
-    if (horseState.bets.length === 0) {
-      board.innerHTML = '<div style="text-align:center; padding:12px; color:rgba(255,255,255,0.45); font-size:12px;">No bets placed yet. Switch players at the top, then add each bet.</div>';
-    } else {
-      board.innerHTML = horseState.bets.map(ticket => {
-        const user = state.users.find(u => u.id === ticket.userId);
-        const horse = HORSES.find(h => h.id === ticket.horseId);
-        const potential = ticket.amount * horse.odds;
-        return `
-          <div class="horse-ticket">
-            <span class="ticket-player">${escapeHtml(user ? user.name : 'Player')}</span>
-            <span class="ticket-horse">${escapeHtml(horse.name)} ${horse.odds.toFixed(2)}×</span>
-            <span>${fmt(ticket.amount)}</span>
-            <span class="ticket-payout">Pays ${fmt(potential)}</span>
-          </div>`;
-      }).join('');
-    }
-  }
-
-  const addBtn = document.getElementById('btnAddHorseBet');
-  const startBtn = document.getElementById('btnStartRace');
-  const clearBtn = document.getElementById('btnClearHorseBets');
-  if (addBtn) addBtn.disabled = horseState.inRace;
-  if (startBtn) startBtn.disabled = horseState.inRace || horseState.bets.length === 0;
-  if (clearBtn) clearBtn.disabled = horseState.inRace || horseState.bets.length === 0;
-}
-
-function addHorseBet() {
-  if (horseState.inRace) return;
-  const user = getActiveUser();
-  const horse = HORSES.find(h => h.id === horseState.selectedHorseId) || HORSES[0];
-  const amount = horseState.bet;
-
-  if (user.balance < amount) {
-    toast('Insufficient funds', true);
-    sfxLose();
-    return;
-  }
-
-  user.balance = Math.round((user.balance - amount) * 100) / 100;
-  const stats = getActiveStats();
-  stats.spins++;
-  stats.totalWagered = Math.round((stats.totalWagered + amount) * 100) / 100;
-
-  horseState.bets.push({
-    ticketId: 'ticket_' + Date.now() + '_' + Math.random().toString(16).slice(2),
-    userId: user.id,
-    horseId: horse.id,
-    amount
-  });
-
-  saveState();
-  renderBalance();
-  renderUsers();
-  renderStats();
-  renderHorseBetControls();
-  setHorseMessage(`${user.name} bet ${fmt(amount)} on ${horse.name}. Add more players or start the race.`, 'win');
-  const balDisplay = document.getElementById('balanceDisplay');
-  balDisplay.classList.remove('flash-down'); void balDisplay.offsetWidth;
-  balDisplay.classList.add('flash-down');
-  sfxClick();
-}
-
-function clearHorseBets() {
-  if (horseState.inRace || horseState.bets.length === 0) return;
-  horseState.bets.forEach(ticket => {
-    const user = state.users.find(u => u.id === ticket.userId);
-    if (user) user.balance = Math.round((user.balance + ticket.amount) * 100) / 100;
-    const stats = state.stats[ticket.userId];
-    if (stats) {
-      stats.spins = Math.max(0, stats.spins - 1);
-      stats.totalWagered = Math.max(0, Math.round((stats.totalWagered - ticket.amount) * 100) / 100);
-    }
-  });
-  horseState.bets = [];
-  saveState();
-  renderBalance();
-  renderUsers();
-  renderStats();
-  renderHorseBetControls();
-  setHorseMessage('All race bets refunded.', '');
-}
-
-function setHorseProgress(horseId, progress) {
-  const p = Math.max(0, Math.min(100, progress));
-  const fill = document.getElementById('raceFill-' + horseId);
-  const runner = document.getElementById('raceRunner-' + horseId);
-  if (fill) fill.style.width = p + '%';
-  if (runner) runner.style.left = `calc(${p}% - ${p > 96 ? 24 : 2}px)`;
-}
-
-function resetHorseTrack() {
-  HORSES.forEach(h => setHorseProgress(h.id, 0));
-}
-
-function startHorseRace() {
-  if (horseState.inRace || horseState.bets.length === 0) return;
-  horseState.inRace = true;
-  renderHorseBetControls();
-  resetHorseTrack();
-  ensureAudio();
-  setHorseMessage('THE RACE IS OFF!', '');
-  sfxSpin();
-
-  const winner = weightedHorseWinner();
-  const loserTargets = {};
-  HORSES.forEach(h => {
-    loserTargets[h.id] = h.id === winner.id ? 100 : 58 + Math.random() * 35;
-  });
-
-  const start = performance.now();
-  const duration = 3600 + Math.random() * 700;
-
-  function frame(now) {
-    const t = Math.min(1, (now - start) / duration);
-    const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-    HORSES.forEach((h, idx) => {
-      const jitter = Math.sin((now / 120) + idx * 1.7) * (t < 0.95 ? 2.2 : 0);
-      let progress = loserTargets[h.id] * eased + jitter;
-      if (h.id === winner.id && t > 0.9) progress = 88 + (t - 0.9) * 120;
-      setHorseProgress(h.id, progress);
-    });
-
-    if (t < 1) {
-      requestAnimationFrame(frame);
-    } else {
-      finishHorseRace(winner);
-    }
-  }
-
-  requestAnimationFrame(frame);
-}
-
-function finishHorseRace(winner) {
-  HORSES.forEach(h => setHorseProgress(h.id, h.id === winner.id ? 100 : Math.min(94, 58 + Math.random() * 35)));
-  horseState.inRace = false;
-
-  let totalPaid = 0;
-  let winningTickets = 0;
-
-  horseState.bets.forEach(ticket => {
-    const user = state.users.find(u => u.id === ticket.userId);
-    const stats = state.stats[ticket.userId];
-    const won = ticket.horseId === winner.id;
-    const payout = won ? Math.round(ticket.amount * winner.odds * 100) / 100 : 0;
-    const net = Math.round((payout - ticket.amount) * 100) / 100;
-
-    if (user && payout > 0) {
-      user.balance = Math.round((user.balance + payout) * 100) / 100;
-      totalPaid += payout;
-      winningTickets++;
-    }
-
-    if (stats) {
-      if (payout > 0) stats.totalWon = Math.round((stats.totalWon + payout) * 100) / 100;
-      if (net > 0) {
-        stats.wins++;
-        if (net > stats.biggest) stats.biggest = net;
-      }
-      stats.recentSpins.unshift({
-        symbols: ['🏇', winner.name, won ? '✅' : '❌'],
-        bet: ticket.amount,
-        payout,
-        net,
-        win: net > 0,
-        game: 'horse'
-      });
-      if (stats.recentSpins.length > 20) stats.recentSpins.pop();
-    }
-  });
-
-  if (winningTickets > 0) {
-    setHorseMessage(`${winner.name.toUpperCase()} WINS! ${winningTickets} ticket${winningTickets === 1 ? '' : 's'} paid ${fmt(totalPaid)}.`, 'win');
-    showWinOverlay('RACE WIN', totalPaid, winner.odds.toFixed(2) + '×', winner.name.toUpperCase());
-    burstParticles(28, 'gold');
-    spawnCoinsFromMachine();
-    sfxBigWin();
-    shake('md');
-  } else {
-    setHorseMessage(`${winner.name.toUpperCase()} WINS — HOUSE SWEEPS THE RACE.`, 'lose');
-    sfxLose();
-    shake('sm');
-  }
-
-  horseState.bets = [];
-  horseState.raceNo++;
-  saveState();
-  renderBalance();
-  renderUsers();
-  renderStats();
-  renderRecentSpins();
-  renderHorseBetControls();
-}
-
-function renderHorsePaytable() {
-  const pt = document.getElementById('horsePaytable');
-  if (!pt) return;
-  pt.innerHTML = HORSES.map(h => `
-    <div class="paytable-row">
-      <div class="paytable-symbols" style="font-size:13px;">${h.emoji} ${escapeHtml(h.name)}</div>
-      <div class="paytable-mult">${h.odds.toFixed(2)}×</div>
-    </div>
-  `).join('') + `
-    <div class="paytable-row jackpot">
-      <div class="paytable-symbols" style="font-size:11px; letter-spacing:0;">House favorite</div>
-      <div class="paytable-mult">${HORSES[0].name}</div>
-    </div>`;
-}
-
-// ============ PLINKO ============
-const PLINKO_ROWS = 8;
-const PLINKO_MULTS = {
-  low:    [0.45, 0.65, 0.85, 1.00, 1.20, 1.00, 0.85, 0.65, 0.45],
-  medium: [0.00, 0.35, 0.70, 1.10, 2.00, 1.10, 0.70, 0.35, 0.00],
-  high:   [12.0, 3.00, 1.00, 0.40, 0.00, 0.40, 1.00, 3.00, 12.0]
-};
-
-const plinkoState = {
-  bet: 0.10,
-  risk: 'medium',
-  dropping: false
-};
-
-function binomialProb(slot, rows) {
-  let c = 1;
-  for (let i = 1; i <= slot; i++) c = c * (rows - i + 1) / i;
-  return c / Math.pow(2, rows);
-}
-
-function plinkoBaseEV(risk) {
-  return PLINKO_MULTS[risk].reduce((sum, m, i) => sum + m * binomialProb(i, PLINKO_ROWS), 0);
-}
-
-function getPlinkoScale() {
-  const targetRtp = Math.max(0, (100 - (state.houseEdge || 0)) / 100);
-  const ev = plinkoBaseEV(plinkoState.risk);
-  return ev > 0 ? targetRtp / ev : 1;
-}
-
-function getPlinkoDisplayedMultipliers() {
-  const scale = getPlinkoScale();
-  return PLINKO_MULTS[plinkoState.risk].map(m => Math.max(0, m * scale));
-}
-
-function buildPlinkoBoard() {
-  const pegs = document.getElementById('plinkoPegs');
-  const slots = document.getElementById('plinkoSlots');
-  const ball = document.getElementById('plinkoBall');
-  if (!pegs || !slots) return;
-
-  pegs.innerHTML = '';
-  for (let row = 0; row < PLINKO_ROWS; row++) {
-    const count = row + 2;
-    for (let col = 0; col < count; col++) {
-      const peg = document.createElement('div');
-      peg.className = 'peg';
-      const x = 50 + (col - (count - 1) / 2) * 10.5;
-      const y = 8 + row * 10.5;
-      peg.style.left = x + '%';
-      peg.style.top = y + '%';
-      pegs.appendChild(peg);
-    }
-  }
-
-  const mults = getPlinkoDisplayedMultipliers();
-  slots.innerHTML = mults.map((m, i) => `<div class="plinko-slot" id="plinkoSlot-${i}">${m.toFixed(m >= 10 ? 0 : 2)}×</div>`).join('');
-  if (ball) {
-    ball.classList.add('hidden');
-    ball.style.left = '50%';
-    ball.style.top = '18px';
-  }
-  renderPlinkoControls();
-}
-
-function setPlinkoMessage(text, cls) {
-  const msg = document.getElementById('plinkoMessage');
-  if (!msg) return;
-  msg.className = 'horse-message' + (cls ? ' ' + cls : '');
-  msg.textContent = text;
-}
-
-function renderPlinkoControls() {
-  const bet = document.getElementById('plinkoBetDisplay');
-  const slider = document.getElementById('plinkoBetSlider');
-  const badge = document.getElementById('plinkoRiskBadge');
-  if (bet) bet.textContent = fmt(plinkoState.bet);
-  if (slider) slider.value = sliderFromBet(plinkoState.bet);
-  if (badge) badge.textContent = plinkoState.risk.toUpperCase() + ' RISK';
-  document.querySelectorAll('.risk-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.risk === plinkoState.risk));
-}
-
-function dropPlinko() {
-  if (plinkoState.dropping) return;
-  const user = getActiveUser();
-  const bet = plinkoState.bet;
-  if (user.balance < bet) {
-    toast('Insufficient funds', true);
-    sfxLose();
-    return;
-  }
-
-  ensureAudio();
-  plinkoState.dropping = true;
-  document.getElementById('btnDropPlinko').disabled = true;
-  document.querySelectorAll('.plinko-slot').forEach(s => s.classList.remove('hit'));
-
-  user.balance = Math.round((user.balance - bet) * 100) / 100;
-  const stats = getActiveStats();
-  stats.spins++;
-  stats.totalWagered = Math.round((stats.totalWagered + bet) * 100) / 100;
-
-  saveState();
-  renderBalance();
-  renderUsers();
-  renderStats();
-  setPlinkoMessage('BALL DROPPING...', '');
-  const balDisplay = document.getElementById('balanceDisplay');
-  balDisplay.classList.remove('flash-down'); void balDisplay.offsetWidth;
-  balDisplay.classList.add('flash-down');
-
-  let slot = 0;
-  const path = [];
-  for (let row = 0; row < PLINKO_ROWS; row++) {
-    const right = Math.random() < 0.5 ? 1 : 0;
-    slot += right;
-    path.push(slot);
-  }
-
-  const ball = document.getElementById('plinkoBall');
-  ball.classList.remove('hidden');
-  ball.style.left = '50%';
-  ball.style.top = '18px';
-  sfxSpin();
-
-  let step = 0;
-  const interval = setInterval(() => {
-    const rowSlot = path[Math.min(step, path.length - 1)];
-    const x = 50 + (rowSlot - (step + 1) / 2) * 10.5;
-    const y = 32 + step * 9.8;
-    ball.style.left = Math.max(8, Math.min(92, x)) + '%';
-    ball.style.top = Math.min(88, y) + '%';
-    sfxClick();
-    step++;
-    if (step > PLINKO_ROWS) {
-      clearInterval(interval);
-      settlePlinko(slot);
-    }
-  }, 190);
-}
-
-function settlePlinko(slot) {
-  const mults = getPlinkoDisplayedMultipliers();
-  const mult = mults[slot] || 0;
-  const payout = Math.round(plinkoState.bet * mult * 100) / 100;
-  const net = Math.round((payout - plinkoState.bet) * 100) / 100;
-  const user = getActiveUser();
-  const stats = getActiveStats();
-
-  if (payout > 0) {
-    user.balance = Math.round((user.balance + payout) * 100) / 100;
-    stats.totalWon = Math.round((stats.totalWon + payout) * 100) / 100;
-  }
-  if (net > 0) {
-    stats.wins++;
-    comboStreak++;
-    if (net > stats.biggest) {
-      stats.biggest = net;
-      flashCard('cardBiggest');
-    }
-    flashCard('cardWins');
-  } else {
-    comboStreak = 0;
-  }
-
-  stats.recentSpins.unshift({
-    symbols: ['🟡', mult.toFixed(2) + '×', slot.toString()],
-    bet: plinkoState.bet,
-    payout,
-    net,
-    win: net > 0,
-    game: 'plinko'
-  });
-  if (stats.recentSpins.length > 20) stats.recentSpins.pop();
-
-  const hit = document.getElementById('plinkoSlot-' + slot);
-  if (hit) hit.classList.add('hit');
-
-  if (net > 0) {
-    setPlinkoMessage(`PLINKO HIT ${mult.toFixed(2)}× — WON ${fmt(payout)}`, 'win');
-    burstParticles(net >= plinkoState.bet * 4 ? 35 : 14, net >= plinkoState.bet * 4 ? 'rainbow' : 'gold');
-    spawnCoinsFromMachine();
-    if (net >= plinkoState.bet * 4) showWinOverlay('PLINKO HIT', payout, mult.toFixed(2) + '×', plinkoState.risk.toUpperCase());
-    sfxWin();
-  } else {
-    setPlinkoMessage(`LANDED ${mult.toFixed(2)}× — LOST ${fmt(Math.abs(net))}`, 'lose');
-    sfxLose();
-  }
-
-  saveState();
-  renderBalance();
-  renderUsers();
-  renderStats();
-  renderRecentSpins();
-
-  plinkoState.dropping = false;
-  document.getElementById('btnDropPlinko').disabled = false;
-}
-
-function renderPlinkoPaytable() {
-  const pt = document.getElementById('plinkoPaytable');
-  if (!pt) return;
-  const mults = getPlinkoDisplayedMultipliers();
-  pt.innerHTML = mults.map((m, i) => `
-    <div class="paytable-row ${i === 0 || i === mults.length - 1 ? 'jackpot' : ''}">
-      <div class="paytable-symbols" style="font-size:12px;">Slot ${i + 1}</div>
-      <div class="paytable-mult">${m.toFixed(m >= 10 ? 0 : 2)}×</div>
-    </div>
-  `).join('');
-}
-
-document.getElementById('horseBetSlider').oninput = (e) => {
-  if (horseState.inRace) return;
-  horseState.bet = betFromSlider(e.target.value);
-  renderHorseBetControls();
-};
-document.getElementById('btnAddHorseBet').onclick = addHorseBet;
-document.getElementById('btnStartRace').onclick = startHorseRace;
-document.getElementById('btnClearHorseBets').onclick = clearHorseBets;
-
-document.getElementById('plinkoBetSlider').oninput = (e) => {
-  if (plinkoState.dropping) return;
-  plinkoState.bet = betFromSlider(e.target.value);
-  renderPlinkoControls();
-};
-document.querySelectorAll('.risk-btn').forEach(btn => {
-  btn.onclick = () => {
-    if (plinkoState.dropping) return;
-    sfxClick();
-    plinkoState.risk = btn.dataset.risk;
-    buildPlinkoBoard();
-    renderPlinkoPaytable();
-  };
-});
-document.getElementById('btnDropPlinko').onclick = dropPlinko;
-
-
 // ============ GAME TAB SWITCHING ============
 function switchGame(game) {
   document.querySelectorAll('.game-tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.game === game);
-  });
-
-  const views = ['slotsView', 'minesView', 'horseView', 'plinkoView'];
-  views.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-
-  const tables = ['paytable', 'minesPaytable', 'horsePaytable', 'plinkoPaytable'];
-  tables.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-
-  if (game === 'slots') {
-    document.getElementById('slotsView').style.display = '';
-    document.getElementById('paytable').style.display = '';
-    document.getElementById('rightPanelTitle').textContent = 'PAYOUTS';
-  } else if (game === 'mines') {
-    document.getElementById('minesView').style.display = '';
-    document.getElementById('minesPaytable').style.display = '';
-    document.getElementById('rightPanelTitle').textContent = 'MINES PAYOUTS';
-    if (minesState.tiles.length === 0) buildMinesGrid();
-    updateMinesControls();
-    updateMinesDisplay();
-  } else if (game === 'horse') {
-    document.getElementById('horseView').style.display = '';
-    document.getElementById('horsePaytable').style.display = '';
-    document.getElementById('rightPanelTitle').textContent = 'HORSE ODDS';
-    buildHorseTrack();
-    buildHorseCards();
-    renderHorsePaytable();
-    renderHorseBetControls();
-  } else if (game === 'plinko') {
-    document.getElementById('plinkoView').style.display = '';
-    document.getElementById('plinkoPaytable').style.display = '';
-    document.getElementById('rightPanelTitle').textContent = 'PLINKO MULTS';
-    buildPlinkoBoard();
-    renderPlinkoPaytable();
-    renderPlinkoControls();
-  }
-}
-document.querySelectorAll('.game-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.game === game);
   });
   if (game === 'slots') {
@@ -3319,6 +2760,666 @@ document.querySelectorAll('.game-tab').forEach(t => {
     switchGame(t.dataset.game);
   };
 });
+
+// ============ HORSE RACING ============
+const HORSES_DATA = [
+  { id: 'thunder', name: 'Thunderbolt', emoji: '🐎', prob: 0.40, color: '#ff6b00' },
+  { id: 'stardust', name: 'Stardust',    emoji: '🦄', prob: 0.25, color: '#ff00aa' },
+  { id: 'lucky',    name: 'Lucky Eight', emoji: '🐴', prob: 0.18, color: '#00d4ff' },
+  { id: 'wild',     name: 'Wild Card',   emoji: '🦓', prob: 0.10, color: '#9d4edd' },
+  { id: 'longshot', name: 'Long Shot',   emoji: '🫏', prob: 0.07, color: '#00ff96' }
+];
+
+const horsesState = { bet: 0.25, selectedHorse: null, racing: false };
+
+function horseOdds(prob) {
+  const edge = (state.houseEdge || 0) / 100;
+  return Math.max(1.01, (1 - edge) / prob);
+}
+
+function renderHorses() {
+  const list = document.getElementById('horsePickList');
+  if (!list) return;
+  list.innerHTML = HORSES_DATA.map(h => {
+    const odds = horseOdds(h.prob);
+    const isSelected = horsesState.selectedHorse === h.id;
+    const disabled = horsesState.racing ? 'disabled' : '';
+    return `
+      <div class="horse-pick ${isSelected ? 'selected' : ''} ${disabled}" data-horse="${h.id}">
+        <div class="horse-pick-emoji">${h.emoji}</div>
+        <div class="horse-pick-info">
+          <div class="horse-pick-name" style="color: ${h.color}">${h.name}</div>
+          <div class="horse-pick-stats">${Math.round(h.prob * 100)}% win chance · payout ${fmt(horsesState.bet * odds)}</div>
+        </div>
+        <div class="horse-pick-odds">${odds.toFixed(2)}×</div>
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('.horse-pick').forEach(el => {
+    el.onclick = () => {
+      if (horsesState.racing) return;
+      sfxClick();
+      horsesState.selectedHorse = el.dataset.horse;
+      renderHorses();
+      document.getElementById('btnRaceStart').disabled = false;
+    };
+  });
+
+  const track = document.getElementById('raceTrack');
+  if (track && track.children.length !== HORSES_DATA.length) {
+    track.innerHTML = HORSES_DATA.map(h => `
+      <div class="horse-lane" data-horse="${h.id}">
+        <div class="horse-name" style="color: ${h.color}">${h.name}</div>
+        <div class="horse-track-area">
+          <div class="horse-emoji" data-horse-emoji="${h.id}">${h.emoji}</div>
+          <div class="finish-line"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  document.getElementById('horsesBetDisplay').textContent = fmt(horsesState.bet);
+  document.getElementById('horsesBetSlider').value = sliderFromBet(horsesState.bet);
+  document.querySelectorAll('.horses-qb').forEach(b => {
+    b.classList.toggle('active', Math.abs(parseFloat(b.dataset.bet) - horsesState.bet) < 0.001);
+  });
+}
+
+function renderHorsesPaytable() {
+  const pt = document.getElementById('horsesPaytable');
+  if (!pt) return;
+  pt.innerHTML = HORSES_DATA.map(h => {
+    const odds = horseOdds(h.prob);
+    return `<div class="paytable-row">
+      <div class="paytable-symbols" style="font-size: 13px;">${h.emoji} <span style="color:${h.color}">${h.name}</span></div>
+      <div class="paytable-mult">${odds.toFixed(2)}×</div>
+    </div>`;
+  }).join('');
+}
+
+async function startRace() {
+  if (horsesState.racing) return;
+  if (!horsesState.selectedHorse) { toast('Pick a horse first!', true); return; }
+  const user = getActiveUser();
+  if (user.balance < horsesState.bet) { toast('Insufficient funds', true); sfxLose(); return; }
+  ensureAudio();
+
+  horsesState.racing = true;
+  document.getElementById('btnRaceStart').disabled = true;
+  user.balance = Math.round((user.balance - horsesState.bet) * 100) / 100;
+  const stats = getActiveStats();
+  stats.totalWagered = Math.round((stats.totalWagered + horsesState.bet) * 100) / 100;
+
+  const balDisplay = document.getElementById('balanceDisplay');
+  balDisplay.classList.remove('flash-down'); void balDisplay.offsetWidth;
+  balDisplay.classList.add('flash-down');
+
+  saveState();
+  renderBalance();
+  renderUsers();
+  renderHorses();
+  setHorseResult('AND THEY\'RE OFF! 🏁', '');
+  sfxSpin();
+
+  // Pick winner based on weighted probability
+  const r = Math.random();
+  let cumulative = 0;
+  let winner = HORSES_DATA[HORSES_DATA.length - 1].id;
+  for (const h of HORSES_DATA) {
+    cumulative += h.prob;
+    if (r < cumulative) { winner = h.id; break; }
+  }
+
+  const trackArea = document.querySelector('.horse-track-area');
+  const trackWidth = trackArea ? trackArea.offsetWidth : 300;
+  const finishX = trackWidth - 40;
+
+  const positions = {};
+  const speeds = {};
+  HORSES_DATA.forEach(h => {
+    positions[h.id] = 0;
+    speeds[h.id] = 1.5 + h.prob * 1.5;
+  });
+
+  HORSES_DATA.forEach(h => {
+    const el = document.querySelector(`[data-horse-emoji="${h.id}"]`);
+    if (el) { el.classList.add('running'); el.style.left = '0px'; }
+  });
+
+  let tick = 0;
+  const raceInterval = setInterval(() => {
+    HORSES_DATA.forEach(h => {
+      if (positions[h.id] >= finishX) return;
+      const burst = 0.4 + Math.random() * 1.6;
+      const speedBoost = h.id === winner ? 1.18 : 1.0;
+      positions[h.id] += speeds[h.id] * burst * speedBoost;
+      if (positions[h.id] > finishX) positions[h.id] = finishX;
+      const el = document.querySelector(`[data-horse-emoji="${h.id}"]`);
+      if (el) el.style.left = positions[h.id] + 'px';
+    });
+    if (positions[winner] >= finishX) {
+      clearInterval(raceInterval);
+      setTimeout(() => endRace(winner), 700);
+    }
+    tick++;
+    if (tick > 250) { clearInterval(raceInterval); endRace(winner); }
+  }, 50);
+}
+
+function endRace(winnerId) {
+  const winnerData = HORSES_DATA.find(h => h.id === winnerId);
+  const playerWon = horsesState.selectedHorse === winnerId;
+  const user = getActiveUser();
+  const stats = getActiveStats();
+
+  HORSES_DATA.forEach(h => {
+    const el = document.querySelector(`[data-horse-emoji="${h.id}"]`);
+    if (el) {
+      el.classList.remove('running');
+      if (h.id === winnerId) el.classList.add('winner');
+    }
+  });
+
+  let payout = 0;
+  let net = -horsesState.bet;
+  if (playerWon) {
+    const odds = horseOdds(winnerData.prob);
+    payout = Math.round(horsesState.bet * odds * 100) / 100;
+    net = Math.round((payout - horsesState.bet) * 100) / 100;
+    user.balance = Math.round((user.balance + payout) * 100) / 100;
+    stats.totalWon = Math.round((stats.totalWon + payout) * 100) / 100;
+    if (net > 0) {
+      stats.wins++;
+      comboStreak++;
+      if (net > stats.biggest) { stats.biggest = net; flashCard('cardBiggest'); }
+      flashCard('cardWins');
+    }
+    const balDisplay = document.getElementById('balanceDisplay');
+    balDisplay.classList.remove('flash-up','flash-down'); void balDisplay.offsetWidth;
+    balDisplay.classList.add('flash-up');
+
+    setHorseResult(`🏆 ${winnerData.name} WINS! YOU WIN ${fmt(payout)}`, 'win');
+    if (net >= horsesState.bet * 5) {
+      showWinOverlay('BIG WIN', payout, horseOdds(winnerData.prob).toFixed(2) + '×', winnerData.name.toUpperCase());
+      burstParticles(40, 'rainbow');
+      shake('lg');
+      sfxBigWin();
+    } else {
+      burstParticles(20, 'gold');
+      shake('sm');
+      sfxWin();
+    }
+    spawnCoinsFromElement('.horses-machine');
+  } else {
+    comboStreak = 0;
+    const yourHorse = HORSES_DATA.find(h => h.id === horsesState.selectedHorse);
+    setHorseResult(`${winnerData.name} wins. Your ${yourHorse.name} lost.`, 'lose');
+    sfxLose();
+  }
+
+  stats.recentSpins.unshift({
+    symbols: [winnerData.emoji, '→', winnerData.name],
+    bet: horsesState.bet,
+    payout, net,
+    win: net > 0,
+    game: 'horses'
+  });
+  if (stats.recentSpins.length > 20) stats.recentSpins.pop();
+
+  horsesState.racing = false;
+  setTimeout(() => {
+    HORSES_DATA.forEach(h => {
+      const el = document.querySelector(`[data-horse-emoji="${h.id}"]`);
+      if (el) { el.classList.remove('winner'); el.style.left = '0px'; }
+    });
+  }, 2800);
+
+  saveState();
+  renderBalance();
+  renderUsers();
+  renderStats();
+  renderRecentSpins();
+  renderHorses();
+  document.getElementById('btnRaceStart').disabled = !horsesState.selectedHorse;
+}
+
+function setHorseResult(text, cls) {
+  const el = document.getElementById('horseResultDisplay');
+  if (!el) return;
+  el.className = 'horse-result-display' + (cls ? ' ' + cls : '');
+  el.querySelector('.horse-result-text').textContent = text;
+}
+
+function spawnCoinsFromElement(selector) {
+  const el = document.querySelector(selector);
+  if (!el) return;
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  for (let i = 0; i < 15; i++) {
+    const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.7;
+    const speed = 6 + Math.random() * 6;
+    particles.push({
+      x: cx + (Math.random() - 0.5) * 100,
+      y: cy,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 5,
+      life: 1, decay: 0.01,
+      color: ['#ffd700', '#ffaa00', '#ffeb3b'][Math.floor(Math.random() * 3)],
+      size: 8 + Math.random() * 6,
+      rot: Math.random() * Math.PI * 2,
+      vrot: (Math.random() - 0.5) * 0.5,
+      shape: 'circle', isCoin: true
+    });
+  }
+}
+
+document.getElementById('btnRaceStart').onclick = startRace;
+document.getElementById('horsesBetSlider').oninput = (e) => {
+  if (horsesState.racing) return;
+  horsesState.bet = betFromSlider(e.target.value);
+  renderHorses();
+};
+document.querySelectorAll('.horses-qb').forEach(b => {
+  b.onclick = () => {
+    if (horsesState.racing) return;
+    sfxClick();
+    horsesState.bet = parseFloat(b.dataset.bet);
+    renderHorses();
+  };
+});
+
+// ============ PLINKO ============
+const PLINKO_PROFILES = {
+  low: {
+    multipliers: [5.6, 2.1, 1.1, 1.0, 0.5, 1.0, 1.1, 2.1, 5.6],
+    colors: ['#ff00aa', '#ff6b00', '#ffd700', '#00ff96', '#00d4ff', '#00ff96', '#ffd700', '#ff6b00', '#ff00aa']
+  },
+  medium: {
+    multipliers: [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
+    colors: ['#ff00aa', '#ff6b00', '#ffd700', '#9d4edd', '#00d4ff', '#9d4edd', '#ffd700', '#ff6b00', '#ff00aa']
+  },
+  high: {
+    multipliers: [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
+    colors: ['#ff00aa', '#ff6b00', '#ffd700', '#9d4edd', '#444', '#9d4edd', '#ffd700', '#ff6b00', '#ff00aa']
+  }
+};
+
+const plinkoState = { bet: 0.10, risk: 'low', dropping: false, balls: [] };
+const plinkoCanvas = document.getElementById('plinkoCanvas');
+const pctx = plinkoCanvas.getContext('2d');
+const PLINKO_ROWS = 8;
+const PLINKO_PEG_ROWS = [];
+
+function setupPlinkoPegs() {
+  PLINKO_PEG_ROWS.length = 0;
+  const w = plinkoCanvas.width;
+  const h = plinkoCanvas.height;
+  const marginTop = 50;
+  const marginBottom = 60;
+  const usableH = h - marginTop - marginBottom;
+  const rowSpacing = usableH / (PLINKO_ROWS - 1);
+  for (let r = 0; r < PLINKO_ROWS; r++) {
+    const pegCount = r + 3;
+    const y = marginTop + r * rowSpacing;
+    const spacing = w / (pegCount + 1);
+    const pegs = [];
+    for (let p = 0; p < pegCount; p++) {
+      pegs.push({ x: spacing * (p + 1), y, r: 4 });
+    }
+    PLINKO_PEG_ROWS.push(pegs);
+  }
+}
+
+function drawPlinko() {
+  const w = plinkoCanvas.width;
+  const h = plinkoCanvas.height;
+  pctx.clearRect(0, 0, w, h);
+  const grad = pctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, '#0a0518');
+  grad.addColorStop(1, '#1a0d2e');
+  pctx.fillStyle = grad;
+  pctx.fillRect(0, 0, w, h);
+
+  pctx.fillStyle = '#fff';
+  pctx.shadowColor = 'rgba(255, 215, 0, 0.6)';
+  pctx.shadowBlur = 6;
+  PLINKO_PEG_ROWS.forEach(row => {
+    row.forEach(peg => {
+      pctx.beginPath();
+      pctx.arc(peg.x, peg.y, peg.r, 0, Math.PI * 2);
+      pctx.fill();
+    });
+  });
+  pctx.shadowBlur = 0;
+
+  plinkoState.balls.forEach(b => {
+    pctx.shadowColor = b.color;
+    pctx.shadowBlur = 12;
+    pctx.fillStyle = b.color;
+    pctx.beginPath();
+    pctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    pctx.fill();
+    pctx.shadowBlur = 0;
+    pctx.fillStyle = 'rgba(255,255,255,0.6)';
+    pctx.beginPath();
+    pctx.arc(b.x - 2, b.y - 2, b.r * 0.4, 0, Math.PI * 2);
+    pctx.fill();
+  });
+  pctx.shadowBlur = 0;
+}
+
+function binom(n, k) {
+  if (k < 0 || k > n) return 0;
+  if (k === 0 || k === n) return 1;
+  let result = 1;
+  for (let i = 0; i < k; i++) {
+    result = result * (n - i) / (i + 1);
+  }
+  return result;
+}
+
+function getPayoutScalePlinko() {
+  const profile = PLINKO_PROFILES[plinkoState.risk];
+  const mults = profile.multipliers;
+  let rawRtp = 0;
+  const n = mults.length - 1;
+  for (let k = 0; k < mults.length; k++) {
+    const p = binom(n, k) / Math.pow(2, n);
+    rawRtp += p * mults[k];
+  }
+  const targetRtp = Math.max(0, (100 - (state.houseEdge || 0)) / 100);
+  if (rawRtp <= 0) return 1;
+  return targetRtp / rawRtp;
+}
+
+function getContrastColor(hex) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128 ? '#000' : '#fff';
+}
+
+function renderPlinkoSlots() {
+  const slotsEl = document.getElementById('plinkoSlots');
+  if (!slotsEl) return;
+  const profile = PLINKO_PROFILES[plinkoState.risk];
+  const scale = getPayoutScalePlinko();
+  slotsEl.style.gridTemplateColumns = `repeat(${profile.multipliers.length}, 1fr)`;
+  slotsEl.innerHTML = profile.multipliers.map((m, i) => {
+    const scaled = m * scale;
+    const color = profile.colors[i];
+    return `<div class="plinko-slot" data-slot="${i}" style="background: ${color}; color: ${getContrastColor(color)};">${scaled.toFixed(scaled < 1 ? 2 : 1)}×</div>`;
+  }).join('');
+}
+
+function renderPlinkoPaytable() {
+  const pt = document.getElementById('plinkoPaytable');
+  if (!pt) return;
+  const profile = PLINKO_PROFILES[plinkoState.risk];
+  const scale = getPayoutScalePlinko();
+  const mults = profile.multipliers;
+  const half = Math.ceil(mults.length / 2);
+  const rows = [];
+  for (let i = 0; i < half; i++) {
+    const m = mults[i] * scale;
+    const label = i === 0 ? 'edge slot' : i === half - 1 ? 'center' : `slot ${i + 1}`;
+    rows.push(`<div class="paytable-row">
+      <div class="paytable-symbols" style="font-size: 12px;">${label}</div>
+      <div class="paytable-mult" style="color: ${profile.colors[i]}">${m.toFixed(m < 1 ? 2 : 1)}×</div>
+    </div>`);
+  }
+  pt.innerHTML = rows.join('');
+}
+
+function dropBall() {
+  if (plinkoState.balls.length >= 4) return; // limit concurrent balls
+  const user = getActiveUser();
+  if (user.balance < plinkoState.bet) { toast('Insufficient funds', true); sfxLose(); return; }
+  ensureAudio();
+
+  user.balance = Math.round((user.balance - plinkoState.bet) * 100) / 100;
+  const stats = getActiveStats();
+  stats.totalWagered = Math.round((stats.totalWagered + plinkoState.bet) * 100) / 100;
+
+  const balDisplay = document.getElementById('balanceDisplay');
+  balDisplay.classList.remove('flash-down'); void balDisplay.offsetWidth;
+  balDisplay.classList.add('flash-down');
+
+  saveState();
+  renderBalance();
+  renderUsers();
+
+  const w = plinkoCanvas.width;
+  const ball = {
+    x: w / 2 + (Math.random() - 0.5) * 6,
+    y: 10,
+    vx: (Math.random() - 0.5) * 0.5,
+    vy: 0,
+    r: 7,
+    color: ['#ffd700', '#ff00aa', '#00d4ff', '#00ff96', '#ff6b00'][Math.floor(Math.random() * 5)],
+    bet: plinkoState.bet,
+    landed: false,
+    age: 0
+  };
+  plinkoState.balls.push(ball);
+  sfxClick();
+
+  if (!plinkoState.dropping) {
+    plinkoState.dropping = true;
+    requestAnimationFrame(plinkoPhysicsStep);
+  }
+}
+
+function plinkoPhysicsStep() {
+  const w = plinkoCanvas.width;
+  const h = plinkoCanvas.height;
+  const gravity = 0.22;
+  const damping = 0.62;
+  const wallDamping = 0.5;
+
+  for (let bi = plinkoState.balls.length - 1; bi >= 0; bi--) {
+    const b = plinkoState.balls[bi];
+    if (b.landed) {
+      b.age++;
+      if (b.age > 40) plinkoState.balls.splice(bi, 1);
+      continue;
+    }
+    b.vy += gravity;
+    b.x += b.vx;
+    b.y += b.vy;
+
+    for (const row of PLINKO_PEG_ROWS) {
+      for (const peg of row) {
+        const dx = b.x - peg.x;
+        const dy = b.y - peg.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const minDist = b.r + peg.r;
+        if (dist < minDist && dist > 0.001) {
+          const nx = dx / dist;
+          const ny = dy / dist;
+          b.x = peg.x + nx * minDist;
+          b.y = peg.y + ny * minDist;
+          const dot = b.vx * nx + b.vy * ny;
+          b.vx = (b.vx - 2 * dot * nx) * damping;
+          b.vy = (b.vy - 2 * dot * ny) * damping;
+          b.vx += (Math.random() - 0.5) * 0.8;
+          if (state.soundOn && Math.random() < 0.4) {
+            playTone(800 + Math.random() * 400, 0.04, 'triangle', 0.03);
+          }
+        }
+      }
+    }
+
+    if (b.x < b.r) { b.x = b.r; b.vx = -b.vx * wallDamping; }
+    if (b.x > w - b.r) { b.x = w - b.r; b.vx = -b.vx * wallDamping; }
+
+    if (b.y > h - 30) {
+      b.y = h - 30;
+      b.landed = true;
+      const profile = PLINKO_PROFILES[plinkoState.risk];
+      const slotCount = profile.multipliers.length;
+      const slotWidth = w / slotCount;
+      const slotIdx = Math.min(slotCount - 1, Math.max(0, Math.floor(b.x / slotWidth)));
+      onPlinkoLand(b, slotIdx);
+    }
+  }
+
+  drawPlinko();
+  if (plinkoState.balls.length > 0) {
+    requestAnimationFrame(plinkoPhysicsStep);
+  } else {
+    plinkoState.dropping = false;
+  }
+}
+
+function onPlinkoLand(ball, slotIdx) {
+  const profile = PLINKO_PROFILES[plinkoState.risk];
+  const scale = getPayoutScalePlinko();
+  const mult = profile.multipliers[slotIdx] * scale;
+  const payout = Math.round(ball.bet * mult * 100) / 100;
+  const net = Math.round((payout - ball.bet) * 100) / 100;
+  const user = getActiveUser();
+  const stats = getActiveStats();
+  user.balance = Math.round((user.balance + payout) * 100) / 100;
+  stats.totalWon = Math.round((stats.totalWon + payout) * 100) / 100;
+  if (net > 0) {
+    stats.wins++;
+    comboStreak++;
+    if (net > stats.biggest) { stats.biggest = net; flashCard('cardBiggest'); }
+    flashCard('cardWins');
+    const balDisplay = document.getElementById('balanceDisplay');
+    balDisplay.classList.remove('flash-up','flash-down'); void balDisplay.offsetWidth;
+    balDisplay.classList.add('flash-up');
+  } else {
+    comboStreak = 0;
+  }
+
+  const slotEl = document.querySelector(`.plinko-slot[data-slot="${slotIdx}"]`);
+  if (slotEl) {
+    slotEl.classList.remove('hit'); void slotEl.offsetWidth;
+    slotEl.classList.add('hit');
+    setTimeout(() => slotEl.classList.remove('hit'), 800);
+  }
+
+  if (net >= ball.bet * 10) {
+    sfxBigWin();
+    burstParticles(40, 'rainbow');
+    shake('lg');
+    showWinOverlay('BIG WIN', payout, mult.toFixed(2) + '×', 'PLINKO');
+  } else if (net > 0) {
+    sfxWin();
+    burstParticles(15, 'gold');
+    shake('sm');
+  } else {
+    sfxLose();
+  }
+
+  stats.recentSpins.unshift({
+    symbols: ['🟡', '→', mult.toFixed(2) + '×'],
+    bet: ball.bet,
+    payout, net,
+    win: net > 0,
+    game: 'plinko'
+  });
+  if (stats.recentSpins.length > 20) stats.recentSpins.pop();
+
+  saveState();
+  renderBalance();
+  renderUsers();
+  renderStats();
+  renderRecentSpins();
+}
+
+document.querySelectorAll('.plinko-risk').forEach(b => {
+  b.onclick = () => {
+    sfxClick();
+    plinkoState.risk = b.dataset.risk;
+    document.querySelectorAll('.plinko-risk').forEach(x => x.classList.toggle('active', x === b));
+    renderPlinkoSlots();
+    renderPlinkoPaytable();
+  };
+});
+document.getElementById('btnPlinkoDrop').onclick = dropBall;
+document.getElementById('plinkoBetSlider').oninput = (e) => {
+  plinkoState.bet = betFromSlider(e.target.value);
+  document.getElementById('plinkoBetDisplay').textContent = fmt(plinkoState.bet);
+  document.querySelectorAll('.plinko-qb').forEach(b => {
+    b.classList.toggle('active', Math.abs(parseFloat(b.dataset.bet) - plinkoState.bet) < 0.001);
+  });
+};
+document.querySelectorAll('.plinko-qb').forEach(b => {
+  b.onclick = () => {
+    sfxClick();
+    plinkoState.bet = parseFloat(b.dataset.bet);
+    document.getElementById('plinkoBetDisplay').textContent = fmt(plinkoState.bet);
+    document.querySelectorAll('.plinko-qb').forEach(x => {
+      x.classList.toggle('active', Math.abs(parseFloat(x.dataset.bet) - plinkoState.bet) < 0.001);
+    });
+    document.getElementById('plinkoBetSlider').value = sliderFromBet(plinkoState.bet);
+  };
+});
+
+setupPlinkoPegs();
+drawPlinko();
+
+// ============ EXTEND switchGame TO HANDLE NEW GAMES ============
+const _origSwitchGame = switchGame;
+switchGame = function(game) {
+  document.querySelectorAll('.game-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.game === game);
+  });
+  document.getElementById('slotsView').style.display = 'none';
+  document.getElementById('minesView').style.display = 'none';
+  document.getElementById('horsesView').style.display = 'none';
+  document.getElementById('plinkoView').style.display = 'none';
+  document.getElementById('paytable').style.display = 'none';
+  document.getElementById('minesPaytable').style.display = 'none';
+  document.getElementById('horsesPaytable').style.display = 'none';
+  document.getElementById('plinkoPaytable').style.display = 'none';
+
+  if (game === 'slots') {
+    document.getElementById('slotsView').style.display = '';
+    document.getElementById('paytable').style.display = '';
+    document.getElementById('rightPanelTitle').textContent = 'PAYOUTS';
+  } else if (game === 'mines') {
+    document.getElementById('minesView').style.display = '';
+    document.getElementById('minesPaytable').style.display = '';
+    document.getElementById('rightPanelTitle').textContent = 'MINES PAYOUTS';
+    if (minesState.tiles.length === 0) {
+      buildMinesGrid();
+      updateMinesControls();
+      updateMinesDisplay();
+    }
+  } else if (game === 'horses') {
+    document.getElementById('horsesView').style.display = '';
+    document.getElementById('horsesPaytable').style.display = '';
+    document.getElementById('rightPanelTitle').textContent = 'HORSE ODDS';
+    renderHorses();
+    renderHorsesPaytable();
+  } else if (game === 'plinko') {
+    document.getElementById('plinkoView').style.display = '';
+    document.getElementById('plinkoPaytable').style.display = '';
+    document.getElementById('rightPanelTitle').textContent = 'PLINKO PAYOUTS';
+    renderPlinkoSlots();
+    renderPlinkoPaytable();
+    setupPlinkoPegs();
+    drawPlinko();
+  }
+};
+document.querySelectorAll('.game-tab').forEach(t => {
+  t.onclick = () => { sfxClick(); switchGame(t.dataset.game); };
+});
+
+// Hook into updateEdgeDisplay so changing house edge live-updates new game paytables
+const _origUpdateEdgeDisplay = updateEdgeDisplay;
+updateEdgeDisplay = function(val) {
+  _origUpdateEdgeDisplay(val);
+  renderHorsesPaytable();
+  if (typeof renderHorses === 'function' && document.getElementById('horsePickList')) renderHorses();
+  renderPlinkoSlots();
+  renderPlinkoPaytable();
+};
 
 renderAll();
 </script>
