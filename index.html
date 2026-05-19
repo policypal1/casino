@@ -616,6 +616,246 @@ body {
   border-color: #ffd700;
 }
 
+/* ===== DICE (7 OVER/UNDER) ===== */
+.dice-section { display: flex; justify-content: center; }
+.dice-machine {
+  width: 100%; max-width: 560px;
+  background: linear-gradient(180deg, #0d2e2e 0%, #082020 100%);
+  border: 2px solid rgba(0, 255, 200, 0.3);
+  border-radius: 20px; padding: 22px;
+  box-shadow: 0 0 40px rgba(0, 255, 200, 0.2), inset 0 0 40px rgba(0,0,0,0.5);
+  position: relative;
+}
+.dice-machine::before {
+  content: ''; position: absolute; inset: -2px;
+  border-radius: 20px; padding: 2px;
+  background: linear-gradient(135deg, #00ffc8, #00d4ff, #ff00aa, #00ffc8);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: borderShift 4s linear infinite; pointer-events: none;
+}
+
+.dice-display {
+  display: flex; justify-content: center; align-items: center;
+  gap: 24px; padding: 24px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(0, 255, 200, 0.3);
+  border-radius: 14px; margin-bottom: 14px;
+  min-height: 120px;
+}
+.die {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 60px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4), inset 0 -4px 8px rgba(0,0,0,0.1);
+  color: #000;
+}
+.die.rolling { animation: dieRoll 0.6s ease-in-out; }
+@keyframes dieRoll {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(180deg) scale(1.15); }
+  50% { transform: rotate(360deg) scale(0.9); }
+  75% { transform: rotate(540deg) scale(1.1); }
+  100% { transform: rotate(720deg) scale(1); }
+}
+.dice-total-display {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  color: #00ffc8;
+  text-shadow: 0 0 16px rgba(0, 255, 200, 0.6);
+  min-width: 80px; text-align: center;
+}
+
+.dice-pick-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.dice-pick {
+  padding: 16px 8px;
+  background: rgba(0,0,0,0.4);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: #fff; cursor: pointer; transition: all 0.2s;
+  text-align: center;
+}
+.dice-pick:hover { background: rgba(255,255,255,0.06); transform: translateY(-2px); }
+.dice-pick.selected {
+  background: linear-gradient(135deg, rgba(0, 255, 200, 0.25), rgba(0, 212, 255, 0.15));
+  border-color: #00ffc8;
+  box-shadow: 0 0 20px rgba(0, 255, 200, 0.5);
+}
+.dice-pick.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+.dice-pick-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.dice-pick-mult {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+.dice-pick-odds {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 2px;
+}
+
+.dice-result-msg {
+  text-align: center; padding: 12px; margin-bottom: 14px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(0, 255, 200, 0.3);
+  border-radius: 10px;
+  min-height: 50px;
+  display: flex; align-items: center; justify-content: center;
+}
+.dice-result-msg .message-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; letter-spacing: 2px;
+  color: rgba(255,255,255,0.8);
+}
+.dice-result-msg.win { background: rgba(0, 200, 100, 0.15); border-color: rgba(0, 255, 150, 0.5); }
+.dice-result-msg.win .message-text { color: #00ff96; text-shadow: 0 0 12px rgba(0,255,150,0.6); }
+.dice-result-msg.lose { background: rgba(120, 30, 30, 0.15); }
+.dice-result-msg.lose .message-text { color: rgba(255,100,100,0.8); }
+
+.btn-dice-roll {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #00ffc8, #00d4ff);
+  border: none; color: #000;
+  border-radius: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px; letter-spacing: 3px; font-weight: 900;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 0 20px rgba(0, 255, 200, 0.5);
+}
+.btn-dice-roll:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(0, 255, 200, 0.8); }
+.btn-dice-roll:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ===== COIN FLIP ===== */
+.coinflip-section { display: flex; justify-content: center; }
+.coinflip-machine {
+  width: 100%; max-width: 560px;
+  background: linear-gradient(180deg, #2e1d0d 0%, #1d1208 100%);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  border-radius: 20px; padding: 22px;
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.25), inset 0 0 40px rgba(0,0,0,0.5);
+  position: relative;
+}
+.coinflip-machine::before {
+  content: ''; position: absolute; inset: -2px;
+  border-radius: 20px; padding: 2px;
+  background: linear-gradient(135deg, #ffd700, #ffaa00, #ff6b00, #ffd700);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: borderShift 4s linear infinite; pointer-events: none;
+}
+
+.coin-stage {
+  display: flex; justify-content: center; align-items: center;
+  padding: 40px 20px;
+  background: radial-gradient(ellipse at center, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0.4) 70%);
+  border-radius: 14px;
+  margin-bottom: 14px;
+  min-height: 180px;
+  perspective: 1000px;
+}
+.coin {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.05s linear;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.coin-face {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 72px;
+  backface-visibility: hidden;
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  border: 4px solid #ff8800;
+  color: #5c2e00;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.coin-tails {
+  transform: rotateY(180deg);
+  background: linear-gradient(135deg, #c0c0c0, #888);
+  border-color: #666;
+}
+.coin.flipping { animation: coinFlip 1.5s cubic-bezier(0.5, 0, 0.5, 1); }
+@keyframes coinFlip {
+  0% { transform: rotateY(0) translateY(0); }
+  50% { transform: rotateY(1800deg) translateY(-80px); }
+  100% { transform: rotateY(3600deg) translateY(0); }
+}
+.coin.show-heads { transform: rotateY(0); }
+.coin.show-tails { transform: rotateY(180deg); }
+
+.coin-pick-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 14px;
+}
+.coin-pick {
+  padding: 16px;
+  background: rgba(0,0,0,0.4);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: #fff; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+.coin-pick:hover { background: rgba(255,255,255,0.06); transform: translateY(-2px); }
+.coin-pick.selected {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 100, 0, 0.15));
+  border-color: #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+.coin-pick.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+.coin-pick-emoji { font-size: 36px; }
+.coin-pick-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: 2px;
+}
+
+.btn-coin-flip {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #ffd700, #ff8800);
+  border: none; color: #000;
+  border-radius: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px; letter-spacing: 3px; font-weight: 900;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+.btn-coin-flip:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(255, 215, 0, 0.8); }
+.btn-coin-flip:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.coin-streak-display {
+  text-align: center;
+  padding: 10px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+}
+.coin-streak-display .streak-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: #ffd700;
+}
+
 /* ===== USER BAR ===== */
 .user-tab {
   flex-shrink: 0; display: flex; align-items: center; gap: 10px;
@@ -1103,6 +1343,8 @@ body {
     <button class="game-tab" data-game="mines">💣 MINES</button>
     <button class="game-tab" data-game="horses">🐎 HORSES</button>
     <button class="game-tab" data-game="plinko">🟡 PLINKO</button>
+    <button class="game-tab" data-game="dice">🎲 7 OVER/UNDER</button>
+    <button class="game-tab" data-game="coinflip">🪙 COIN FLIP</button>
   </div>
 
   <div class="user-bar" id="userBar"></div>
@@ -1310,12 +1552,112 @@ body {
       </div>
     </section>
 
+    <section class="dice-section" id="diceView" style="display:none;">
+      <div class="dice-machine">
+        <div class="dice-display">
+          <div class="die" id="die1">🎲</div>
+          <div class="dice-total-display" id="diceTotal">—</div>
+          <div class="die" id="die2">🎲</div>
+        </div>
+
+        <div class="dice-result-msg" id="diceResultMsg">
+          <span class="message-text">PICK UNDER 7, EXACTLY 7, OR OVER 7</span>
+        </div>
+
+        <div class="dice-pick-row">
+          <div class="dice-pick" data-pick="under">
+            <div class="dice-pick-label">UNDER 7</div>
+            <div class="dice-pick-mult">2×</div>
+            <div class="dice-pick-odds">rolls 2-6 · 41.67%</div>
+          </div>
+          <div class="dice-pick" data-pick="seven">
+            <div class="dice-pick-label">EXACTLY 7</div>
+            <div class="dice-pick-mult">4×</div>
+            <div class="dice-pick-odds">roll 7 · 16.67%</div>
+          </div>
+          <div class="dice-pick" data-pick="over">
+            <div class="dice-pick-label">OVER 7</div>
+            <div class="dice-pick-mult">2×</div>
+            <div class="dice-pick-odds">rolls 8-12 · 41.67%</div>
+          </div>
+        </div>
+
+        <div class="bet-controls">
+          <div class="bet-amount-display">
+            <span class="bet-label">BET</span>
+            <span class="bet-value" id="diceBetDisplay">$0.10</span>
+          </div>
+          <input type="range" id="diceBetSlider" min="1" max="100" value="10" step="1" class="bet-slider" />
+          <div class="quick-bets">
+            <button class="quick-bet dice-qb" data-bet="0.01">1¢</button>
+            <button class="quick-bet dice-qb" data-bet="0.05">5¢</button>
+            <button class="quick-bet dice-qb" data-bet="0.10">10¢</button>
+            <button class="quick-bet dice-qb" data-bet="0.25">25¢</button>
+            <button class="quick-bet dice-qb" data-bet="0.50">50¢</button>
+            <button class="quick-bet dice-qb" data-bet="1.00">$1</button>
+          </div>
+        </div>
+
+        <button class="btn-dice-roll" id="btnDiceRoll" disabled>🎲 ROLL THE DICE</button>
+      </div>
+    </section>
+
+    <section class="coinflip-section" id="coinflipView" style="display:none;">
+      <div class="coinflip-machine">
+        <div class="coin-stage">
+          <div class="coin show-heads" id="coinEl">
+            <div class="coin-face">👑</div>
+            <div class="coin-face coin-tails">🦅</div>
+          </div>
+        </div>
+
+        <div class="coin-streak-display">
+          Current streak: <span class="streak-num" id="coinStreak">0</span> · Best: <span class="streak-num" id="coinBestStreak">0</span>
+        </div>
+
+        <div class="dice-result-msg" id="coinResultMsg">
+          <span class="message-text">PICK HEADS OR TAILS</span>
+        </div>
+
+        <div class="coin-pick-row">
+          <div class="coin-pick" data-pick="heads">
+            <div class="coin-pick-emoji">👑</div>
+            <div class="coin-pick-label">HEADS</div>
+          </div>
+          <div class="coin-pick" data-pick="tails">
+            <div class="coin-pick-emoji">🦅</div>
+            <div class="coin-pick-label">TAILS</div>
+          </div>
+        </div>
+
+        <div class="bet-controls">
+          <div class="bet-amount-display">
+            <span class="bet-label">BET</span>
+            <span class="bet-value" id="coinBetDisplay">$0.10</span>
+          </div>
+          <input type="range" id="coinBetSlider" min="1" max="100" value="10" step="1" class="bet-slider" />
+          <div class="quick-bets">
+            <button class="quick-bet coin-qb" data-bet="0.01">1¢</button>
+            <button class="quick-bet coin-qb" data-bet="0.05">5¢</button>
+            <button class="quick-bet coin-qb" data-bet="0.10">10¢</button>
+            <button class="quick-bet coin-qb" data-bet="0.25">25¢</button>
+            <button class="quick-bet coin-qb" data-bet="0.50">50¢</button>
+            <button class="quick-bet coin-qb" data-bet="1.00">$1</button>
+          </div>
+        </div>
+
+        <button class="btn-coin-flip" id="btnCoinFlip" disabled>🪙 FLIP THE COIN</button>
+      </div>
+    </section>
+
     <aside class="side-panel">
       <h3 class="panel-title" id="rightPanelTitle">PAYOUTS</h3>
       <div class="paytable" id="paytable"></div>
       <div class="paytable" id="minesPaytable" style="display:none;"></div>
       <div class="paytable" id="horsesPaytable" style="display:none;"></div>
       <div class="paytable" id="plinkoPaytable" style="display:none;"></div>
+      <div class="paytable" id="dicePaytable" style="display:none;"></div>
+      <div class="paytable" id="coinflipPaytable" style="display:none;"></div>
       <h3 class="panel-title mt-large" id="recentTitle">RECENT SPINS</h3>
       <div class="recent-spins" id="recentSpins"></div>
     </aside>
@@ -3054,17 +3396,25 @@ function setupPlinkoPegs() {
   PLINKO_PEG_ROWS.length = 0;
   const w = plinkoCanvas.width;
   const h = plinkoCanvas.height;
-  const marginTop = 50;
+  const marginTop = 60;
   const marginBottom = 60;
   const usableH = h - marginTop - marginBottom;
   const rowSpacing = usableH / (PLINKO_ROWS - 1);
+  // Standard plinko triangle: row 0 has 2 pegs (or 3), bottom row has rows+2 pegs
+  // For 8 rows: row 0 = 3 pegs, row 7 = 10 pegs is what we had — that's BACKWARDS.
+  // Correct: balls drop through a NARROW top funnel and pegs FAN OUT downward.
+  // Row r has (r + 3) pegs, but the pegs are CENTERED, with the column spacing fixed.
+  // The number of slots at bottom = (last row pegs - 1) = 9 slots
+  const pegSpacing = w / 11;  // fixed horizontal peg-to-peg distance
   for (let r = 0; r < PLINKO_ROWS; r++) {
     const pegCount = r + 3;
     const y = marginTop + r * rowSpacing;
-    const spacing = w / (pegCount + 1);
+    // Center this row's pegs horizontally
+    const rowWidth = (pegCount - 1) * pegSpacing;
+    const startX = (w - rowWidth) / 2;
     const pegs = [];
     for (let p = 0; p < pegCount; p++) {
-      pegs.push({ x: spacing * (p + 1), y, r: 4 });
+      pegs.push({ x: startX + p * pegSpacing, y, r: 5 });
     }
     PLINKO_PEG_ROWS.push(pegs);
   }
@@ -3145,7 +3495,25 @@ function renderPlinkoSlots() {
   if (!slotsEl) return;
   const profile = PLINKO_PROFILES[plinkoState.risk];
   const scale = getPayoutScalePlinko();
-  slotsEl.style.gridTemplateColumns = `repeat(${profile.multipliers.length}, 1fr)`;
+  const slotCount = profile.multipliers.length;
+  // Match slots to actual peg field width
+  const canvasW = plinkoCanvas.width;
+  const bottomRow = PLINKO_PEG_ROWS[PLINKO_PEG_ROWS.length - 1];
+  let leftPct = 0, rightPct = 0;
+  if (bottomRow && bottomRow.length > 0) {
+    const firstX = bottomRow[0].x;
+    const lastX = bottomRow[bottomRow.length - 1].x;
+    leftPct = (firstX / canvasW) * 100;
+    rightPct = ((canvasW - lastX) / canvasW) * 100;
+    // Center first slot under first peg → shift left by half a slot
+    const slotWidthPct = (100 - leftPct - rightPct) / (slotCount - 1);
+    leftPct = leftPct - slotWidthPct / 2;
+    rightPct = rightPct - slotWidthPct / 2;
+  }
+  slotsEl.style.gridTemplateColumns = `repeat(${slotCount}, 1fr)`;
+  slotsEl.style.marginLeft = Math.max(0, leftPct) + '%';
+  slotsEl.style.marginRight = Math.max(0, rightPct) + '%';
+  slotsEl.style.transform = '';
   slotsEl.innerHTML = profile.multipliers.map((m, i) => {
     const scaled = m * scale;
     const color = profile.colors[i];
@@ -3173,7 +3541,7 @@ function renderPlinkoPaytable() {
 }
 
 function dropBall() {
-  if (plinkoState.balls.length >= 4) return; // limit concurrent balls
+  if (plinkoState.balls.length >= 4) return;
   const user = getActiveUser();
   if (user.balance < plinkoState.bet) { toast('Insufficient funds', true); sfxLose(); return; }
   ensureAudio();
@@ -3190,17 +3558,37 @@ function dropBall() {
   renderBalance();
   renderUsers();
 
+  // PRE-DETERMINE landing slot using true binomial. Each row = 50/50 left/right.
+  // After PLINKO_ROWS bounces, slot = number of "rights"
+  let targetSlot = 0;
+  for (let i = 0; i < PLINKO_ROWS; i++) {
+    if (Math.random() < 0.5) targetSlot++;
+  }
+
+  // Compute the path: list of x-positions through each row, ending at the target slot
+  const bottomRow = PLINKO_PEG_ROWS[PLINKO_PEG_ROWS.length - 1];
+  const profile = PLINKO_PROFILES[plinkoState.risk];
+  const slotCount = profile.multipliers.length;
+  const firstPegX = bottomRow[0].x;
+  const lastPegX = bottomRow[bottomRow.length - 1].x;
+  const slotSpacing = (lastPegX - firstPegX) / (slotCount - 1);
+  const targetX = firstPegX + targetSlot * slotSpacing;
+
   const w = plinkoCanvas.width;
   const ball = {
-    x: w / 2 + (Math.random() - 0.5) * 6,
+    x: w / 2 + (Math.random() - 0.5) * 4,
     y: 10,
-    vx: (Math.random() - 0.5) * 0.5,
+    vx: 0,
     vy: 0,
     r: 7,
     color: ['#ffd700', '#ff00aa', '#00d4ff', '#00ff96', '#ff6b00'][Math.floor(Math.random() * 5)],
     bet: plinkoState.bet,
+    targetSlot,
+    targetX,
     landed: false,
-    age: 0
+    age: 0,
+    currentRow: 0,
+    nextRowY: PLINKO_PEG_ROWS[0][0].y
   };
   plinkoState.balls.push(ball);
   sfxClick();
@@ -3214,9 +3602,8 @@ function dropBall() {
 function plinkoPhysicsStep() {
   const w = plinkoCanvas.width;
   const h = plinkoCanvas.height;
-  const gravity = 0.22;
-  const damping = 0.62;
-  const wallDamping = 0.5;
+  const gravity = 0.28;
+  const damping = 0.55;
 
   for (let bi = plinkoState.balls.length - 1; bi >= 0; bi--) {
     const b = plinkoState.balls[bi];
@@ -3225,43 +3612,71 @@ function plinkoPhysicsStep() {
       if (b.age > 40) plinkoState.balls.splice(bi, 1);
       continue;
     }
+
     b.vy += gravity;
-    b.x += b.vx;
     b.y += b.vy;
 
-    for (const row of PLINKO_PEG_ROWS) {
+    // When passing a row of pegs, do a controlled bounce that nudges toward target
+    if (b.currentRow < PLINKO_PEG_ROWS.length && b.y >= b.nextRowY - 2) {
+      const row = PLINKO_PEG_ROWS[b.currentRow];
+      // Find closest peg to current x
+      let closestPeg = row[0];
+      let minDist = Math.abs(b.x - row[0].x);
       for (const peg of row) {
-        const dx = b.x - peg.x;
-        const dy = b.y - peg.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        const minDist = b.r + peg.r;
-        if (dist < minDist && dist > 0.001) {
-          const nx = dx / dist;
-          const ny = dy / dist;
-          b.x = peg.x + nx * minDist;
-          b.y = peg.y + ny * minDist;
-          const dot = b.vx * nx + b.vy * ny;
-          b.vx = (b.vx - 2 * dot * nx) * damping;
-          b.vy = (b.vy - 2 * dot * ny) * damping;
-          b.vx += (Math.random() - 0.5) * 0.8;
-          if (state.soundOn && Math.random() < 0.4) {
-            playTone(800 + Math.random() * 400, 0.04, 'triangle', 0.03);
-          }
-        }
+        const d = Math.abs(b.x - peg.x);
+        if (d < minDist) { minDist = d; closestPeg = peg; }
+      }
+      // Calculate how many more rows remain, and how far the target is
+      const rowsLeft = PLINKO_PEG_ROWS.length - b.currentRow;
+      const xDiff = b.targetX - b.x;
+      // Average horizontal movement needed per remaining row
+      const pegSpacing = w / 11;
+      const avgPerRow = xDiff / rowsLeft;
+      // Direction we should bounce (with some natural randomness)
+      // Each bounce should move us roughly +/- pegSpacing/2 horizontally
+      let bounceDir;
+      const desiredMagnitude = pegSpacing * 0.5;
+      // Probability of bouncing toward target should match the math:
+      // If we need to gain X more units to the right in N rows, and each unit
+      // is +pegSpacing/2 or -pegSpacing/2, the probability of going right should be:
+      // p_right = (X/(pegSpacing) + N/2) / N = X/(pegSpacing*N) + 0.5
+      // But we already chose target via binomial, so just make decisions consistent.
+      // Use: go in the direction of avgPerRow, with random variation
+      if (Math.random() < 0.5 + (avgPerRow / desiredMagnitude) * 0.5) {
+        bounceDir = 1;
+      } else {
+        bounceDir = -1;
+      }
+      // Apply bounce
+      b.vx = bounceDir * desiredMagnitude / 6;  // spread the horizontal motion over ~6 frames
+      b.vy = Math.max(1.5, b.vy * 0.5);  // bounce up a little
+      b.y = closestPeg.y + closestPeg.r + b.r;
+      b.currentRow++;
+      if (b.currentRow < PLINKO_PEG_ROWS.length) {
+        b.nextRowY = PLINKO_PEG_ROWS[b.currentRow][0].y;
+      }
+      if (state.soundOn && Math.random() < 0.5) {
+        playTone(800 + Math.random() * 400, 0.04, 'triangle', 0.03);
       }
     }
 
-    if (b.x < b.r) { b.x = b.r; b.vx = -b.vx * wallDamping; }
-    if (b.x > w - b.r) { b.x = w - b.r; b.vx = -b.vx * wallDamping; }
+    b.x += b.vx;
+    // Gentle pull toward target X to ensure correct landing
+    if (b.currentRow >= PLINKO_PEG_ROWS.length) {
+      const dx = b.targetX - b.x;
+      b.x += dx * 0.15;
+      b.vx *= 0.85;
+    }
+
+    // Wall bounds (soft)
+    if (b.x < b.r) { b.x = b.r; b.vx = Math.abs(b.vx) * 0.3; }
+    if (b.x > w - b.r) { b.x = w - b.r; b.vx = -Math.abs(b.vx) * 0.3; }
 
     if (b.y > h - 30) {
       b.y = h - 30;
       b.landed = true;
-      const profile = PLINKO_PROFILES[plinkoState.risk];
-      const slotCount = profile.multipliers.length;
-      const slotWidth = w / slotCount;
-      const slotIdx = Math.min(slotCount - 1, Math.max(0, Math.floor(b.x / slotWidth)));
-      onPlinkoLand(b, slotIdx);
+      // Use the pre-determined slot, NOT the x-position
+      onPlinkoLand(b, b.targetSlot);
     }
   }
 
@@ -3420,6 +3835,435 @@ updateEdgeDisplay = function(val) {
   renderPlinkoSlots();
   renderPlinkoPaytable();
 };
+
+// ============ DICE: 7 OVER/UNDER ============
+const diceState = {
+  bet: 0.10,
+  pick: null,
+  rolling: false,
+  payouts: { under: 2, seven: 4, over: 2 }
+};
+
+const DIE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+
+function renderDicePaytable() {
+  const pt = document.getElementById('dicePaytable');
+  if (!pt) return;
+  pt.innerHTML = `
+    <div class="paytable-row">
+      <div class="paytable-symbols" style="font-size: 12px;">UNDER 7 (2-6)</div>
+      <div class="paytable-mult">2×</div>
+    </div>
+    <div class="paytable-row jackpot">
+      <div class="paytable-symbols" style="font-size: 12px;">EXACTLY 7</div>
+      <div class="paytable-mult">4×</div>
+    </div>
+    <div class="paytable-row">
+      <div class="paytable-symbols" style="font-size: 12px;">OVER 7 (8-12)</div>
+      <div class="paytable-mult">2×</div>
+    </div>
+    <div class="paytable-row" style="opacity: 0.6; margin-top: 8px;">
+      <div class="paytable-symbols" style="font-size: 10px;">odds: 41.67% / 16.67% / 41.67%</div>
+      <div class="paytable-mult" style="font-size: 11px;"></div>
+    </div>`;
+}
+
+function renderDiceControls() {
+  const betDisplay = document.getElementById('diceBetDisplay');
+  if (!betDisplay) return;
+  betDisplay.textContent = fmt(diceState.bet);
+  document.getElementById('diceBetSlider').value = sliderFromBet(diceState.bet);
+  document.querySelectorAll('.dice-qb').forEach(b => {
+    b.classList.toggle('active', Math.abs(parseFloat(b.dataset.bet) - diceState.bet) < 0.001);
+  });
+  document.querySelectorAll('.dice-pick').forEach(el => {
+    el.classList.toggle('selected', el.dataset.pick === diceState.pick);
+    el.classList.toggle('disabled', diceState.rolling);
+  });
+  document.getElementById('btnDiceRoll').disabled = !diceState.pick || diceState.rolling;
+}
+
+async function rollDice() {
+  if (diceState.rolling) return;
+  if (!diceState.pick) { toast('Pick under, 7, or over first', true); return; }
+  const user = getActiveUser();
+  if (user.balance < diceState.bet) { toast('Insufficient funds', true); sfxLose(); return; }
+  ensureAudio();
+
+  diceState.rolling = true;
+  renderDiceControls();
+  user.balance = Math.round((user.balance - diceState.bet) * 100) / 100;
+  const stats = getActiveStats();
+  stats.totalWagered = Math.round((stats.totalWagered + diceState.bet) * 100) / 100;
+
+  const balDisplay = document.getElementById('balanceDisplay');
+  balDisplay.classList.remove('flash-down'); void balDisplay.offsetWidth;
+  balDisplay.classList.add('flash-down');
+
+  saveState();
+  renderBalance();
+  renderUsers();
+
+  const die1El = document.getElementById('die1');
+  const die2El = document.getElementById('die2');
+  const totalEl = document.getElementById('diceTotal');
+  die1El.classList.remove('rolling'); die2El.classList.remove('rolling');
+  void die1El.offsetWidth; void die2El.offsetWidth;
+  die1El.classList.add('rolling');
+  die2El.classList.add('rolling');
+  totalEl.textContent = '?';
+
+  setDiceMsg('ROLLING...', '');
+  sfxSpin();
+
+  const animInterval = setInterval(() => {
+    die1El.textContent = DIE_FACES[Math.floor(Math.random() * 6)];
+    die2El.textContent = DIE_FACES[Math.floor(Math.random() * 6)];
+  }, 60);
+
+  await new Promise(r => setTimeout(r, 800));
+  clearInterval(animInterval);
+
+  const d1 = Math.floor(Math.random() * 6) + 1;
+  const d2 = Math.floor(Math.random() * 6) + 1;
+  const total = d1 + d2;
+  die1El.textContent = DIE_FACES[d1 - 1];
+  die2El.textContent = DIE_FACES[d2 - 1];
+  totalEl.textContent = total;
+  sfxReelStop();
+
+  let outcome;
+  if (total < 7) outcome = 'under';
+  else if (total === 7) outcome = 'seven';
+  else outcome = 'over';
+
+  const won = (outcome === diceState.pick);
+  let payout = 0;
+  let net = -diceState.bet;
+  if (won) {
+    const mult = diceState.payouts[diceState.pick];
+    payout = Math.round(diceState.bet * mult * 100) / 100;
+    net = Math.round((payout - diceState.bet) * 100) / 100;
+    user.balance = Math.round((user.balance + payout) * 100) / 100;
+    stats.totalWon = Math.round((stats.totalWon + payout) * 100) / 100;
+    if (net > 0) {
+      stats.wins++;
+      comboStreak++;
+      if (net > stats.biggest) { stats.biggest = net; flashCard('cardBiggest'); }
+      flashCard('cardWins');
+    }
+    balDisplay.classList.remove('flash-up','flash-down'); void balDisplay.offsetWidth;
+    balDisplay.classList.add('flash-up');
+
+    if (diceState.pick === 'seven') {
+      setDiceMsg(`🎯 EXACTLY 7! YOU WIN ${fmt(payout)}`, 'win');
+      showWinOverlay('LUCKY 7!', payout, '4×', 'EXACT MATCH');
+      burstParticles(50, 'rainbow');
+      shake('lg');
+      sfxBigWin();
+    } else {
+      setDiceMsg(`✓ WIN ${fmt(payout)} (rolled ${total})`, 'win');
+      burstParticles(20, 'gold');
+      shake('sm');
+      sfxWin();
+    }
+    spawnCoinsFromElement('.dice-machine');
+  } else {
+    comboStreak = 0;
+    const yourPickLabel = diceState.pick === 'under' ? 'UNDER 7' : diceState.pick === 'seven' ? 'EXACTLY 7' : 'OVER 7';
+    setDiceMsg(`Rolled ${total}. You picked ${yourPickLabel}.`, 'lose');
+    sfxLose();
+  }
+
+  stats.recentSpins.unshift({
+    symbols: [DIE_FACES[d1-1], DIE_FACES[d2-1], '=' + total],
+    bet: diceState.bet,
+    payout, net,
+    win: net > 0,
+    game: 'dice'
+  });
+  if (stats.recentSpins.length > 20) stats.recentSpins.pop();
+
+  diceState.rolling = false;
+  saveState();
+  renderBalance();
+  renderUsers();
+  renderStats();
+  renderRecentSpins();
+  renderDiceControls();
+}
+
+function setDiceMsg(text, cls) {
+  const el = document.getElementById('diceResultMsg');
+  if (!el) return;
+  el.className = 'dice-result-msg' + (cls ? ' ' + cls : '');
+  el.querySelector('.message-text').textContent = text;
+}
+
+document.querySelectorAll('.dice-pick').forEach(el => {
+  el.onclick = () => {
+    if (diceState.rolling) return;
+    sfxClick();
+    diceState.pick = el.dataset.pick;
+    renderDiceControls();
+  };
+});
+document.getElementById('btnDiceRoll').onclick = rollDice;
+document.getElementById('diceBetSlider').oninput = (e) => {
+  if (diceState.rolling) return;
+  diceState.bet = betFromSlider(e.target.value);
+  renderDiceControls();
+};
+document.querySelectorAll('.dice-qb').forEach(b => {
+  b.onclick = () => {
+    if (diceState.rolling) return;
+    sfxClick();
+    diceState.bet = parseFloat(b.dataset.bet);
+    renderDiceControls();
+  };
+});
+
+// ============ COIN FLIP ============
+const coinState = { bet: 0.10, pick: null, flipping: false, streak: 0, bestStreak: 0 };
+
+function coinPayout() {
+  const edge = (state.houseEdge || 0) / 100;
+  return Math.max(1.01, 2 * (1 - edge));
+}
+
+function renderCoinflipPaytable() {
+  const pt = document.getElementById('coinflipPaytable');
+  if (!pt) return;
+  const payout = coinPayout();
+  pt.innerHTML = `
+    <div class="paytable-row">
+      <div class="paytable-symbols" style="font-size: 13px;">👑 HEADS</div>
+      <div class="paytable-mult">${payout.toFixed(2)}×</div>
+    </div>
+    <div class="paytable-row">
+      <div class="paytable-symbols" style="font-size: 13px;">🦅 TAILS</div>
+      <div class="paytable-mult">${payout.toFixed(2)}×</div>
+    </div>
+    <div class="paytable-row" style="opacity: 0.6; margin-top: 8px;">
+      <div class="paytable-symbols" style="font-size: 10px;">50/50 · pick right for ${payout.toFixed(2)}×</div>
+      <div class="paytable-mult" style="font-size: 11px;"></div>
+    </div>`;
+}
+
+function renderCoinflipControls() {
+  const betDisplay = document.getElementById('coinBetDisplay');
+  if (!betDisplay) return;
+  betDisplay.textContent = fmt(coinState.bet);
+  document.getElementById('coinBetSlider').value = sliderFromBet(coinState.bet);
+  document.querySelectorAll('.coin-qb').forEach(b => {
+    b.classList.toggle('active', Math.abs(parseFloat(b.dataset.bet) - coinState.bet) < 0.001);
+  });
+  document.querySelectorAll('.coin-pick').forEach(el => {
+    el.classList.toggle('selected', el.dataset.pick === coinState.pick);
+    el.classList.toggle('disabled', coinState.flipping);
+  });
+  document.getElementById('btnCoinFlip').disabled = !coinState.pick || coinState.flipping;
+  document.getElementById('coinStreak').textContent = coinState.streak;
+  document.getElementById('coinBestStreak').textContent = coinState.bestStreak;
+}
+
+async function flipCoin() {
+  if (coinState.flipping) return;
+  if (!coinState.pick) { toast('Pick heads or tails first', true); return; }
+  const user = getActiveUser();
+  if (user.balance < coinState.bet) { toast('Insufficient funds', true); sfxLose(); return; }
+  ensureAudio();
+
+  coinState.flipping = true;
+  renderCoinflipControls();
+  user.balance = Math.round((user.balance - coinState.bet) * 100) / 100;
+  const stats = getActiveStats();
+  stats.totalWagered = Math.round((stats.totalWagered + coinState.bet) * 100) / 100;
+
+  const balDisplay = document.getElementById('balanceDisplay');
+  balDisplay.classList.remove('flash-down'); void balDisplay.offsetWidth;
+  balDisplay.classList.add('flash-down');
+
+  saveState();
+  renderBalance();
+  renderUsers();
+
+  setCoinMsg('FLIPPING...', '');
+  sfxSpin();
+
+  const result = Math.random() < 0.5 ? 'heads' : 'tails';
+
+  const coinEl = document.getElementById('coinEl');
+  coinEl.classList.remove('flipping', 'show-heads', 'show-tails');
+  void coinEl.offsetWidth;
+  coinEl.classList.add('flipping');
+
+  await new Promise(r => setTimeout(r, 1500));
+
+  coinEl.classList.remove('flipping');
+  coinEl.classList.add(result === 'heads' ? 'show-heads' : 'show-tails');
+  sfxReelStop();
+
+  const won = (result === coinState.pick);
+  let payout = 0;
+  let net = -coinState.bet;
+  if (won) {
+    const mult = coinPayout();
+    payout = Math.round(coinState.bet * mult * 100) / 100;
+    net = Math.round((payout - coinState.bet) * 100) / 100;
+    user.balance = Math.round((user.balance + payout) * 100) / 100;
+    stats.totalWon = Math.round((stats.totalWon + payout) * 100) / 100;
+    if (net > 0) {
+      stats.wins++;
+      comboStreak++;
+      coinState.streak++;
+      if (coinState.streak > coinState.bestStreak) coinState.bestStreak = coinState.streak;
+      if (net > stats.biggest) { stats.biggest = net; flashCard('cardBiggest'); }
+      flashCard('cardWins');
+    }
+    balDisplay.classList.remove('flash-up','flash-down'); void balDisplay.offsetWidth;
+    balDisplay.classList.add('flash-up');
+
+    const label = result === 'heads' ? 'HEADS 👑' : 'TAILS 🦅';
+    setCoinMsg(`✓ ${label} — YOU WIN ${fmt(payout)}`, 'win');
+
+    if (coinState.streak >= 5) {
+      showWinOverlay(`${coinState.streak}× STREAK!`, payout, mult.toFixed(2) + '×', label);
+      burstParticles(50, 'rainbow');
+      shake('lg');
+      sfxBigWin();
+    } else if (coinState.streak >= 3) {
+      burstParticles(30, 'rainbow');
+      shake('md');
+      sfxBigWin();
+    } else {
+      burstParticles(15, 'gold');
+      shake('sm');
+      sfxWin();
+    }
+    spawnCoinsFromElement('.coinflip-machine');
+  } else {
+    comboStreak = 0;
+    coinState.streak = 0;
+    const label = result === 'heads' ? 'HEADS 👑' : 'TAILS 🦅';
+    setCoinMsg(`${label} — lost ${fmt(coinState.bet)}`, 'lose');
+    sfxLose();
+  }
+
+  stats.recentSpins.unshift({
+    symbols: [result === 'heads' ? '👑' : '🦅', '', ''],
+    bet: coinState.bet,
+    payout, net,
+    win: net > 0,
+    game: 'coinflip'
+  });
+  if (stats.recentSpins.length > 20) stats.recentSpins.pop();
+
+  coinState.flipping = false;
+  saveState();
+  renderBalance();
+  renderUsers();
+  renderStats();
+  renderRecentSpins();
+  renderCoinflipControls();
+}
+
+function setCoinMsg(text, cls) {
+  const el = document.getElementById('coinResultMsg');
+  if (!el) return;
+  el.className = 'dice-result-msg' + (cls ? ' ' + cls : '');
+  el.querySelector('.message-text').textContent = text;
+}
+
+document.querySelectorAll('.coin-pick').forEach(el => {
+  el.onclick = () => {
+    if (coinState.flipping) return;
+    sfxClick();
+    coinState.pick = el.dataset.pick;
+    renderCoinflipControls();
+  };
+});
+document.getElementById('btnCoinFlip').onclick = flipCoin;
+document.getElementById('coinBetSlider').oninput = (e) => {
+  if (coinState.flipping) return;
+  coinState.bet = betFromSlider(e.target.value);
+  renderCoinflipControls();
+};
+document.querySelectorAll('.coin-qb').forEach(b => {
+  b.onclick = () => {
+    if (coinState.flipping) return;
+    sfxClick();
+    coinState.bet = parseFloat(b.dataset.bet);
+    renderCoinflipControls();
+  };
+});
+
+// Extend switchGame to handle dice and coinflip
+const _origSwitchGame2 = switchGame;
+switchGame = function(game) {
+  document.querySelectorAll('.game-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.game === game);
+  });
+  ['slotsView','minesView','horsesView','plinkoView','diceView','coinflipView'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  ['paytable','minesPaytable','horsesPaytable','plinkoPaytable','dicePaytable','coinflipPaytable'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  if (game === 'slots') {
+    document.getElementById('slotsView').style.display = '';
+    document.getElementById('paytable').style.display = '';
+    document.getElementById('rightPanelTitle').textContent = 'PAYOUTS';
+  } else if (game === 'mines') {
+    document.getElementById('minesView').style.display = '';
+    document.getElementById('minesPaytable').style.display = '';
+    document.getElementById('rightPanelTitle').textContent = 'MINES PAYOUTS';
+    if (minesState.tiles.length === 0) {
+      buildMinesGrid(); updateMinesControls(); updateMinesDisplay();
+    }
+  } else if (game === 'horses') {
+    document.getElementById('horsesView').style.display = '';
+    document.getElementById('horsesPaytable').style.display = '';
+    document.getElementById('rightPanelTitle').textContent = 'HORSE ODDS';
+    renderHorses(); renderHorsesPaytable();
+  } else if (game === 'plinko') {
+    document.getElementById('plinkoView').style.display = '';
+    document.getElementById('plinkoPaytable').style.display = '';
+    document.getElementById('rightPanelTitle').textContent = 'PLINKO PAYOUTS';
+    setupPlinkoPegs();
+    renderPlinkoSlots();
+    renderPlinkoPaytable();
+    drawPlinko();
+  } else if (game === 'dice') {
+    document.getElementById('diceView').style.display = '';
+    document.getElementById('dicePaytable').style.display = '';
+    document.getElementById('rightPanelTitle').textContent = 'DICE PAYOUTS';
+    renderDicePaytable();
+    renderDiceControls();
+  } else if (game === 'coinflip') {
+    document.getElementById('coinflipView').style.display = '';
+    document.getElementById('coinflipPaytable').style.display = '';
+    document.getElementById('rightPanelTitle').textContent = 'COIN FLIP PAYOUTS';
+    renderCoinflipPaytable();
+    renderCoinflipControls();
+  }
+};
+document.querySelectorAll('.game-tab').forEach(t => {
+  t.onclick = () => { sfxClick(); switchGame(t.dataset.game); };
+});
+
+// Update edge display also refreshes coinflip paytable (dice is fixed)
+const _origUpdateEdgeDisplay2 = updateEdgeDisplay;
+updateEdgeDisplay = function(val) {
+  _origUpdateEdgeDisplay2(val);
+  renderCoinflipPaytable();
+};
+
+renderDiceControls();
+renderCoinflipControls();
 
 renderAll();
 </script>
