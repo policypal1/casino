@@ -1026,12 +1026,13 @@ body {
     </div>
 
     <div class="admin-section">
-      <h3>🍀 LUCK METER</h3>
+      <h3>🏠 HOUSE EDGE</h3>
       <div class="luck-row">
-        <input type="range" id="adminLuck" min="0" max="100" step="1" value="0" />
-        <span class="luck-value" id="adminLuckValue">0%</span>
+        <input type="range" id="adminEdge" min="0" max="100" step="1" value="10" />
+        <span class="luck-value" id="adminEdgeValue">10%</span>
       </div>
-      <div class="luck-hint" id="adminLuckHint">0% = pure chance · 50% = generous · 100% = always wins</div>
+      <div class="luck-hint" id="adminEdgeHint">0% = fair (player breaks even long-term) · 10% = house takes 10¢ per $1 · 100% = unwinnable</div>
+      <div class="luck-hint" id="adminRtpHint" style="margin-top: 4px; color: rgba(0, 255, 150, 0.7);">Effective player RTP: 90%</div>
     </div>
 
     <div class="admin-section">
@@ -1073,7 +1074,7 @@ body {
 
 <script>
 // ============ STATE ============
-const STORAGE_KEY = 'kumpulaCasino_v4';
+const STORAGE_KEY = 'kumpulaCasino_v5';
 
 const DEFAULT_SYMBOLS = [
   { id: 'cherry',  emoji: '🍒',  weight: 14, mult: 3 },
@@ -1100,7 +1101,7 @@ const DEFAULT_STATE = {
   jackpotGrowth: 0.01,
   symbols: DEFAULT_SYMBOLS,
   bet: 0.05,
-  luck: 0,
+  houseEdge: 10,
   stats: {},
   soundOn: true
 };
@@ -1142,32 +1143,38 @@ function pickSymbol() {
   return state.symbols[0];
 }
 
-// Luck mechanic: 0 = pure RNG, 100 = guaranteed at-least-bet-back every spin.
-// In between, that % of "all different" (losing) results get re-rolled.
-// We also bias the re-roll toward making 2 reels match — naturally producing more
-// near-misses and small wins, which feels good without being obvious.
-function applyLuck(results) {
-  const luck = state.luck || 0;
-  if (luck <= 0) return results;
-  const allDifferent = results[0].id !== results[1].id &&
-                       results[1].id !== results[2].id &&
-                       results[0].id !== results[2].id;
-  if (!allDifferent) return results; // already a win, leave it
-  if (Math.random() * 100 >= luck) return results; // luck didn't trigger
-  // Re-roll: force a match on two reels by copying one symbol onto another
-  // Pick which reel to "fix" so two of them match. The third stays — this often
-  // produces near-miss style results which feel exciting.
-  const newResults = [...results];
-  const fixIdx = Math.floor(Math.random() * 3);
-  const sourceIdx = (fixIdx + 1) % 3;
-  newResults[fixIdx] = results[sourceIdx];
-  // At very high luck (>80), occasionally upgrade to a full 3-of-a-kind
-  if (luck > 80 && Math.random() < (luck - 80) / 30) {
-    const matchIdx = Math.floor(Math.random() * 3);
-    const sym = results[matchIdx];
-    return [sym, sym, sym];
+// Calculate the base RTP from the current symbol setup (assuming 2x two-match payout)
+// before any house-edge scaling. Used to derive the scale factor.
+function computeBaseRtp() {
+  const total = totalWeight();
+  if (total === 0) return 1;
+  let evThree = 0;
+  for (const sym of state.symbols) {
+    const p = (sym.weight / total) ** 3;
+    evThree += sym.mult * p;
   }
-  return newResults;
+  const pAllMatch = state.symbols.reduce((a, s) => a + (s.weight / total) ** 3, 0);
+  // P(all different) = sum over ordered distinct triples
+  const probs = state.symbols.map(s => s.weight / total);
+  let pAllDiff = 0;
+  for (let i = 0; i < probs.length; i++) {
+    for (let j = 0; j < probs.length; j++) {
+      for (let k = 0; k < probs.length; k++) {
+        if (i !== j && j !== k && i !== k) pAllDiff += probs[i] * probs[j] * probs[k];
+      }
+    }
+  }
+  const pTwoMatch = 1 - pAllMatch - pAllDiff;
+  return evThree + pTwoMatch * TWO_MATCH_MULT;
+}
+
+// Get the scaling factor to apply to slot payouts so the effective RTP matches
+// (100 - houseEdge)%. Computed fresh every spin so admin changes apply instantly.
+function getPayoutScale() {
+  const targetRtp = Math.max(0, (100 - (state.houseEdge || 0)) / 100);
+  const baseRtp = computeBaseRtp();
+  if (baseRtp <= 0) return 1;
+  return targetRtp / baseRtp;
 }
 function betFromSlider(val) { return Math.round(val) / 100; }
 function sliderFromBet(bet) { return Math.max(1, Math.min(100, Math.round(bet * 100))); }
@@ -1267,15 +1274,19 @@ function renderStats() {
 
 function renderPaytable() {
   const pt = document.getElementById('paytable');
+  if (!pt) return;
+  const scale = getPayoutScale();
   const sorted = [...state.symbols].sort((a, b) => b.mult - a.mult);
-  pt.innerHTML = sorted.map((sym, i) => `
-    <div class="paytable-row ${i === 0 ? 'jackpot' : ''}">
+  pt.innerHTML = sorted.map((sym, i) => {
+    const m = sym.mult * scale;
+    return `<div class="paytable-row ${i === 0 ? 'jackpot' : ''}">
       <div class="paytable-symbols">${sym.emoji} ${sym.emoji} ${sym.emoji}</div>
-      <div class="paytable-mult">${sym.mult}×</div>
-    </div>`).join('') + `
+      <div class="paytable-mult">${m.toFixed(m < 10 ? 2 : 1)}×</div>
+    </div>`;
+  }).join('') + `
     <div class="paytable-row">
       <div class="paytable-symbols" style="font-size: 11px; letter-spacing: 0;">any two matching</div>
-      <div class="paytable-mult">${TWO_MATCH_MULT}×</div>
+      <div class="paytable-mult">${(TWO_MATCH_MULT * scale).toFixed(2)}×</div>
     </div>`;
 }
 
@@ -1421,7 +1432,7 @@ async function spin() {
   renderStats();
   setMessage('SPINNING...', '');
 
-  const results = applyLuck([pickSymbol(), pickSymbol(), pickSymbol()]);
+  const results = [pickSymbol(), pickSymbol(), pickSymbol()];
 
   await Promise.all([
     animateReel(0, results[0], 900),
@@ -1442,8 +1453,10 @@ async function spin() {
     results[0].id === results[2].id
   );
 
+  const payoutScale = getPayoutScale();
+
   if (allMatch) {
-    multiplier = results[0].mult;
+    multiplier = results[0].mult * payoutScale;
     payout = bet * multiplier;
     if (results[0].id === 'seven') {
       payout += state.jackpot;
@@ -1457,8 +1470,8 @@ async function spin() {
       setTimeout(() => r.classList.remove('winning'), 1600);
     });
   } else if (twoMatch) {
-    multiplier = TWO_MATCH_MULT;
-    payout = bet * TWO_MATCH_MULT;
+    multiplier = TWO_MATCH_MULT * payoutScale;
+    payout = bet * multiplier;
     winType = 'small';
   }
 
@@ -1760,9 +1773,9 @@ function renderAdmin() {
   document.getElementById('adminJackpot').value = state.jackpot.toFixed(2);
   document.getElementById('adminJackpotGrowth').value = state.jackpotGrowth;
 
-  const luckSlider = document.getElementById('adminLuck');
-  luckSlider.value = state.luck || 0;
-  updateLuckDisplay(state.luck || 0);
+  const edgeSlider = document.getElementById('adminEdge');
+  edgeSlider.value = state.houseEdge || 0;
+  updateEdgeDisplay(state.houseEdge || 0);
 
   const payDiv = document.getElementById('adminPayouts');
   payDiv.innerHTML = state.symbols.map((sym, i) => `
@@ -1860,32 +1873,45 @@ document.getElementById('adminJackpotGrowth').onchange = (e) => {
   saveState();
 };
 
-function updateLuckDisplay(val) {
+function updateEdgeDisplay(val) {
   const v = parseInt(val) || 0;
-  document.getElementById('adminLuckValue').textContent = v + '%';
+  document.getElementById('adminEdgeValue').textContent = v + '%';
   let hint;
-  if (v === 0) hint = '0% = pure chance · house edge ~5%';
-  else if (v < 25) hint = 'Slight nudge in your favor';
-  else if (v < 50) hint = 'Friendly mode · more wins than usual';
-  else if (v < 75) hint = 'Generous · most spins return something';
-  else if (v < 100) hint = 'Very lucky · big wins way more often';
-  else hint = '100% = every spin wins (rigged for the player)';
-  document.getElementById('adminLuckHint').textContent = hint;
+  if (v === 0) hint = '0% = fair · player breaks even long-term';
+  else if (v < 5) hint = 'Very thin edge · player slightly disadvantaged';
+  else if (v < 10) hint = 'Vegas-tier · 5-10¢ per $1 wagered';
+  else if (v < 20) hint = 'Standard house edge · profitable for the house';
+  else if (v < 40) hint = 'Heavy edge · players lose fast';
+  else if (v < 75) hint = 'Brutal · player loses most of every bet on average';
+  else if (v < 100) hint = 'Nearly unwinnable';
+  else hint = '100% = no payouts at all, every bet is pure loss';
+  document.getElementById('adminEdgeHint').textContent = hint;
 
-  // color the value text based on level
-  const el = document.getElementById('adminLuckValue');
-  if (v === 0) el.style.color = 'rgba(255,255,255,0.6)';
-  else if (v < 50) el.style.color = '#ffd700';
-  else el.style.color = '#00ff96';
+  const rtpEl = document.getElementById('adminRtpHint');
+  rtpEl.textContent = 'Effective player RTP: ' + (100 - v) + '%';
+  if (v === 0) rtpEl.style.color = 'rgba(0, 255, 150, 0.7)';
+  else if (v < 10) rtpEl.style.color = 'rgba(255, 215, 0, 0.7)';
+  else if (v < 30) rtpEl.style.color = 'rgba(255, 170, 0, 0.7)';
+  else rtpEl.style.color = 'rgba(255, 100, 100, 0.7)';
+
+  const valEl = document.getElementById('adminEdgeValue');
+  if (v === 0) valEl.style.color = '#00ff96';
+  else if (v < 15) valEl.style.color = '#ffd700';
+  else valEl.style.color = '#ff6b6b';
+
+  // Re-render paytables and mines payouts so changes show immediately
+  if (typeof renderPaytable === 'function') renderPaytable();
+  if (typeof renderMinesPaytable === 'function') renderMinesPaytable();
+  if (typeof updateMinesDisplay === 'function' && minesState && minesState.tiles.length > 0) updateMinesDisplay();
 }
 
-document.getElementById('adminLuck').oninput = (e) => {
-  state.luck = parseInt(e.target.value) || 0;
-  updateLuckDisplay(state.luck);
+document.getElementById('adminEdge').oninput = (e) => {
+  state.houseEdge = parseInt(e.target.value) || 0;
+  updateEdgeDisplay(state.houseEdge);
 };
-document.getElementById('adminLuck').onchange = () => {
+document.getElementById('adminEdge').onchange = () => {
   saveState();
-  toast('Luck set to ' + state.luck + '%');
+  toast('House edge set to ' + state.houseEdge + '%');
 };
 
 document.getElementById('addUserBtn').onclick = () => {
@@ -1986,7 +2012,9 @@ function fairMultiplier(total, mines, picks, houseEdge) {
   for (let k = 0; k < picks; k++) {
     pAllSafe *= (safe - k) / (total - k);
   }
-  return (1 - (houseEdge || 0.03)) / pAllSafe;
+  // Use the global house edge from state, falling back to the param then to 3%
+  const edge = (houseEdge !== undefined) ? houseEdge : ((state.houseEdge || 0) / 100);
+  return Math.max(0, (1 - edge)) / pAllSafe;
 }
 
 function maxMinesForGrid(size) { return size * size - 1; }
@@ -2062,22 +2090,7 @@ function onTileClick(idx) {
   const tile = minesState.tiles[idx];
   if (tile.revealed) return;
 
-  // Luck: convert mine clicks to safe at high luck (and move the mine elsewhere)
-  let isMine = tile.isMine;
-  const luck = state.luck || 0;
-  if (isMine && luck > 0 && Math.random() * 100 < luck) {
-    tile.isMine = false;
-    isMine = false;
-    const candidates = minesState.tiles
-      .map((t, i) => ({ t, i }))
-      .filter(x => !x.t.revealed && !x.t.isMine && x.i !== idx);
-    if (candidates.length > 0) {
-      const move = candidates[Math.floor(Math.random() * candidates.length)];
-      move.t.isMine = true;
-      minesState.mineIndices = minesState.mineIndices.filter(i => i !== idx);
-      minesState.mineIndices.push(move.i);
-    }
-  }
+  const isMine = tile.isMine;
 
   tile.revealed = true;
   tile.el.classList.add('revealed');
