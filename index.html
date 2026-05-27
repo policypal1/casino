@@ -3,101 +3,382 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Kumpula Casino - Game Menu</title>
+<title>Kumpula Casino — Game Menu</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}html,body{min-height:100%;overflow-x:hidden}body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none;-webkit-tap-highlight-color:transparent}.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(120,50,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(120,50,255,.07) 1px,transparent 1px);background-size:40px 40px;animation:gridMove 20s linear infinite}@keyframes gridMove{to{transform:translate(40px,40px)}}.bg-glow{position:fixed;border-radius:50%;filter:blur(120px);opacity:.45;z-index:0;pointer-events:none}.glow-1{width:500px;height:500px;background:#ff00aa;top:-100px;left:-100px;animation:float1 15s ease-in-out infinite}.glow-2{width:600px;height:600px;background:#00d4ff;bottom:-200px;right:-100px;animation:float2 18s ease-in-out infinite}.glow-3{width:400px;height:400px;background:#ffaa00;top:40%;left:50%;animation:float3 12s ease-in-out infinite}@keyframes float1{50%{transform:translate(100px,80px)}}@keyframes float2{50%{transform:translate(-80px,-100px)}}@keyframes float3{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-60px)}}.page{position:relative;z-index:5;min-height:100vh;padding-bottom:50px}.topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 28px;background:rgba(15,10,30,.6);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,0,170,.2)}.logo{display:flex;align-items:center;gap:12px;font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px}.logo-icon{font-size:38px;filter:drop-shadow(0 0 12px #ffaa00)}.logo-accent{background:linear-gradient(90deg,#ff00aa,#ffaa00);-webkit-background-clip:text;background-clip:text;color:transparent;margin-left:6px}.balance-pill{display:flex;flex-direction:column;align-items:flex-end;padding:8px 20px;background:linear-gradient(135deg,rgba(255,170,0,.15),rgba(255,0,170,.15));border:1px solid rgba(255,170,0,.4);border-radius:10px}.balance-label{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.6);font-weight:700}.balance-amount{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.6);letter-spacing:1px}.wrap{max-width:1180px;margin:0 auto;padding:34px 22px}.hero{text-align:center;margin:18px auto 28px;max-width:840px}.eyebrow{font-size:12px;font-weight:800;letter-spacing:3px;color:#00d4ff;text-transform:uppercase;margin-bottom:10px}.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,96px);line-height:.9;letter-spacing:4px}.hero p{color:rgba(255,255,255,.72);font-size:16px;line-height:1.7;margin-top:16px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin:30px 0 14px}.section-head h2{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px}.section-head p{color:rgba(255,255,255,.55);font-size:13px}.users{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.user-card{display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:16px;cursor:pointer;transition:.2s}.user-card:hover{transform:translateY(-2px);border-color:rgba(0,212,255,.45);background:rgba(255,255,255,.07)}.user-card.active{border-color:#ff00aa;background:linear-gradient(135deg,rgba(255,0,170,.22),rgba(0,212,255,.14));box-shadow:0 0 28px rgba(255,0,170,.25)}.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:900;box-shadow:0 4px 16px rgba(0,0,0,.35)}.user-name{font-weight:800}.user-bal{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px}.add-user{display:grid;grid-template-columns:1.4fr .8fr auto;gap:10px;margin-top:12px}.add-user input{padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);color:#fff;outline:none}.add-user button,.launch-btn{border:none;border-radius:12px;padding:12px 16px;background:linear-gradient(135deg,#ff00aa,#ff6b00);color:#fff;font-weight:900;letter-spacing:1px;cursor:pointer;transition:.2s}.add-user button:hover,.launch-btn:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(255,0,170,.35)}.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}.game-card{position:relative;min-height:190px;padding:20px;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.11);border-radius:22px;text-decoration:none;color:#fff;overflow:hidden;transition:.22s}.game-card:before{content:'';position:absolute;inset:-2px;background:radial-gradient(circle at 20% 20%,var(--accent),transparent 36%);opacity:.22}.game-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 18px 44px rgba(0,0,0,.35)}.game-top{position:relative;display:flex;justify-content:space-between;align-items:start;gap:12px}.game-icon{font-size:48px;filter:drop-shadow(0 0 12px var(--accent))}.tag{font-size:10px;letter-spacing:1.7px;font-weight:900;color:#08060f;background:var(--accent);padding:6px 9px;border-radius:999px}.game-card h3{position:relative;font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;margin-top:24px}.game-card p{position:relative;color:rgba(255,255,255,.68);font-size:13px;line-height:1.5;margin-top:6px}.launch-line{position:relative;margin-top:18px;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--accent)}.disabled-note{display:none;margin-top:10px;color:#ff9aa8;font-size:13px}.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-120px);z-index:10;background:rgba(255,50,100,.95);padding:12px 18px;border-radius:12px;font-weight:800;transition:.3s}.toast.show{transform:translateX(-50%) translateY(0)}@media(max-width:650px){.topbar{padding:14px 16px}.logo{font-size:24px}.balance-pill{padding:6px 12px}.wrap{padding:24px 14px}.add-user{grid-template-columns:1fr}.game-card{min-height:170px}.section-head{display:block}.section-head p{margin-top:4px}}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;overflow-x:hidden}
+body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none;-webkit-tap-highlight-color:transparent}
+
+.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(120,50,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(120,50,255,.07) 1px,transparent 1px);background-size:40px 40px;animation:gridMove 20s linear infinite}
+@keyframes gridMove{to{transform:translate(40px,40px)}}
+.bg-glow{position:fixed;border-radius:50%;filter:blur(120px);opacity:.45;z-index:0;pointer-events:none}
+.glow-1{width:500px;height:500px;background:#ff00aa;top:-100px;left:-100px;animation:float1 15s ease-in-out infinite}
+.glow-2{width:600px;height:600px;background:#00d4ff;bottom:-200px;right:-100px;animation:float2 18s ease-in-out infinite}
+.glow-3{width:400px;height:400px;background:#ffaa00;top:40%;left:50%;animation:float3 12s ease-in-out infinite}
+@keyframes float1{50%{transform:translate(100px,80px)}}
+@keyframes float2{50%{transform:translate(-80px,-100px)}}
+@keyframes float3{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-60px)}}
+
+.page{position:relative;z-index:5;min-height:100vh;padding-bottom:50px}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 28px;background:rgba(15,10,30,.6);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,0,170,.2)}
+.logo{display:flex;align-items:center;gap:12px;font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px}
+.logo-icon{font-size:38px;filter:drop-shadow(0 0 12px #ffaa00)}
+.logo-accent{background:linear-gradient(90deg,#ff00aa,#ffaa00);-webkit-background-clip:text;background-clip:text;color:transparent;margin-left:6px}
+.balance-pill{display:flex;flex-direction:column;align-items:flex-end;padding:8px 20px;background:linear-gradient(135deg,rgba(255,170,0,.15),rgba(255,0,170,.15));border:1px solid rgba(255,170,0,.4);border-radius:10px}
+.balance-label{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.6);font-weight:700}
+.balance-amount{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.6);letter-spacing:1px}
+
+.wrap{max-width:1180px;margin:0 auto;padding:34px 22px}
+.hero{text-align:center;margin:18px auto 28px;max-width:840px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:3px;color:#00d4ff;text-transform:uppercase;margin-bottom:10px}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,96px);line-height:.9;letter-spacing:4px}
+.hero p{color:rgba(255,255,255,.72);font-size:16px;line-height:1.7;margin-top:16px}
+
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin:30px 0 14px}
+.section-head h2{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px}
+.section-head p{color:rgba(255,255,255,.55);font-size:13px}
+
+.users{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.user-card{display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:16px;cursor:pointer;transition:.2s;position:relative}
+.user-card:hover{transform:translateY(-2px);border-color:rgba(0,212,255,.45);background:rgba(255,255,255,.07)}
+.user-card.active{border-color:#ff00aa;background:linear-gradient(135deg,rgba(255,0,170,.22),rgba(0,212,255,.14));box-shadow:0 0 28px rgba(255,0,170,.25)}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:900;box-shadow:0 4px 16px rgba(0,0,0,.35);flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-bal{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px}
+.user-del{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-size:12px;display:none;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.user-card:hover .user-del{display:flex}
+.user-del:hover{background:rgba(255,50,80,.6);color:#fff;border-color:#ff3355}
+
+.add-user{display:grid;grid-template-columns:1.4fr .8fr auto auto;gap:10px;margin-top:12px}
+.add-user input{padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);color:#fff;outline:none;font-family:Inter,sans-serif}
+.add-user input:focus{border-color:#00d4ff;box-shadow:0 0 12px rgba(0,212,255,.25)}
+.add-user button,.launch-btn,.deposit-btn{border:none;border-radius:12px;padding:12px 16px;background:linear-gradient(135deg,#ff00aa,#ff6b00);color:#fff;font-weight:900;letter-spacing:1px;cursor:pointer;transition:.2s;font-family:Inter,sans-serif}
+.add-user button:hover,.launch-btn:hover,.deposit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(255,0,170,.35)}
+.deposit-btn{background:linear-gradient(135deg,#00ff96,#00d4ff);color:#08060f}
+.deposit-btn:hover{box-shadow:0 8px 26px rgba(0,212,255,.35)}
+
+.quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.quick-actions button{padding:10px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;letter-spacing:1px;transition:.15s;font-family:Inter,sans-serif}
+.quick-actions button:hover{transform:translateY(-2px);border-color:#00d4ff;background:rgba(0,212,255,.1)}
+.quick-actions button.danger{border-color:rgba(255,80,100,.25)}
+.quick-actions button.danger:hover{background:rgba(255,50,80,.15);border-color:#ff3355}
+
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.game-card{position:relative;min-height:200px;padding:20px;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.11);border-radius:22px;text-decoration:none;color:#fff;overflow:hidden;transition:.22s;display:flex;flex-direction:column}
+.game-card:before{content:'';position:absolute;inset:-2px;background:radial-gradient(circle at 20% 20%,var(--accent),transparent 36%);opacity:.22;pointer-events:none}
+.game-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 18px 44px rgba(0,0,0,.35)}
+.game-top{position:relative;display:flex;justify-content:space-between;align-items:start;gap:12px}
+.game-icon{font-size:48px;filter:drop-shadow(0 0 12px var(--accent))}
+.tag{font-size:10px;letter-spacing:1.7px;font-weight:900;color:#08060f;background:var(--accent);padding:6px 9px;border-radius:999px}
+.game-card h3{position:relative;font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;margin-top:18px}
+.game-card p{position:relative;color:rgba(255,255,255,.68);font-size:13px;line-height:1.5;margin-top:6px;flex:1}
+.launch-line{position:relative;margin-top:14px;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--accent)}
+
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-120px);z-index:100;background:rgba(15,10,30,.95);border:1px solid #ff3355;padding:12px 18px;border-radius:12px;font-weight:800;transition:.3s;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:#00ff96}
+
+.modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.72);backdrop-filter:blur(6px)}
+.modal.show{display:flex}
+.modal-content{width:90%;max-width:420px;padding:28px;background:linear-gradient(180deg,#1a0d2e,#0d0820);border:2px solid #ff00aa;border-radius:20px;box-shadow:0 0 40px rgba(255,0,170,.3)}
+.modal h3{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:14px}
+.modal input{width:100%;padding:14px;border-radius:10px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:18px;text-align:center;margin-bottom:12px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px}
+.modal input:focus{outline:none;border-color:#00d4ff;box-shadow:0 0 12px rgba(0,212,255,.3)}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-actions button{padding:12px;border-radius:10px;border:none;font-weight:900;letter-spacing:1px;cursor:pointer;font-family:Inter,sans-serif}
+.modal-actions .cancel{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15)}
+.modal-actions .confirm{background:linear-gradient(135deg,#00ff96,#00d4ff);color:#08060f}
+
+@media(max-width:650px){
+  .topbar{padding:14px 16px}
+  .logo{font-size:24px}
+  .logo-icon{font-size:28px}
+  .balance-pill{padding:6px 12px}
+  .balance-amount{font-size:22px}
+  .wrap{padding:24px 14px}
+  .add-user{grid-template-columns:1fr 1fr;gap:8px}
+  .add-user button{grid-column:span 2}
+  .game-card{min-height:180px}
+  .section-head{display:block}
+  .section-head p{margin-top:4px}
+}
 </style>
 </head>
 <body>
-<div class="bg-grid"></div><div class="bg-glow glow-1"></div><div class="bg-glow glow-2"></div><div class="bg-glow glow-3"></div>
+<div class="bg-grid"></div>
+<div class="bg-glow glow-1"></div>
+<div class="bg-glow glow-2"></div>
+<div class="bg-glow glow-3"></div>
+
 <div class="page">
   <header class="topbar">
     <div class="logo"><span class="logo-icon">🎰</span><span>KUMPULA<span class="logo-accent">CASINO</span></span></div>
     <div class="balance-pill"><span class="balance-label">SELECTED BALANCE</span><span class="balance-amount" id="selectedBalance">$0.00</span></div>
   </header>
+
   <main class="wrap">
     <section class="hero">
       <div class="eyebrow">Game Launcher</div>
       <h1>Pick a player. Pick a game.</h1>
-      <p>This menu keeps the casino from turning into one giant file. Classic games live in one file. New games live in another file. Balances stay shared through localStorage.</p>
+      <p>This menu keeps the casino from turning into one giant file. Classic games live in one file. New games live in another. Balances stay shared through localStorage.</p>
     </section>
 
-    <div class="section-head"><div><h2>1. Choose Player</h2><p>Current players are pulled from the same saved casino data.</p></div></div>
+    <div class="section-head"><div><h2>1. Choose Player</h2><p>Hover a card to remove a player. Deposit funds with the green button.</p></div></div>
     <div class="users" id="users"></div>
     <div class="add-user">
-      <input id="newName" placeholder="New player name" />
+      <input id="newName" placeholder="New player name" maxlength="20" />
       <input id="newBalance" type="number" value="0" min="0" step="0.01" placeholder="Starting balance" />
       <button id="addPlayer">ADD PLAYER</button>
+      <button class="deposit-btn" id="depositBtn">+ DEPOSIT</button>
+    </div>
+    <div class="quick-actions">
+      <button id="resetStats">RESET MY STATS</button>
+      <button class="danger" id="wipeAll">WIPE ALL DATA</button>
     </div>
 
     <div class="section-head"><div><h2>2. Choose Game</h2><p>Cards open the correct game file directly.</p></div></div>
     <div class="games" id="games"></div>
-    <div class="disabled-note" id="disabledNote">Select a player first.</div>
   </main>
 </div>
+
 <div class="toast" id="toast"></div>
+
+<div class="modal" id="depositModal">
+  <div class="modal-content">
+    <h3>DEPOSIT FUNDS</h3>
+    <p style="color:rgba(255,255,255,.6);font-size:13px;margin-bottom:12px">Add cash to <span id="depositName" style="color:#ffd700;font-weight:800"></span>'s balance.</p>
+    <input type="number" id="depositAmount" min="0.01" step="0.01" placeholder="Amount ($)" />
+    <div class="modal-actions">
+      <button class="cancel" id="depositCancel">CANCEL</button>
+      <button class="confirm" id="depositConfirm">DEPOSIT</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const STORAGE_KEY = 'kumpulaCasino_v5';
+'use strict';
+
+// IMPORTANT: must match STORAGE_KEY in casino-new-games.html (currently v7)
+const STORAGE_KEY = 'kumpulaCasino_v7';
 const DEFAULT_STATE = {
   users: [
-    { id:'sam', name:'Sam', balance:0, color:'#ff00aa' },
-    { id:'will', name:'Will', balance:0, color:'#00d4ff' },
+    { id:'sam',   name:'Sam',   balance:0, color:'#ff00aa' },
+    { id:'will',  name:'Will',  balance:0, color:'#00d4ff' },
     { id:'isaac', name:'Isaac', balance:0, color:'#ffaa00' }
   ],
-  activeUserId:'sam', jackpot:50, jackpotGrowth:.01, houseEdge:10, soundOn:true, stats:{}
+  activeUserId: 'sam',
+  houseEdge: 10,
+  soundOn: true,
+  stats: {}
 };
+
+// Classic games (existing casino-classics.html)
 const CLASSIC_GAMES = [
-  ['slots','Slots','🎰','Classic slot machine with reels, jackpot, and near misses.','#ff00aa','casino-classics.html','CLASSIC'],
-  ['mines','Mines','💣','Pick safe tiles and cash out before you hit a mine.','#00d4ff','casino-classics.html','CLASSIC'],
-  ['horses','Horses','🐎','Pick a horse, start the race, and watch the track.','#ffaa00','casino-classics.html','CLASSIC'],
-  ['plinko','Plinko','🟡','Drop the ball through the pegs and hit a multiplier.','#ffd700','casino-classics.html','CLASSIC'],
-  ['dice','7 Over / Under','🎲','Pick under seven, exactly seven, or over seven.','#00ffc8','casino-classics.html','CLASSIC'],
-  ['coinflip','Queen Flip','👑','Pick heads or tails with streak tracking.','#ffb703','casino-classics.html','CLASSIC']
+  ['slots',    'Slots',          '🎰', 'Classic slot machine with reels, jackpot, and near misses.',  '#ff00aa', 'casino-classics.html', 'CLASSIC'],
+  ['mines',    'Mines',          '💣', 'Pick safe tiles and cash out before you hit a mine.',         '#00d4ff', 'casino-classics.html', 'CLASSIC'],
+  ['horses',   'Horses',         '🐎', 'Pick a horse, start the race, and watch the track.',          '#ffaa00', 'casino-classics.html', 'CLASSIC'],
+  ['plinko',   'Plinko',         '🟡', 'Drop the ball through the pegs and hit a multiplier.',        '#ffd700', 'casino-classics.html', 'CLASSIC'],
+  ['dice',     '7 Over / Under', '🎲', 'Pick under seven, exactly seven, or over seven.',             '#00ffc8', 'casino-classics.html', 'CLASSIC'],
+  ['coinflip', 'Queen Flip',     '👑', 'Pick heads or tails with streak tracking.',                   '#ffb703', 'casino-classics.html', 'CLASSIC']
 ];
+
+// New games (casino-new-games.html) — must match GAMES array in that file
 const NEW_GAMES = [
-  ['roulette','Roulette','🔴','Bet red, black, green, or a straight number.','#ff3355','casino-new-games.html','NEW'],
-  ['crash','Crash','🚀','Cash out before the multiplier explodes.','#00d4ff','casino-new-games.html','NEW'],
-  ['wheel','Wheel','🎡','Spin a multiplier wheel with low and high hits.','#ffd700','casino-new-games.html','NEW'],
-  ['luckyDice','Dice','🎲','Pick the exact die face and try to hit 6×.','#00ffc8','casino-new-games.html','NEW'],
-  ['blackjack','Blackjack','🃏','Play against the dealer. Hit, stand, or push.','#b26bff','casino-new-games.html','NEW']
+  ['roulette',  'Roulette',  '🔴', 'Bet red, black, green, or a straight number on the wheel.',     '#ff3355', 'casino-new-games.html', 'NEW'],
+  ['crash',     'Crash',     '🚀', 'Cash out before the multiplier explodes.',                      '#00d4ff', 'casino-new-games.html', 'NEW'],
+  ['wheel',     'Wheel',     '🎡', 'Spin a multiplier wheel with low and high hits.',               '#ffd700', 'casino-new-games.html', 'NEW'],
+  ['luckyDice', 'Dice',      '🎲', 'Pick the exact die face and try to hit 5×.',                    '#00ffc8', 'casino-new-games.html', 'NEW'],
+  ['blackjack', 'Blackjack', '🃏', 'Play against the dealer. Hit, stand, or push.',                 '#b26bff', 'casino-new-games.html', 'NEW'],
+  ['stocks',    'Stocks',    '📈', 'Buy shares, ride the chart, cash out before the market dumps.', '#00ff96', 'casino-new-games.html', 'HOT']
 ];
+
 let state = loadState();
+let depositTargetId = null;
+
 function loadState(){
-  try{const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return initStats(structuredClone(DEFAULT_STATE)); const loaded=JSON.parse(raw); return initStats({...structuredClone(DEFAULT_STATE),...loaded});}
-  catch(e){return initStats(structuredClone(DEFAULT_STATE));}
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return initStats(clone(DEFAULT_STATE));
+    const loaded = JSON.parse(raw);
+    return initStats({...clone(DEFAULT_STATE), ...loaded});
+  } catch(e) {
+    return initStats(clone(DEFAULT_STATE));
+  }
 }
-function initStats(s){s.stats=s.stats||{};(s.users||[]).forEach(u=>{if(!s.stats[u.id])s.stats[u.id]={spins:0,wins:0,biggest:0,totalWagered:0,totalWon:0,recentSpins:[]};});return s}
-function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
-function fmt(n){return '$'+(Math.round((Number(n)||0)*100)/100).toFixed(2)}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function activeUser(){return state.users.find(u=>u.id===state.activeUserId)||state.users[0]}
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function initStats(s){
+  s.stats = s.stats || {};
+  (s.users || []).forEach(u => {
+    if (!s.stats[u.id]) s.stats[u.id] = {spins:0,wins:0,biggest:0,totalWagered:0,totalWon:0,recentSpins:[]};
+  });
+  return s;
+}
+function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
+function fmt(n){ return '$' + (Math.round((Number(n)||0)*100)/100).toFixed(2); }
+function cents(n){ return Math.round((Number(n)||0)*100)/100; }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function activeUser(){ return state.users.find(u => u.id === state.activeUserId) || state.users[0]; }
+
 function renderUsers(){
-  const box=document.getElementById('users');
-  box.innerHTML=state.users.map(u=>`<div class="user-card ${u.id===state.activeUserId?'active':''}" data-id="${u.id}"><div class="avatar" style="background:${u.color}">${esc(u.name.slice(0,2).toUpperCase())}</div><div><div class="user-name">${esc(u.name)}</div><div class="user-bal">${fmt(u.balance)}</div></div></div>`).join('');
-  box.querySelectorAll('.user-card').forEach(card=>card.onclick=()=>{state.activeUserId=card.dataset.id;save();render();});
+  const box = document.getElementById('users');
+  box.innerHTML = state.users.map(u => `
+    <div class="user-card ${u.id===state.activeUserId?'active':''}" data-id="${u.id}">
+      <div class="avatar" style="background:${u.color}">${esc(u.name.slice(0,2).toUpperCase())}</div>
+      <div class="user-info">
+        <div class="user-name">${esc(u.name)}</div>
+        <div class="user-bal">${fmt(u.balance)}</div>
+      </div>
+      ${state.users.length > 1 ? `<button class="user-del" data-del="${u.id}" title="Remove player">✕</button>` : ''}
+    </div>`).join('');
+
+  box.querySelectorAll('.user-card').forEach(card => {
+    card.onclick = (e) => {
+      if (e.target.dataset.del) return; // handled below
+      state.activeUserId = card.dataset.id;
+      save();
+      render();
+    };
+  });
+  box.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.del;
+      const u = state.users.find(x => x.id === id);
+      if (!u) return;
+      if (!confirm(`Remove player "${u.name}"? Their balance and stats will be lost.`)) return;
+      state.users = state.users.filter(x => x.id !== id);
+      if (state.stats) delete state.stats[id];
+      if (state.activeUserId === id && state.users.length) state.activeUserId = state.users[0].id;
+      save();
+      render();
+      toast(`Removed ${u.name}.`, 'success');
+    };
+  });
 }
+
 function renderGames(){
-  const all=[...CLASSIC_GAMES,...NEW_GAMES];
-  const user=activeUser();
-  document.getElementById('games').innerHTML=all.map(g=>{
-    const [id,title,icon,desc,color,file,tag]=g;
-    const href=`${file}?game=${encodeURIComponent(id)}&user=${encodeURIComponent(user.id)}`;
-    return `<a class="game-card" href="${href}" style="--accent:${color}" onclick="saveActive('${user.id}')"><div class="game-top"><div class="game-icon">${icon}</div><div class="tag">${tag}</div></div><h3>${title}</h3><p>${desc}</p><div class="launch-line">OPEN GAME →</div></a>`;
+  const all = [...CLASSIC_GAMES, ...NEW_GAMES];
+  const user = activeUser();
+  document.getElementById('games').innerHTML = all.map(g => {
+    const [id, title, icon, desc, color, file, tag] = g;
+    const href = `${file}?game=${encodeURIComponent(id)}&user=${encodeURIComponent(user.id)}`;
+    return `
+      <a class="game-card" href="${href}" style="--accent:${color}" data-user="${user.id}">
+        <div class="game-top">
+          <div class="game-icon">${icon}</div>
+          <div class="tag">${tag}</div>
+        </div>
+        <h3>${esc(title)}</h3>
+        <p>${esc(desc)}</p>
+        <div class="launch-line">OPEN GAME →</div>
+      </a>`;
   }).join('');
+
+  // Save active user just before navigating so the game file picks them up
+  document.querySelectorAll('.game-card').forEach(c => c.addEventListener('click', () => {
+    state.activeUserId = c.dataset.user;
+    save();
+  }));
 }
-window.saveActive=(id)=>{state.activeUserId=id;save();};
-function render(){renderUsers();renderGames();document.getElementById('selectedBalance').textContent=fmt(activeUser().balance)}
-document.getElementById('addPlayer').onclick=()=>{
-  const name=document.getElementById('newName').value.trim();
-  const bal=Math.max(0,Number(document.getElementById('newBalance').value)||0);
-  if(!name){toast('Enter a player name.');return;}
-  const id=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+Date.now().toString(36).slice(-4);
-  const colors=['#ff00aa','#00d4ff','#ffaa00','#00ff96','#9d4edd','#ff6b00'];
-  state.users.push({id,name,balance:Math.round(bal*100)/100,color:colors[state.users.length%colors.length]});
-  state.activeUserId=id; initStats(state); save(); document.getElementById('newName').value=''; render();
+
+function render(){
+  renderUsers();
+  renderGames();
+  document.getElementById('selectedBalance').textContent = fmt(activeUser().balance);
+}
+
+// ============ ADD PLAYER ============
+document.getElementById('addPlayer').onclick = () => {
+  const name = document.getElementById('newName').value.trim();
+  const bal = Math.max(0, Number(document.getElementById('newBalance').value) || 0);
+  if (!name) { toast('Enter a player name.'); return; }
+  if (name.length > 20) { toast('Name too long (max 20).'); return; }
+  // Generate stable-ish ID
+  const baseId = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'player';
+  const id = baseId + '-' + Date.now().toString(36).slice(-4);
+  const colors = ['#ff00aa','#00d4ff','#ffaa00','#00ff96','#9d4edd','#ff6b00','#ff3355','#b26bff'];
+  state.users.push({
+    id,
+    name,
+    balance: cents(bal),
+    color: colors[state.users.length % colors.length]
+  });
+  state.activeUserId = id;
+  initStats(state);
+  save();
+  document.getElementById('newName').value = '';
+  document.getElementById('newBalance').value = '0';
+  render();
+  toast(`Added ${name}.`, 'success');
 };
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+
+// Enter key on name field
+document.getElementById('newName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('addPlayer').click();
+});
+
+// ============ DEPOSIT ============
+document.getElementById('depositBtn').onclick = () => {
+  depositTargetId = state.activeUserId;
+  const u = activeUser();
+  document.getElementById('depositName').textContent = u.name;
+  document.getElementById('depositAmount').value = '';
+  document.getElementById('depositModal').classList.add('show');
+  setTimeout(() => document.getElementById('depositAmount').focus(), 50);
+};
+document.getElementById('depositCancel').onclick = () => {
+  document.getElementById('depositModal').classList.remove('show');
+};
+document.getElementById('depositConfirm').onclick = () => {
+  const amt = Number(document.getElementById('depositAmount').value);
+  if (!amt || amt <= 0) { toast('Enter a positive amount.'); return; }
+  if (amt > 10000) { toast('Max deposit $10,000.'); return; }
+  const u = state.users.find(x => x.id === depositTargetId);
+  if (!u) return;
+  u.balance = cents(u.balance + amt);
+  save();
+  document.getElementById('depositModal').classList.remove('show');
+  render();
+  toast(`Deposited ${fmt(amt)} to ${u.name}.`, 'success');
+};
+document.getElementById('depositModal').addEventListener('click', e => {
+  if (e.target.id === 'depositModal') {
+    document.getElementById('depositModal').classList.remove('show');
+  }
+});
+document.getElementById('depositAmount').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('depositConfirm').click();
+});
+
+// ============ RESET STATS / WIPE ALL ============
+document.getElementById('resetStats').onclick = () => {
+  const u = activeUser();
+  if (!confirm(`Reset stats and recent plays for ${u.name}? Balance will be kept.`)) return;
+  state.stats[u.id] = {spins:0,wins:0,biggest:0,totalWagered:0,totalWon:0,recentSpins:[]};
+  save();
+  render();
+  toast(`Stats reset for ${u.name}.`, 'success');
+};
+document.getElementById('wipeAll').onclick = () => {
+  if (!confirm('WIPE ALL DATA? This deletes every player, balance, and stat. Cannot be undone.')) return;
+  if (!confirm('Are you absolutely sure? This is permanent.')) return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  state = initStats(clone(DEFAULT_STATE));
+  save();
+  render();
+  toast('All data wiped.', 'success');
+};
+
+// ============ TOAST ============
+function toast(msg, type=''){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
 render();
 </script>
 </body>
