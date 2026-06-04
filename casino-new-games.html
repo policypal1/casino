@@ -197,6 +197,44 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
 .win-amount{font-family:'Bebas Neue',sans-serif;font-size:48px;color:#00ff96;margin-top:8px;text-shadow:0 0 14px rgba(0,255,150,.5)}
 
 /* ============ RESPONSIVE ============ */
+
+.topbar-right{display:flex;gap:12px;align-items:center}
+.admin-toggle{padding:10px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;font-size:12px;font-weight:900;letter-spacing:1.5px;cursor:pointer;transition:.2s;font-family:Inter,sans-serif}
+.admin-toggle:hover{background:rgba(255,0,170,.2);border-color:#ff00aa;transform:translateY(-1px)}
+.admin-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);z-index:200;opacity:0;pointer-events:none;transition:.25s}
+.admin-backdrop.show{opacity:1;pointer-events:all}
+.admin-panel{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:100%;background:linear-gradient(180deg,#0d0820,#08060f);border-left:2px solid rgba(255,0,170,.4);z-index:201;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,.55)}
+.admin-panel.show{transform:translateX(0)}
+.admin-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid rgba(255,0,170,.3)}
+.admin-header h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;background:linear-gradient(90deg,#ff00aa,#ffaa00);-webkit-background-clip:text;background-clip:text;color:transparent}
+.admin-close{background:none;border:none;color:#fff;font-size:32px;cursor:pointer;line-height:1;padding:0 8px}
+.admin-body{flex:1;overflow-y:auto;padding:18px 24px 40px}
+.admin-section{margin-bottom:24px}
+.admin-section h3{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:rgba(255,255,255,.65);padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:12px}
+.admin-user-row{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:8px}
+.admin-user-row .name{flex:1;font-weight:800;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-user-row input{width:104px;padding:8px 10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:13px;font-variant-numeric:tabular-nums}
+.admin-user-row button{padding:7px 10px;background:rgba(255,50,50,.15);border:1px solid rgba(255,50,50,.35);color:#ff6b6b;border-radius:8px;cursor:pointer;font-weight:900}
+.admin-add-user{display:grid;grid-template-columns:1fr 100px auto;gap:8px;margin-top:12px}
+.admin-add-user input{padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:13px}
+.admin-add-user button{padding:10px 14px;background:linear-gradient(135deg,#ff00aa,#ff6b00);border:none;color:#fff;border-radius:8px;font-size:12px;font-weight:900;letter-spacing:1px;cursor:pointer}
+.luck-row{display:flex;align-items:center;gap:12px}
+.luck-row input[type=range]{flex:1;height:8px;appearance:none;background:linear-gradient(90deg,rgba(0,255,150,.5),rgba(255,215,0,.45),rgba(255,80,80,.45));border-radius:999px;outline:none}
+.luck-row input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;background:linear-gradient(135deg,#00ff96,#ffd700);border-radius:50%;cursor:pointer;box-shadow:0 0 12px rgba(0,255,150,.6)}
+.luck-row input[type=range]::-moz-range-thumb{width:22px;height:22px;background:linear-gradient(135deg,#00ff96,#ffd700);border-radius:50%;cursor:pointer;border:none}
+.luck-value{font-family:'Bebas Neue',sans-serif;font-size:24px;color:#ffd700;min-width:62px;text-align:right;font-variant-numeric:tabular-nums}
+.luck-hint{font-size:11px;color:rgba(255,255,255,.55);margin-top:8px;line-height:1.45}
+.admin-actions{display:flex;flex-direction:column;gap:8px}
+.admin-actions button{padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:9px;font-size:13px;font-weight:800;letter-spacing:1px;cursor:pointer;transition:.18s}
+.admin-actions button:hover{background:rgba(255,255,255,.1)}
+.btn-danger{background:rgba(255,50,50,.15)!important;border-color:rgba(255,50,50,.4)!important;color:#ff7b7b!important}
+.admin-note{font-size:12px;line-height:1.5;color:rgba(255,255,255,.55);margin-top:8px}
+@media(max-width:650px){.topbar-right{gap:8px}.admin-toggle{padding:8px 10px;font-size:11px}.admin-add-user{grid-template-columns:1fr}.admin-add-user button{width:100%}}
+
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-120px);z-index:400;background:rgba(15,10,30,.96);border:1px solid #00ff96;padding:12px 18px;border-radius:12px;font-weight:900;transition:.3s;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.err{border-color:#ff3355}
+
 @media(max-width:1100px){
   .main-content{grid-template-columns:1fr}
   .side-panel{max-width:560px;margin:0 auto;width:100%}
@@ -239,6 +277,7 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
     <div class="balance-display" id="balanceDisplay"><span class="balance-label">BALANCE</span><span class="balance-amount" id="balanceAmount">$0.00</span></div>
     <a href="index.html" class="menu-btn">MENU</a>
     <button class="sound-toggle" id="soundToggle">🔊</button>
+    <button class="menu-btn" id="adminToggle">⚙ ADMIN</button>
   </div>
 </header>
 
@@ -422,11 +461,55 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
   </div>
 </div>
 
+
+<div class="admin-backdrop" id="adminBackdrop"></div>
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-header">
+    <h2>⚙ ADMIN PANEL</h2>
+    <button class="admin-close" id="adminClose">×</button>
+  </div>
+  <div class="admin-body">
+    <div class="admin-section">
+      <h3>PLAYERS</h3>
+      <div id="adminUsers"></div>
+      <div class="admin-add-user">
+        <input type="text" id="newUserName" placeholder="New player name..." maxlength="20" />
+        <input type="number" id="newUserBalance" placeholder="Start $" value="0" step="0.01" />
+        <button id="addUserBtn">+ ADD</button>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h3>HOUSE EDGE</h3>
+      <div class="luck-row">
+        <input type="range" id="adminEdge" min="0" max="100" step="1" value="10" />
+        <span class="luck-value" id="adminEdgeValue">10%</span>
+      </div>
+      <div class="luck-hint" id="adminEdgeHint">10% = house takes about 10¢ per $1 wagered.</div>
+      <div class="luck-hint" id="adminRtpHint" style="color:rgba(0,255,150,.72)">Effective player RTP: 90%</div>
+      <div class="admin-note">This value is shared across the index, classic games, and new games.</div>
+    </div>
+
+    <div class="admin-section">
+      <h3>QUICK ACTIONS</h3>
+      <div class="admin-actions">
+        <button id="resetAllBtn" class="btn-danger">RESET ALL BALANCES + STATS</button>
+        <button id="exportBtn">EXPORT DATA (JSON)</button>
+        <button id="importBtn">IMPORT DATA (JSON)</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
 'use strict';
 
 // ============ STATE & STORAGE ============
 const STORAGE_KEY = 'kumpulaCasino_v7';
+const LEGACY_STORAGE_KEYS = ['kumpulaCasino_v5','kumpulaCasino_v6'];
 const DEFAULT_STATE = {
   users: [
     {id:'sam',  name:'Sam',  balance:0, color:'#ff00aa'},
@@ -458,10 +541,20 @@ function initStats(s){
 }
 function loadState(){
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      for (const key of LEGACY_STORAGE_KEYS) {
+        raw = localStorage.getItem(key);
+        if (raw) break;
+      }
+    }
     if (!raw) return initStats(clone(DEFAULT_STATE));
     const loaded = JSON.parse(raw);
-    return initStats({...clone(DEFAULT_STATE), ...loaded});
+    const merged = initStats({...clone(DEFAULT_STATE), ...loaded});
+    if (!merged.users || !merged.users.length) merged.users = clone(DEFAULT_STATE).users;
+    if (!merged.users.some(u => u.id === merged.activeUserId)) merged.activeUserId = merged.users[0].id;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); } catch(e) {}
+    return merged;
   } catch(e) { return initStats(clone(DEFAULT_STATE)); }
 }
 function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
@@ -1126,21 +1219,22 @@ function finishBJ(stand=false){
 }
 
 // ============================================================
-//                         STOCKS (NEW)
+//                         STOCKS (FIXED)
 // ============================================================
 const stockState = {
   running: false,
   price: 100,
   startPrice: 100,
-  history: [],
-  shares: 0,
-  cashInvested: 0,    // total spent buying shares (cost basis dollars)
-  initialBet: 0,      // first buy-in (used as wager for stats)
+  history: [100],
+  shares: 0,              // fractional shares so small casino balances can play
+  cashInvested: 0,        // remaining cost basis for open shares
+  totalInvested: 0,       // total dollars spent this round
+  totalReturned: 0,       // dollars sold/cashed out this round
   timer: null,
   startTime: 0,
-  crashPoint: 0,      // when this number hits, market crashes
-  volatility: 0.015,  // % per tick — grows over time
-  trend: 0.002,       // slight upward drift early on
+  crashPoint: 0,
+  volatility: 0.015,
+  trend: 0.002,
   symbol: '$KUMP'
 };
 const STOCK_SYMBOLS = ['$KUMP','$SALEM','$VLTG','$NEON','$RNDR','$ECHO','$BRRR','$MOON','$RIZZ','$WAGMI'];
@@ -1149,29 +1243,30 @@ function pickSymbol(){
   stockState.symbol = STOCK_SYMBOLS[Math.floor(Math.random()*STOCK_SYMBOLS.length)];
   document.getElementById('stockSymbol').textContent = stockState.symbol;
 }
+function stockBetAmount(){ return Math.max(0.01, cents(betState.stocks || 0.01)); }
+function sharesLabel(n){ return (Number(n) || 0).toFixed(4).replace(/0+$/,'').replace(/\.$/,'') || '0'; }
+function stockRoundNet(){ return cents(stockState.totalReturned - stockState.totalInvested); }
 
 function updateStockUI(){
   const priceEl = document.getElementById('stockPrice');
   const changeEl = document.getElementById('stockChange');
   priceEl.textContent = '$' + stockState.price.toFixed(2);
-  const pct = ((stockState.price - stockState.startPrice) / stockState.startPrice) * 100;
+  const pct = ((stockState.price - stockState.startPrice) / Math.max(0.01, stockState.startPrice)) * 100;
   changeEl.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
   changeEl.className = 'ticker-change ' + (pct >= 0 ? 'up' : 'down');
 
-  // Position panel
-  document.getElementById('stockShares').textContent = stockState.shares;
+  document.getElementById('stockShares').textContent = sharesLabel(stockState.shares);
   const avg = stockState.shares > 0 ? stockState.cashInvested / stockState.shares : 0;
   document.getElementById('stockAvg').textContent = '$' + avg.toFixed(2);
   document.getElementById('stockInvested').textContent = fmt(stockState.cashInvested);
   const positionValue = stockState.shares * stockState.price;
-  const pl = positionValue - stockState.cashInvested;
+  const pl = cents(positionValue + stockState.totalReturned - stockState.totalInvested);
   const plEl = document.getElementById('stockPL');
   plEl.textContent = (pl >= 0 ? '+' : '−') + fmt(Math.abs(pl));
   plEl.classList.remove('up','down');
   plEl.classList.add(pl >= 0 ? 'up' : 'down');
 
-  // Chart curve
-  const pts = stockState.history;
+  const pts = stockState.history.length ? stockState.history : [stockState.price];
   if (pts.length >= 2) {
     const minP = Math.min(...pts) * 0.97;
     const maxP = Math.max(...pts) * 1.03;
@@ -1184,184 +1279,194 @@ function updateStockUI(){
     });
     d += ` L500,200 L0,200 Z`;
     document.getElementById('stockPath').setAttribute('d', d);
+  } else {
+    document.getElementById('stockPath').setAttribute('d', '');
   }
 
-  // Danger styling when volatility ramps up
   const chart = document.getElementById('stockChart');
   chart.classList.remove('danger');
   if (stockState.volatility > 0.035) chart.classList.add('danger');
 
-  // Buy/sell button affordability
-  document.getElementById('btnBuyShare').disabled = !stockState.running || user().balance < stockState.price;
-  document.getElementById('btnSellShare').disabled = !stockState.running || stockState.shares <= 0;
+  const buyAmt = stockBetAmount();
+  const buyBtn = document.getElementById('btnBuyShare');
+  const sellBtn = document.getElementById('btnSellShare');
+  buyBtn.textContent = 'BUY ' + fmt(buyAmt);
+  sellBtn.textContent = 'SELL 25%';
+  buyBtn.disabled = !stockState.running || user().balance < buyAmt;
+  sellBtn.disabled = !stockState.running || stockState.shares <= 0;
+  document.getElementById('btnStocksStart').disabled = stockState.running;
+  document.getElementById('btnStocksCash').disabled = !stockState.running || stockState.shares <= 0;
 }
 
 function genStockCrashTime(){
-  // Crash time in seconds — biased toward earlier with house edge
   const edge = (state.houseEdge || 10) / 100;
-  const raw = -Math.log(Math.max(0.001, Math.random())) * 8; // expected ~8s, fat tail
-  return Math.max(3, Math.min(35, raw * (1 - edge * 0.3)));
+  const raw = -Math.log(Math.max(0.001, Math.random())) * 9;
+  return Math.max(5, Math.min(45, raw * (1 - edge * 0.25)));
+}
+
+function investInStock(amount){
+  const u = user();
+  const invest = cents(Math.min(Math.max(0, amount), u.balance));
+  if (invest < 0.01) return 0;
+  const sharesBought = invest / stockState.price;
+  u.balance = cents(u.balance - invest);
+  stockState.shares += sharesBought;
+  stockState.cashInvested = cents(stockState.cashInvested + invest);
+  stockState.totalInvested = cents(stockState.totalInvested + invest);
+  stats().totalWagered = cents(stats().totalWagered + invest);
+  flashBalance('down');
+  save(); renderShell(); updateStockUI();
+  return invest;
+}
+
+function sellStockPortion(portion){
+  if (!stockState.running || stockState.shares <= 0) return 0;
+  const u = user();
+  const sellShares = stockState.shares * Math.max(0, Math.min(1, portion));
+  if (sellShares <= 0) return 0;
+  const beforeShares = stockState.shares;
+  const payout = cents(sellShares * stockState.price);
+  const costPortion = cents(stockState.cashInvested * (sellShares / beforeShares));
+  stockState.shares = Math.max(0, stockState.shares - sellShares);
+  stockState.cashInvested = cents(Math.max(0, stockState.cashInvested - costPortion));
+  stockState.totalReturned = cents(stockState.totalReturned + payout);
+  u.balance = cents(u.balance + payout);
+  stats().totalWon = cents(stats().totalWon + payout);
+  flashBalance('up');
+  save(); renderShell(); updateStockUI();
+  return payout;
 }
 
 document.getElementById('btnStocksStart').onclick = () => {
   if (stockState.running) return;
-  const initialBet = betState.stocks;
-  if (initialBet < 0.01) { msg('stocks','BET TOO LOW','lose'); return; }
-  // Initial bet acts as starting cash — buy as many shares as the bet allows at $100 start price
-  // Actually let's let the player START the market then BUY shares manually — initialBet just registers a stake
+  const initialBet = stockBetAmount();
   if (user().balance < initialBet) { msg('stocks','INSUFFICIENT FUNDS','lose'); sfxLose(); return; }
 
   stockState.running = true;
-  stockState.startPrice = 90 + Math.random() * 30; // $90-$120
+  stockState.startPrice = 90 + Math.random() * 30;
   stockState.price = stockState.startPrice;
   stockState.history = [stockState.price];
   stockState.shares = 0;
   stockState.cashInvested = 0;
-  stockState.initialBet = initialBet;
+  stockState.totalInvested = 0;
+  stockState.totalReturned = 0;
   stockState.volatility = 0.012;
   stockState.trend = 0.003;
   stockState.crashPoint = Date.now() + genStockCrashTime() * 1000;
   stockState.startTime = Date.now();
   pickSymbol();
+  stats().spins++;
 
-  // Auto-buy 1 share with the initial bet (so the round actually has a position from start)
-  // Only if affordable
-  if (user().balance >= stockState.price) {
-    user().balance = cents(user().balance - stockState.price);
-    stockState.cashInvested = stockState.price;
-    stockState.shares = 1;
-    stats().totalWagered = cents(stats().totalWagered + stockState.price);
-    stats().spins++;
-    flashBalance('down');
-    save(); renderShell();
-  }
+  const invested = investInStock(initialBet);
+  if (invested <= 0) { resetStockRound(); return; }
 
-  msg('stocks', 'MARKET OPEN — BUY/SELL ANYTIME', 'info');
-  document.getElementById('btnStocksStart').disabled = true;
-  document.getElementById('btnStocksCash').disabled = false;
+  msg('stocks', `MARKET OPEN — BOUGHT ${fmt(invested)} OF ${stockState.symbol}`, 'info');
   document.getElementById('stockChart').classList.remove('crashed');
-
+  clearInterval(stockState.timer);
   stockState.timer = setInterval(stockTick, 200);
   updateStockUI();
 };
 
 function stockTick(){
-  // Volatility grows over time, trend turns slightly bearish later
+  if (!stockState.running) return;
   const elapsed = (Date.now() - stockState.startTime) / 1000;
   stockState.volatility = Math.min(0.06, 0.012 + elapsed * 0.0015);
-  stockState.trend = 0.003 - elapsed * 0.0003; // shifts from +0.3% to negative
-
+  stockState.trend = 0.003 - elapsed * 0.0003;
   const change = (Math.random() - 0.5) * 2 * stockState.volatility + stockState.trend;
-  stockState.price = Math.max(1, stockState.price * (1 + change));
+  stockState.price = Math.max(0.01, stockState.price * (1 + change));
   stockState.history.push(stockState.price);
   if (stockState.history.length > 100) stockState.history.shift();
-
-  if (Math.random() < 0.1) sfxTick();
+  if (Math.random() < 0.08) sfxTick();
   updateStockUI();
-
   if (Date.now() >= stockState.crashPoint) stockCrash();
 }
 
 document.getElementById('btnBuyShare').onclick = () => {
   if (!stockState.running) return;
-  const u = user();
-  if (u.balance < stockState.price) { msg('stocks','CAN\'T AFFORD A SHARE','lose'); sfxLose(); return; }
+  const amount = stockBetAmount();
+  if (user().balance < amount) { msg('stocks','INSUFFICIENT FUNDS','lose'); sfxLose(); return; }
   sfxClick();
-  u.balance = cents(u.balance - stockState.price);
-  stockState.cashInvested = cents(stockState.cashInvested + stockState.price);
-  stockState.shares++;
-  stats().totalWagered = cents(stats().totalWagered + stockState.price);
-  flashBalance('down');
-  save();
-  document.getElementById('balanceAmount').textContent = fmt(u.balance);
-  updateStockUI();
+  const invested = investInStock(amount);
+  msg('stocks', `BOUGHT ${fmt(invested)} MORE OF ${stockState.symbol}`, 'info');
 };
 
 document.getElementById('btnSellShare').onclick = () => {
   if (!stockState.running || stockState.shares <= 0) return;
   sfxClick();
-  const u = user();
-  u.balance = cents(u.balance + stockState.price);
-  // proportionally reduce cost basis
-  const avg = stockState.cashInvested / stockState.shares;
-  stockState.cashInvested = cents(stockState.cashInvested - avg);
-  stockState.shares--;
-  stats().totalWon = cents(stats().totalWon + stockState.price);
-  flashBalance('up');
-  save();
-  document.getElementById('balanceAmount').textContent = fmt(u.balance);
-  updateStockUI();
+  const payout = sellStockPortion(0.25);
+  const net = stockRoundNet();
+  msg('stocks', `SOLD 25% FOR ${fmt(payout)} — ROUND ${net >= 0 ? '+' : '−'}${fmt(Math.abs(net))}`, net >= 0 ? 'win' : 'lose');
 };
 
 document.getElementById('btnStocksCash').onclick = () => {
   if (!stockState.running) return;
   clearInterval(stockState.timer);
-  const u = user();
-  const cashOut = stockState.shares * stockState.price;
-  u.balance = cents(u.balance + cashOut);
-  stats().totalWon = cents(stats().totalWon + cashOut);
-  const net = cents(cashOut - stockState.cashInvested);
+  const remainingShares = stockState.shares;
+  const cashOut = cents(remainingShares * stockState.price);
+  if (remainingShares > 0) {
+    user().balance = cents(user().balance + cashOut);
+    stockState.totalReturned = cents(stockState.totalReturned + cashOut);
+    stats().totalWon = cents(stats().totalWon + cashOut);
+  }
+  const net = stockRoundNet();
   if (net > 0) { stats().wins++; if (net > stats().biggest) stats().biggest = net; flashBalance('up'); }
   else flashBalance('down');
 
-  // Add a single recent-play entry summarizing the round
   stats().recentSpins.unshift({
-    symbols: ['📈', stockState.symbol, `${stockState.shares}sh @ $${stockState.price.toFixed(2)}`],
-    bet: stockState.cashInvested,
-    payout: cashOut,
+    symbols: ['📈', stockState.symbol, `${sharesLabel(remainingShares)}sh @ $${stockState.price.toFixed(2)}`],
+    bet: stockState.totalInvested,
+    payout: stockState.totalReturned,
     net,
     win: net > 0,
     game: 'stocks'
   });
   if (stats().recentSpins.length > 24) stats().recentSpins.pop();
 
-  msg('stocks',
-    net > 0 ? `CASHED OUT — PROFIT ${fmt(net)}` : net < 0 ? `CASHED OUT — LOSS ${fmt(Math.abs(net))}` : `CASHED OUT — BREAK EVEN`,
-    net > 0 ? 'win' : net < 0 ? 'lose' : 'info');
-
-  if (net > stockState.cashInvested * 2) sfxBig();
+  msg('stocks', net > 0 ? `CASHED OUT — PROFIT ${fmt(net)}` : net < 0 ? `CASHED OUT — LOSS ${fmt(Math.abs(net))}` : 'CASHED OUT — BREAK EVEN', net > 0 ? 'win' : net < 0 ? 'lose' : 'info');
+  if (net > stockState.totalInvested * 2) sfxBig();
   else if (net > 0) sfxWin();
   else if (net < 0) sfxLose();
-
-  if (net > 0 && net >= stockState.cashInvested) showWin('BIG WIN', cashOut);
+  if (net > 0 && net >= stockState.totalInvested) showWin('BIG WIN', stockState.totalReturned);
   else if (net > 0) burst(20);
-
-  resetStockRound();
-  save(); renderShell();
+  resetStockRound(false);
+  save(); renderShell(); updateStockUI();
 };
 
 function stockCrash(){
   clearInterval(stockState.timer);
   document.getElementById('stockChart').classList.add('crashed');
-  msg('stocks', `MARKET CRASHED — LOST ${fmt(stockState.cashInvested - stockState.shares * 0)}`, 'lose');
-
-  // All shares worth $0 now
-  const net = -stockState.cashInvested;
+  const lostValue = cents(stockState.shares * stockState.price);
+  const net = stockRoundNet();
+  const finalNet = cents(stockState.totalReturned - stockState.totalInvested);
   stats().recentSpins.unshift({
-    symbols: ['💥', stockState.symbol, 'CRASHED'],
-    bet: stockState.cashInvested,
-    payout: 0,
-    net,
-    win: false,
+    symbols: ['💥', stockState.symbol, `${sharesLabel(stockState.shares)}sh lost`],
+    bet: stockState.totalInvested,
+    payout: stockState.totalReturned,
+    net: finalNet,
+    win: finalNet > 0,
     game: 'stocks'
   });
   if (stats().recentSpins.length > 24) stats().recentSpins.pop();
-
+  msg('stocks', `MARKET CRASHED — OPEN SHARES LOST ${fmt(lostValue)}`, 'lose');
   sfxLose(); shake();
-  resetStockRound();
-  save(); renderShell();
+  resetStockRound(false);
+  save(); renderShell(); updateStockUI();
 }
 
-function resetStockRound(){
+function resetStockRound(resetMessage = true){
   stockState.running = false;
   stockState.shares = 0;
   stockState.cashInvested = 0;
+  stockState.totalInvested = 0;
+  stockState.totalReturned = 0;
   stockState.price = 100;
+  stockState.startPrice = 100;
   stockState.history = [100];
-  document.getElementById('btnStocksStart').disabled = false;
-  document.getElementById('btnStocksCash').disabled = true;
-  document.getElementById('btnBuyShare').disabled = true;
-  document.getElementById('btnSellShare').disabled = true;
+  stockState.volatility = 0.015;
+  clearInterval(stockState.timer);
+  stockState.timer = null;
+  if (resetMessage) msg('stocks','BUY SHARES, RIDE THE WAVE, CASH OUT BEFORE THE CRASH','');
+  document.getElementById('stockChart').classList.remove('danger');
   updateStockUI();
 }
 
@@ -1400,6 +1505,139 @@ function burst(count = 20){
   }
   step();
 }
+
+
+// ============ ADMIN PANEL ============
+function toast(text, err=false){
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = text;
+  t.className = 'toast show' + (err ? ' err' : '');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+function openAdmin(){
+  document.getElementById('adminPanel').classList.add('show');
+  document.getElementById('adminBackdrop').classList.add('show');
+  renderAdmin();
+}
+function closeAdmin(){
+  document.getElementById('adminPanel').classList.remove('show');
+  document.getElementById('adminBackdrop').classList.remove('show');
+}
+function blankStats(){ return {spins:0,wins:0,biggest:0,totalWagered:0,totalWon:0,recentSpins:[]}; }
+function refreshAfterAdmin(){
+  initStats(state);
+  renderTabs();
+  renderShell();
+  renderBJ();
+  updateStockUI();
+}
+function updateEdgeDisplay(val){
+  const v = Math.max(0, Math.min(100, parseInt(val) || 0));
+  document.getElementById('adminEdgeValue').textContent = v + '%';
+  const hint = document.getElementById('adminEdgeHint');
+  if (v === 0) hint.textContent = '0% = fair mode. Players break even long-term before variance.';
+  else if (v < 10) hint.textContent = 'Low edge. The casino has a small advantage.';
+  else if (v < 25) hint.textContent = 'Standard edge. Players lose gradually over time.';
+  else if (v < 60) hint.textContent = 'Heavy edge. Players lose fast.';
+  else hint.textContent = 'Extreme edge. Games become very hard to win.';
+  document.getElementById('adminRtpHint').textContent = 'Effective player RTP: ' + (100 - v) + '%';
+  document.getElementById('adminEdgeValue').style.color = v < 10 ? '#00ff96' : v < 25 ? '#ffd700' : '#ff6b6b';
+  renderPaytable();
+}
+function renderAdmin(){
+  initStats(state);
+  const usersDiv = document.getElementById('adminUsers');
+  usersDiv.innerHTML = state.users.map(u => `
+    <div class="admin-user-row">
+      <div class="user-avatar" style="background:${u.color};width:30px;height:30px;font-size:11px">${esc(u.name.slice(0,2).toUpperCase())}</div>
+      <div class="name">${esc(u.name)}</div>
+      <input type="number" value="${cents(u.balance).toFixed(2)}" step="0.01" data-user-id="${u.id}" class="admin-bal-input" />
+      <button data-remove-id="${u.id}" title="Remove">×</button>
+    </div>`).join('');
+  usersDiv.querySelectorAll('.admin-bal-input').forEach(inp => {
+    inp.onchange = () => {
+      const u = state.users.find(x => x.id === inp.dataset.userId);
+      if (!u) return;
+      u.balance = cents(Math.max(0, Number(inp.value) || 0));
+      save(); refreshAfterAdmin(); renderAdmin(); toast('Balance updated');
+    };
+  });
+  usersDiv.querySelectorAll('[data-remove-id]').forEach(btn => {
+    btn.onclick = () => {
+      if (state.users.length <= 1) { toast('Need at least one player', true); return; }
+      const id = btn.dataset.removeId;
+      const u = state.users.find(x => x.id === id);
+      if (!u || !confirm(`Remove ${u.name}?`)) return;
+      state.users = state.users.filter(x => x.id !== id);
+      if (state.stats) delete state.stats[id];
+      if (state.activeUserId === id) state.activeUserId = state.users[0].id;
+      save(); refreshAfterAdmin(); renderAdmin(); toast('Player removed');
+    };
+  });
+  const edge = Math.max(0, Math.min(100, Number(state.houseEdge) || 0));
+  document.getElementById('adminEdge').value = edge;
+  updateEdgeDisplay(edge);
+}
+
+document.getElementById('adminToggle').onclick = openAdmin;
+document.getElementById('adminClose').onclick = closeAdmin;
+document.getElementById('adminBackdrop').onclick = closeAdmin;
+document.getElementById('adminEdge').oninput = (e) => {
+  state.houseEdge = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+  updateEdgeDisplay(state.houseEdge);
+};
+document.getElementById('adminEdge').onchange = () => { save(); toast('House edge saved'); };
+document.getElementById('addUserBtn').onclick = () => {
+  const nameInp = document.getElementById('newUserName');
+  const balInp = document.getElementById('newUserBalance');
+  const name = nameInp.value.trim();
+  if (!name) { toast('Enter a player name', true); return; }
+  const id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now().toString(36).slice(-5);
+  const colors = ['#ff00aa','#00d4ff','#ffaa00','#00ff96','#9d4edd','#ff6b00','#ff3355','#b26bff'];
+  state.users.push({id, name, balance:cents(Math.max(0, Number(balInp.value) || 0)), color:colors[state.users.length % colors.length]});
+  state.activeUserId = id;
+  initStats(state);
+  nameInp.value = ''; balInp.value = '0';
+  save(); refreshAfterAdmin(); renderAdmin(); toast(name + ' added');
+};
+document.getElementById('resetAllBtn').onclick = () => {
+  if (!confirm('Reset every player balance and all stats?')) return;
+  state.users.forEach(u => { u.balance = 0; state.stats[u.id] = blankStats(); });
+  save(); refreshAfterAdmin(); renderAdmin(); toast('All balances and stats reset');
+};
+document.getElementById('exportBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'kumpula-casino-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Exported JSON');
+};
+document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
+document.getElementById('importFile').onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      state = initStats({...clone(DEFAULT_STATE), ...imported});
+      if (!state.users || !state.users.length) state.users = clone(DEFAULT_STATE).users;
+      if (!state.users.some(u => u.id === state.activeUserId)) state.activeUserId = state.users[0].id;
+      save(); refreshAfterAdmin(); renderAdmin(); toast('Imported data');
+    } catch(err) { toast('Invalid JSON file', true); }
+  };
+  reader.readAsText(file);
+};
+window.addEventListener('storage', (e) => {
+  if (e.key !== STORAGE_KEY) return;
+  state = loadState();
+  refreshAfterAdmin();
+  if (document.getElementById('adminPanel').classList.contains('show')) renderAdmin();
+});
 
 // ============================================================
 //                         BOOT
