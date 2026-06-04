@@ -91,6 +91,40 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
 .modal-actions .cancel{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15)}
 .modal-actions .confirm{background:linear-gradient(135deg,#00ff96,#00d4ff);color:#08060f}
 
+
+.topbar-right{display:flex;gap:12px;align-items:center}
+.admin-toggle{padding:10px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;font-size:12px;font-weight:900;letter-spacing:1.5px;cursor:pointer;transition:.2s;font-family:Inter,sans-serif}
+.admin-toggle:hover{background:rgba(255,0,170,.2);border-color:#ff00aa;transform:translateY(-1px)}
+.admin-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);z-index:200;opacity:0;pointer-events:none;transition:.25s}
+.admin-backdrop.show{opacity:1;pointer-events:all}
+.admin-panel{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:100%;background:linear-gradient(180deg,#0d0820,#08060f);border-left:2px solid rgba(255,0,170,.4);z-index:201;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,.55)}
+.admin-panel.show{transform:translateX(0)}
+.admin-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid rgba(255,0,170,.3)}
+.admin-header h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;background:linear-gradient(90deg,#ff00aa,#ffaa00);-webkit-background-clip:text;background-clip:text;color:transparent}
+.admin-close{background:none;border:none;color:#fff;font-size:32px;cursor:pointer;line-height:1;padding:0 8px}
+.admin-body{flex:1;overflow-y:auto;padding:18px 24px 40px}
+.admin-section{margin-bottom:24px}
+.admin-section h3{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:rgba(255,255,255,.65);padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:12px}
+.admin-user-row{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:8px}
+.admin-user-row .name{flex:1;font-weight:800;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-user-row input{width:104px;padding:8px 10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:13px;font-variant-numeric:tabular-nums}
+.admin-user-row button{padding:7px 10px;background:rgba(255,50,50,.15);border:1px solid rgba(255,50,50,.35);color:#ff6b6b;border-radius:8px;cursor:pointer;font-weight:900}
+.admin-add-user{display:grid;grid-template-columns:1fr 100px auto;gap:8px;margin-top:12px}
+.admin-add-user input{padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:13px}
+.admin-add-user button{padding:10px 14px;background:linear-gradient(135deg,#ff00aa,#ff6b00);border:none;color:#fff;border-radius:8px;font-size:12px;font-weight:900;letter-spacing:1px;cursor:pointer}
+.luck-row{display:flex;align-items:center;gap:12px}
+.luck-row input[type=range]{flex:1;height:8px;appearance:none;background:linear-gradient(90deg,rgba(0,255,150,.5),rgba(255,215,0,.45),rgba(255,80,80,.45));border-radius:999px;outline:none}
+.luck-row input[type=range]::-webkit-slider-thumb{appearance:none;width:22px;height:22px;background:linear-gradient(135deg,#00ff96,#ffd700);border-radius:50%;cursor:pointer;box-shadow:0 0 12px rgba(0,255,150,.6)}
+.luck-row input[type=range]::-moz-range-thumb{width:22px;height:22px;background:linear-gradient(135deg,#00ff96,#ffd700);border-radius:50%;cursor:pointer;border:none}
+.luck-value{font-family:'Bebas Neue',sans-serif;font-size:24px;color:#ffd700;min-width:62px;text-align:right;font-variant-numeric:tabular-nums}
+.luck-hint{font-size:11px;color:rgba(255,255,255,.55);margin-top:8px;line-height:1.45}
+.admin-actions{display:flex;flex-direction:column;gap:8px}
+.admin-actions button{padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:9px;font-size:13px;font-weight:800;letter-spacing:1px;cursor:pointer;transition:.18s}
+.admin-actions button:hover{background:rgba(255,255,255,.1)}
+.btn-danger{background:rgba(255,50,50,.15)!important;border-color:rgba(255,50,50,.4)!important;color:#ff7b7b!important}
+.admin-note{font-size:12px;line-height:1.5;color:rgba(255,255,255,.55);margin-top:8px}
+@media(max-width:650px){.topbar-right{gap:8px}.admin-toggle{padding:8px 10px;font-size:11px}.admin-add-user{grid-template-columns:1fr}.admin-add-user button{width:100%}}
+
 @media(max-width:650px){
   .topbar{padding:14px 16px}
   .logo{font-size:24px}
@@ -115,7 +149,10 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
 <div class="page">
   <header class="topbar">
     <div class="logo"><span class="logo-icon">🎰</span><span>KUMPULA<span class="logo-accent">CASINO</span></span></div>
-    <div class="balance-pill"><span class="balance-label">SELECTED BALANCE</span><span class="balance-amount" id="selectedBalance">$0.00</span></div>
+    <div class="topbar-right">
+      <div class="balance-pill"><span class="balance-label">SELECTED BALANCE</span><span class="balance-amount" id="selectedBalance">$0.00</span></div>
+      <button class="admin-toggle" id="adminToggle">⚙ ADMIN</button>
+    </div>
   </header>
 
   <main class="wrap">
@@ -143,6 +180,47 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
   </main>
 </div>
 
+
+<div class="admin-backdrop" id="adminBackdrop"></div>
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-header">
+    <h2>⚙ ADMIN PANEL</h2>
+    <button class="admin-close" id="adminClose">×</button>
+  </div>
+  <div class="admin-body">
+    <div class="admin-section">
+      <h3>PLAYERS</h3>
+      <div id="adminUsers"></div>
+      <div class="admin-add-user">
+        <input type="text" id="newUserName" placeholder="New player name..." maxlength="20" />
+        <input type="number" id="newUserBalance" placeholder="Start $" value="0" step="0.01" />
+        <button id="addUserBtn">+ ADD</button>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h3>HOUSE EDGE</h3>
+      <div class="luck-row">
+        <input type="range" id="adminEdge" min="0" max="100" step="1" value="10" />
+        <span class="luck-value" id="adminEdgeValue">10%</span>
+      </div>
+      <div class="luck-hint" id="adminEdgeHint">10% = house takes about 10¢ per $1 wagered.</div>
+      <div class="luck-hint" id="adminRtpHint" style="color:rgba(0,255,150,.72)">Effective player RTP: 90%</div>
+      <div class="admin-note">This value is shared across the index, classic games, and new games.</div>
+    </div>
+
+    <div class="admin-section">
+      <h3>QUICK ACTIONS</h3>
+      <div class="admin-actions">
+        <button id="resetAllBtn" class="btn-danger">RESET ALL BALANCES + STATS</button>
+        <button id="exportBtn">EXPORT DATA (JSON)</button>
+        <button id="importBtn">IMPORT DATA (JSON)</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" />
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div class="modal" id="depositModal">
@@ -160,8 +238,9 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
 <script>
 'use strict';
 
-// IMPORTANT: must match STORAGE_KEY in casino-new-games.html (currently v7)
+// Shared across index, classic games, and new games. v5/v6 are migrated automatically.
 const STORAGE_KEY = 'kumpulaCasino_v7';
+const LEGACY_STORAGE_KEYS = ['kumpulaCasino_v5','kumpulaCasino_v6'];
 const DEFAULT_STATE = {
   users: [
     { id:'sam',   name:'Sam',   balance:0, color:'#ff00aa' },
@@ -199,10 +278,20 @@ let depositTargetId = null;
 
 function loadState(){
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      for (const key of LEGACY_STORAGE_KEYS) {
+        raw = localStorage.getItem(key);
+        if (raw) break;
+      }
+    }
     if (!raw) return initStats(clone(DEFAULT_STATE));
     const loaded = JSON.parse(raw);
-    return initStats({...clone(DEFAULT_STATE), ...loaded});
+    const merged = initStats({...clone(DEFAULT_STATE), ...loaded});
+    if (!merged.users || !merged.users.length) merged.users = clone(DEFAULT_STATE).users;
+    if (!merged.users.some(u => u.id === merged.activeUserId)) merged.activeUserId = merged.users[0].id;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); } catch(e) {}
+    return merged;
   } catch(e) {
     return initStats(clone(DEFAULT_STATE));
   }
@@ -364,12 +453,139 @@ document.getElementById('resetStats').onclick = () => {
 document.getElementById('wipeAll').onclick = () => {
   if (!confirm('WIPE ALL DATA? This deletes every player, balance, and stat. Cannot be undone.')) return;
   if (!confirm('Are you absolutely sure? This is permanent.')) return;
-  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  try { [STORAGE_KEY, ...LEGACY_STORAGE_KEYS].forEach(k => localStorage.removeItem(k)); } catch(e) {}
   state = initStats(clone(DEFAULT_STATE));
   save();
   render();
   toast('All data wiped.', 'success');
 };
+
+
+// ============ ADMIN PANEL ============
+function openAdmin(){
+  document.getElementById('adminPanel').classList.add('show');
+  document.getElementById('adminBackdrop').classList.add('show');
+  renderAdmin();
+}
+function closeAdmin(){
+  document.getElementById('adminPanel').classList.remove('show');
+  document.getElementById('adminBackdrop').classList.remove('show');
+}
+function baseUserId(name){ return name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'player'; }
+function blankStats(){ return {spins:0,wins:0,biggest:0,totalWagered:0,totalWon:0,recentSpins:[]}; }
+function resetEveryUserStats(){ state.users.forEach(u => { state.stats[u.id] = blankStats(); }); }
+function updateEdgeDisplay(val){
+  const v = Math.max(0, Math.min(100, parseInt(val) || 0));
+  const edgeValue = document.getElementById('adminEdgeValue');
+  const hint = document.getElementById('adminEdgeHint');
+  const rtp = document.getElementById('adminRtpHint');
+  edgeValue.textContent = v + '%';
+  if (v === 0) hint.textContent = '0% = fair mode. Players break even long-term before variance.';
+  else if (v < 10) hint.textContent = 'Low edge. The casino has a small advantage.';
+  else if (v < 25) hint.textContent = 'Standard edge. Players lose gradually over time.';
+  else if (v < 60) hint.textContent = 'Heavy edge. Players lose fast.';
+  else hint.textContent = 'Extreme edge. Games become very hard to win.';
+  rtp.textContent = 'Effective player RTP: ' + (100 - v) + '%';
+  edgeValue.style.color = v < 10 ? '#00ff96' : v < 25 ? '#ffd700' : '#ff6b6b';
+}
+function renderAdmin(){
+  initStats(state);
+  const usersDiv = document.getElementById('adminUsers');
+  usersDiv.innerHTML = state.users.map(u => `
+    <div class="admin-user-row">
+      <div class="avatar" style="background:${u.color};width:30px;height:30px;font-size:11px">${esc(u.name.slice(0,2).toUpperCase())}</div>
+      <div class="name">${esc(u.name)}</div>
+      <input type="number" value="${cents(u.balance).toFixed(2)}" step="0.01" data-user-id="${u.id}" class="admin-bal-input" />
+      <button data-remove-id="${u.id}" title="Remove">×</button>
+    </div>`).join('');
+
+  usersDiv.querySelectorAll('.admin-bal-input').forEach(inp => {
+    inp.onchange = () => {
+      const u = state.users.find(x => x.id === inp.dataset.userId);
+      if (!u) return;
+      u.balance = cents(Math.max(0, Number(inp.value) || 0));
+      save(); render(); renderAdmin(); toast('Balance updated.', 'success');
+    };
+  });
+  usersDiv.querySelectorAll('[data-remove-id]').forEach(btn => {
+    btn.onclick = () => {
+      if (state.users.length <= 1) { toast('Need at least one player.'); return; }
+      const id = btn.dataset.removeId;
+      const u = state.users.find(x => x.id === id);
+      if (!u || !confirm(`Remove ${u.name}?`)) return;
+      state.users = state.users.filter(x => x.id !== id);
+      if (state.stats) delete state.stats[id];
+      if (state.activeUserId === id) state.activeUserId = state.users[0].id;
+      save(); render(); renderAdmin(); toast('Player removed.', 'success');
+    };
+  });
+
+  const edge = Math.max(0, Math.min(100, Number(state.houseEdge) || 0));
+  document.getElementById('adminEdge').value = edge;
+  updateEdgeDisplay(edge);
+}
+
+document.getElementById('adminToggle').onclick = openAdmin;
+document.getElementById('adminClose').onclick = closeAdmin;
+document.getElementById('adminBackdrop').onclick = closeAdmin;
+document.getElementById('adminEdge').oninput = (e) => {
+  state.houseEdge = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+  updateEdgeDisplay(state.houseEdge);
+};
+document.getElementById('adminEdge').onchange = () => { save(); toast('House edge saved.', 'success'); };
+document.getElementById('addUserBtn').onclick = () => {
+  const nameInp = document.getElementById('newUserName');
+  const balInp = document.getElementById('newUserBalance');
+  const name = nameInp.value.trim();
+  if (!name) { toast('Enter a player name.'); return; }
+  const id = baseUserId(name) + '-' + Date.now().toString(36).slice(-5);
+  const colors = ['#ff00aa','#00d4ff','#ffaa00','#00ff96','#9d4edd','#ff6b00','#ff3355','#b26bff'];
+  state.users.push({id, name, balance:cents(Math.max(0, Number(balInp.value) || 0)), color:colors[state.users.length % colors.length]});
+  state.activeUserId = id;
+  initStats(state);
+  nameInp.value = '';
+  balInp.value = '0';
+  save(); render(); renderAdmin(); toast(`${name} added.`, 'success');
+};
+document.getElementById('resetAllBtn').onclick = () => {
+  if (!confirm('Reset every player balance and all stats?')) return;
+  state.users.forEach(u => { u.balance = 0; });
+  resetEveryUserStats();
+  if (typeof state.jackpot === 'number') state.jackpot = 50;
+  save(); render(); renderAdmin(); toast('All balances and stats reset.', 'success');
+};
+document.getElementById('exportBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'kumpula-casino-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Exported JSON.', 'success');
+};
+document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
+document.getElementById('importFile').onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      state = initStats({...clone(DEFAULT_STATE), ...imported});
+      if (!state.users || !state.users.length) state.users = clone(DEFAULT_STATE).users;
+      if (!state.users.some(u => u.id === state.activeUserId)) state.activeUserId = state.users[0].id;
+      save(); render(); renderAdmin(); toast('Imported data.', 'success');
+    } catch(err) { toast('Invalid JSON file.'); }
+  };
+  reader.readAsText(file);
+};
+window.addEventListener('storage', (e) => {
+  if (e.key !== STORAGE_KEY) return;
+  state = loadState();
+  render();
+  if (document.getElementById('adminPanel').classList.contains('show')) renderAdmin();
+});
 
 // ============ TOAST ============
 function toast(msg, type=''){
