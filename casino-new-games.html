@@ -163,23 +163,40 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
 .bj-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 
 /* ============ STOCKS ============ */
-.stocks-stage{flex-direction:column;gap:10px;align-items:stretch;min-height:390px}
+.stocks-stage{flex-direction:column;gap:10px;align-items:stretch;min-height:560px}
 .ticker-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.4);border-radius:10px;border:1px solid rgba(0,255,150,.2);font-family:'JetBrains Mono',monospace;gap:10px}
 .ticker-symbol{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:#ffd700;min-width:76px}
 .ticker-price{font-size:24px;font-weight:700;color:#fff}
 .ticker-change{font-size:14px;font-weight:700;padding:3px 8px;border-radius:5px;white-space:nowrap}
 .ticker-change.up{color:#00ff96;background:rgba(0,255,150,.1)}
 .ticker-change.down{color:#ff5577;background:rgba(255,85,119,.1)}
+.market-dashboard{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.market-pill{padding:8px 10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:10px;text-align:left}
+.market-pill span{display:block;font-size:9px;letter-spacing:1.4px;color:rgba(255,255,255,.48);font-weight:800;margin-bottom:2px}
+.market-pill b{display:block;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1.5px;color:#fff}
+.market-pill b.hot{color:#00ff96}.market-pill b.cold{color:#ff5577}.market-pill b.warn{color:#ffaa00}
 .stock-list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .stock-card{padding:9px 10px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;text-align:left;transition:.15s;font-family:'JetBrains Mono',monospace}
 .stock-card:hover{background:rgba(255,255,255,.08);transform:translateY(-1px)}
 .stock-card.active{border-color:#00ff96;background:rgba(0,255,150,.1);box-shadow:0 0 16px rgba(0,255,150,.15)}
 .stock-card .sym{display:block;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:#fff}
 .stock-card .mini{display:flex;justify-content:space-between;gap:8px;margin-top:2px;font-size:11px;color:rgba(255,255,255,.62)}
-.stock-card .mini .up{color:#00ff96}.stock-card .mini .down{color:#ff5577}
-.stock-chart{width:100%;height:190px;background:linear-gradient(180deg,rgba(0,255,150,.06),rgba(0,0,0,.35));border-radius:12px;border:1px solid rgba(0,255,150,.2);position:relative;overflow:hidden}
-.stock-chart svg{position:absolute;inset:0;width:100%;height:100%}
+.stock-card .stock-name{display:block;margin-top:2px;font-size:10px;color:rgba(255,255,255,.42);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stock-card .mini .up{color:#00ff96}.stock-card .mini .down{color:#ff5577}.stock-card .mini .flat{color:#ffaa00}
+.stock-card.hot{box-shadow:0 0 18px rgba(0,255,150,.16)}
+.stock-card.dump{box-shadow:0 0 18px rgba(255,85,119,.14)}
+.stock-chart{width:100%;height:210px;background:linear-gradient(180deg,rgba(0,255,150,.06),rgba(0,0,0,.35));border-radius:12px;border:1px solid rgba(0,255,150,.2);position:relative;overflow:hidden}
+.stock-chart svg{position:absolute;inset:0;width:100%;height:100%;z-index:2}
+.stock-chart:before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);transform:translateX(-100%);animation:stockScan 3.4s linear infinite;z-index:1}
+@keyframes stockScan{to{transform:translateX(100%)}}
+.stock-pulse{position:absolute;width:10px;height:10px;border-radius:50%;background:#00ff96;box-shadow:0 0 18px #00ff96;z-index:3;transform:translate(-50%,-50%);transition:.25s linear}
+.volume-bars{position:absolute;left:0;right:0;bottom:0;height:46px;display:flex;align-items:flex-end;gap:2px;padding:0 7px 7px;z-index:1;opacity:.45}
+.volume-bars span{flex:1;min-width:2px;border-radius:3px 3px 0 0;background:rgba(255,255,255,.35)}
 .market-news{padding:9px 12px;border-radius:9px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.2);font-size:12px;color:rgba(255,255,255,.74);line-height:1.35;text-align:left}
+.stock-feed{max-height:92px;overflow:auto;text-align:left;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.08);font-size:11px;color:rgba(255,255,255,.64);display:flex;flex-direction:column;gap:5px}
+.feed-item{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:5px}
+.feed-item:last-child{border-bottom:none;padding-bottom:0}
+.feed-item b{color:#fff}.feed-item .up{color:#00ff96}.feed-item .down{color:#ff5577}.feed-item .warn{color:#ffaa00}
 .position-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;background:rgba(0,0,0,.35);border-radius:10px;border:1px solid rgba(255,255,255,.08)}
 .pos-cell{display:flex;flex-direction:column}
 .pos-label{font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,.5);font-weight:700;margin-bottom:2px}
@@ -187,6 +204,7 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
 .pos-value.up{color:#00ff96}
 .pos-value.down{color:#ff5577}
 .share-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.stock-main-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .share-btn{padding:14px 10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;cursor:pointer;transition:.15s}
 .share-btn:hover:not(:disabled){transform:translateY(-2px)}
 .share-btn:disabled{opacity:.35;cursor:not-allowed}
@@ -258,7 +276,7 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
   .game-tabs,.user-bar{padding-left:12px;padding-right:12px}
   .topbar-right{gap:6px}
   .menu-btn,.sound-toggle{padding:8px 10px;font-size:11px}
-  .bj-actions,.crash-actions,.share-controls{grid-template-columns:1fr}
+  .bj-actions,.crash-actions,.share-controls,.stock-main-actions,.market-dashboard{grid-template-columns:1fr}
   .card{width:50px;height:72px}
   .win-content{padding:24px 30px}
   .win-title{font-size:48px}
@@ -414,22 +432,32 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
     <div class="stage stocks-stage">
       <div class="ticker-bar">
         <span class="ticker-symbol" id="stockSymbol">KUMP</span>
-        <span class="ticker-price" id="stockPrice">$100.00</span>
+        <span class="ticker-price" id="stockPrice">$0.48</span>
         <span class="ticker-change up" id="stockChange">+0.00%</span>
+      </div>
+      <div class="market-dashboard">
+        <div class="market-pill"><span>MARKET MOOD</span><b id="marketMood">CLOSED</b></div>
+        <div class="market-pill"><span>VOLATILITY</span><b id="marketVol">LOW</b></div>
+        <div class="market-pill"><span>MOMENTUM</span><b id="marketMomentum">FLAT</b></div>
+        <div class="market-pill"><span>NEXT NEWS</span><b id="nextNews">—</b></div>
       </div>
       <div class="stock-list" id="stockList"></div>
       <div class="stock-chart" id="stockChart">
-        <svg id="stockSvg" viewBox="0 0 500 190" preserveAspectRatio="none">
+        <svg id="stockSvg" viewBox="0 0 500 210" preserveAspectRatio="none">
           <defs>
             <linearGradient id="stockFill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#00ff96" stop-opacity="0.35"/>
               <stop offset="100%" stop-color="#00ff96" stop-opacity="0"/>
             </linearGradient>
           </defs>
-          <path id="stockPath" d="" fill="url(#stockFill)" stroke="#00ff96" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px #00ff96)"/>
+          <path id="stockArea" d="" fill="url(#stockFill)" stroke="none"/>
+          <path id="stockPath" d="" fill="none" stroke="#00ff96" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px #00ff96)"/>
         </svg>
+        <div class="volume-bars" id="volumeBars"></div>
+        <div class="stock-pulse" id="stockPulse"></div>
       </div>
-      <div class="market-news" id="marketNews">Market closed. Open the market, pick a ticker, then buy or sell with the trade amount below.</div>
+      <div class="market-news" id="marketNews">Market closed. Open the market, pick a ticker, then buy or sell with 1¢ to $1 trades.</div>
+      <div class="stock-feed" id="stockFeed"></div>
       <div class="position-grid">
         <div class="pos-cell"><span class="pos-label">BUYING POWER</span><span class="pos-value" id="stockCash">$0.00</span></div>
         <div class="pos-cell"><span class="pos-label">TOTAL EQUITY</span><span class="pos-value" id="stockEquity">$0.00</span></div>
@@ -437,6 +465,10 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
         <div class="pos-cell"><span class="pos-label">AVG COST</span><span class="pos-value" id="stockAvg">$0.00</span></div>
         <div class="pos-cell"><span class="pos-label">POSITION VALUE</span><span class="pos-value" id="stockInvested">$0.00</span></div>
         <div class="pos-cell"><span class="pos-label">OPEN P/L</span><span class="pos-value" id="stockPL">$0.00</span></div>
+        <div class="pos-cell"><span class="pos-label">DAY RANGE</span><span class="pos-value" id="stockRange">$0.00-$0.00</span></div>
+        <div class="pos-cell"><span class="pos-label">VOLUME</span><span class="pos-value" id="stockVolume">0</span></div>
+        <div class="pos-cell"><span class="pos-label">TREND</span><span class="pos-value" id="stockTrend">FLAT</span></div>
+        <div class="pos-cell"><span class="pos-label">LAST MOVE</span><span class="pos-value" id="stockLastMove">0.00%</span></div>
       </div>
     </div>
     <div class="message-bar" id="stocksMsg"><span class="message-text">OPEN THE MARKET, PICK A STOCK, THEN TRADE</span></div>
@@ -446,8 +478,9 @@ body{font-family:Inter,sans-serif;background:#08060f;color:#fff;user-select:none
       <button class="share-btn sell" id="btnSellShare" disabled>SELL</button>
       <button class="share-btn sell" id="btnSellAllStock" disabled>SELL STOCK</button>
     </div>
-    <div class="crash-actions">
+    <div class="stock-main-actions">
       <button class="main-btn" id="btnStocksStart">OPEN MARKET</button>
+      <button class="main-btn" id="btnNewsScan" disabled>SCAN NEWS</button>
       <button class="main-btn success" id="btnStocksCash" disabled>SELL ALL</button>
     </div>
   </div>
@@ -539,7 +572,7 @@ const GAMES = [
   ['blackjack', 'Blackjack', '🃏'],
   ['stocks',    'Stocks',    '📈']
 ];
-const betState = {roulette:.10, crash:.10, wheel:.10, luckyDice:.10, blackjack:.25, stocks:10.00};
+const betState = {roulette:.10, crash:.10, wheel:.10, luckyDice:.10, blackjack:.25, stocks:.10};
 
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
 function initStats(s){
@@ -593,12 +626,11 @@ function betToSlider(b){
   return Math.max(1, Math.min(100, Math.round(1 + t * 99)));
 }
 function stockSliderToAmount(v){
-  const t = (v - 1) / 99;
-  return cents(1 + t * t * 99);
+  // Stocks use the same casino-scale trade sizing as every other game: $0.01-$1.00.
+  return sliderToBet(v);
 }
 function stockAmountToSlider(amount){
-  const t = Math.sqrt(Math.max(0, (amount - 1) / 99));
-  return Math.max(1, Math.min(100, Math.round(1 + t * 99)));
+  return betToSlider(Math.max(0.01, Math.min(1, Number(amount) || 0.01)));
 }
 
 // ============ AUDIO ============
@@ -752,7 +784,7 @@ function betHtml(game){
   const sliderVal = stockMode ? stockAmountToSlider(b) : betToSlider(b);
   const pct = ((sliderVal - 1) / 99) * 100;
   const quicks = stockMode
-    ? [['1.00','$1'],['5.00','$5'],['10.00','$10'],['25.00','$25'],['50.00','$50'],['100.00','$100']]
+    ? [['0.01','1¢'],['0.05','5¢'],['0.10','10¢'],['0.25','25¢'],['0.50','50¢'],['1.00','$1']]
     : [['0.01','1¢'],['0.05','5¢'],['0.10','10¢'],['0.25','25¢'],['0.50','50¢'],['1.00','$1']];
   return `
     <div class="bet-amount-display"><span class="bet-label">${stockMode ? 'TRADE AMOUNT' : 'BET'}</span><span class="bet-value" id="${game}BetDisplay">${fmt(b)}</span></div>
@@ -1251,20 +1283,23 @@ function finishBJ(stand=false){
 //                         STOCK SIMULATOR
 // ============================================================
 const STOCK_DEFS = [
-  {symbol:'KUMP', name:'Kumpula Gaming', base:100, price:100, drift:0.00045, volatility:0.0045},
-  {symbol:'SALEM', name:'Salem Energy', base:64, price:64, drift:0.00025, volatility:0.0038},
-  {symbol:'VLTG', name:'Voltage Motors', base:38, price:38, drift:0.00070, volatility:0.0065},
-  {symbol:'NEON', name:'Neon Tech', base:82, price:82, drift:0.00055, volatility:0.0058},
-  {symbol:'BRRR', name:'Brrr Foods', base:24, price:24, drift:0.00015, volatility:0.0032},
-  {symbol:'MOON', name:'Moon Mining', base:145, price:145, drift:0.00035, volatility:0.0070}
+  {symbol:'KUMP', name:'Kumpula Gaming', sector:'Casino', base:.48, price:.48, drift:0.00025, volatility:0.0100},
+  {symbol:'SALEM', name:'Salem Energy', sector:'Energy', base:.32, price:.32, drift:0.00010, volatility:0.0085},
+  {symbol:'VLTG', name:'Voltage Motors', sector:'EV', base:.18, price:.18, drift:0.00035, volatility:0.0140},
+  {symbol:'NEON', name:'Neon Tech', sector:'Tech', base:.74, price:.74, drift:0.00030, volatility:0.0120},
+  {symbol:'BRRR', name:'Brrr Foods', sector:'Food', base:.22, price:.22, drift:0.00005, volatility:0.0075},
+  {symbol:'MOON', name:'Moon Mining', sector:'Mining', base:.96, price:.96, drift:0.00020, volatility:0.0160}
 ];
 const stockState = {
   running:false,
   timer:null,
   selected:'KUMP',
   tick:0,
+  newsClock:4,
+  marketBias:0,
   sessionStartEquity:0,
-  news:'Market closed. Open the market, pick a ticker, then buy or sell with the trade amount below.',
+  news:'Market closed. Open the market, pick a ticker, then buy or sell with 1¢ to $1 trades.',
+  feed:['System: penny market loaded. Max trade size is $1.00.'],
   tickers:{},
   positions:{}
 };
@@ -1275,8 +1310,31 @@ function initStockMarket(){
       stockState.tickers[def.symbol] = {
         ...def,
         open:def.price,
+        high:def.price,
+        low:def.price,
+        lastMove:0,
+        momentum:0,
+        sentiment:0,
+        newsImpact:0,
+        trend:0,
+        trendTicks:0,
+        volume:Math.floor(400 + Math.random()*900),
+        volumeHistory:Array.from({length:36}, () => Math.floor(120 + Math.random()*260)),
         history:Array.from({length:36}, () => def.price)
       };
+    } else {
+      const t = stockState.tickers[def.symbol];
+      // Upgrade older in-browser sessions into the penny-stock version without breaking balances.
+      if (t.price > 5) {
+        t.price = def.price; t.base = def.base; t.open = def.price; t.high = def.price; t.low = def.price;
+        t.history = Array.from({length:36}, () => def.price);
+      }
+      t.name = def.name; t.sector = def.sector; t.base = def.base; t.drift = def.drift; t.volatility = def.volatility;
+      t.high = t.high || t.price; t.low = t.low || t.price; t.momentum = t.momentum || 0; t.sentiment = t.sentiment || 0;
+      t.newsImpact = t.newsImpact || 0; t.trend = t.trend || 0; t.trendTicks = t.trendTicks || 0; t.lastMove = t.lastMove || 0;
+      t.volume = t.volume || Math.floor(400 + Math.random()*900);
+      t.volumeHistory = t.volumeHistory || Array.from({length:36}, () => Math.floor(120 + Math.random()*260));
+      t.history = t.history || Array.from({length:36}, () => t.price);
     }
     if (!stockState.positions[def.symbol]) stockState.positions[def.symbol] = {shares:0, cost:0, realized:0};
   });
@@ -1285,11 +1343,14 @@ initStockMarket();
 
 function selectedStock(){ return stockState.tickers[stockState.selected] || stockState.tickers.KUMP; }
 function selectedPosition(){ return stockState.positions[stockState.selected] || {shares:0,cost:0,realized:0}; }
-function stockBetAmount(){ return Math.max(1, cents(betState.stocks || 1)); }
+function stockBetAmount(){ return Math.max(0.01, Math.min(1, cents(betState.stocks || 0.01))); }
+function stockPriceLabel(n){ return '$' + (Math.round((Number(n)||0)*100)/100).toFixed(2); }
+function signedPct(n){ return (n >= 0 ? '+' : '') + (Number(n)||0).toFixed(2) + '%'; }
 function sharesLabel(n){
   const value = Number(n) || 0;
   if (value >= 100) return value.toFixed(1).replace(/\.0$/,'');
   if (value >= 10) return value.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+  if (value >= 1) return value.toFixed(3).replace(/0+$/,'').replace(/\.$/,'');
   return value.toFixed(4).replace(/0+$/,'').replace(/\.$/,'') || '0';
 }
 function positionValue(symbol){
@@ -1304,16 +1365,47 @@ function selectedOpenPL(){
   const t = selectedStock(), p = selectedPosition();
   return cents((p.shares * t.price) - p.cost);
 }
+function averageMarketMove(){
+  const arr = Object.values(stockState.tickers);
+  if (!arr.length) return 0;
+  return arr.reduce((sum,t) => sum + ((t.price - t.open) / Math.max(0.01, t.open))*100, 0) / arr.length;
+}
+function marketVolatilityLabel(){
+  const avg = Object.values(stockState.tickers).reduce((sum,t) => sum + Math.abs(t.lastMove || 0), 0) / Math.max(1, Object.keys(stockState.tickers).length);
+  if (avg > 4.5) return ['WILD','warn'];
+  if (avg > 2.0) return ['ACTIVE','hot'];
+  return ['LOW',''];
+}
+function trendLabel(t){
+  if ((t.trend || 0) > 0) return 'UPTREND';
+  if ((t.trend || 0) < 0) return 'DOWNTREND';
+  return 'CHOPPY';
+}
+function renderStockFeed(){
+  const feed = document.getElementById('stockFeed');
+  if (!feed) return;
+  feed.innerHTML = stockState.feed.map((item,i) => `<div class="feed-item"><b>${i===0?'LIVE':'LOG'}</b><span>${item}</span></div>`).join('');
+}
+function addStockFeed(text, toneClass=''){
+  const label = toneClass ? `<span class="${toneClass}">${esc(text)}</span>` : esc(text);
+  stockState.feed.unshift(label);
+  if (stockState.feed.length > 8) stockState.feed.pop();
+  renderStockFeed();
+}
 
 function renderStockList(){
   const list = document.getElementById('stockList');
   if (!list) return;
   list.innerHTML = Object.values(stockState.tickers).map(t => {
     const pct = ((t.price - t.open) / Math.max(0.01, t.open)) * 100;
-    const cls = pct >= 0 ? 'up' : 'down';
-    return `<button class="stock-card ${t.symbol === stockState.selected ? 'active' : ''}" data-stock="${t.symbol}">
+    const cls = pct > .05 ? 'up' : pct < -.05 ? 'down' : 'flat';
+    const heat = Math.abs(t.lastMove || 0) > 3.5 ? ((t.lastMove || 0) > 0 ? 'hot' : 'dump') : '';
+    const pos = stockState.positions[t.symbol];
+    const owned = pos && pos.shares > 0 ? ` • ${sharesLabel(pos.shares)} sh` : '';
+    return `<button class="stock-card ${t.symbol === stockState.selected ? 'active' : ''} ${heat}" data-stock="${t.symbol}">
       <span class="sym">${esc(t.symbol)}</span>
-      <span class="mini"><span>$${t.price.toFixed(2)}</span><span class="${cls}">${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%</span></span>
+      <span class="mini"><span>${stockPriceLabel(t.price)}</span><span class="${cls}">${signedPct(pct)}</span></span>
+      <span class="stock-name">${esc(t.name)}${owned}</span>
     </button>`;
   }).join('');
   list.querySelectorAll('[data-stock]').forEach(btn => {
@@ -1328,21 +1420,65 @@ function renderStockList(){
 function updateStockChart(){
   const t = selectedStock();
   const pts = t.history && t.history.length ? t.history : [t.price];
+  const line = document.getElementById('stockPath');
+  const area = document.getElementById('stockArea');
   if (pts.length < 2) {
-    document.getElementById('stockPath').setAttribute('d', '');
+    if (line) line.setAttribute('d', '');
+    if (area) area.setAttribute('d', '');
     return;
   }
-  const minP = Math.min(...pts) * 0.995;
-  const maxP = Math.max(...pts) * 1.005;
-  const range = Math.max(0.01, maxP - minP);
-  let d = '';
+  const minP = Math.min(...pts) * 0.985;
+  const maxP = Math.max(...pts) * 1.015;
+  const range = Math.max(0.001, maxP - minP);
+  let lineD = '';
+  let lastX = 0, lastY = 0;
   pts.forEach((p, i) => {
     const x = (i / Math.max(1, pts.length - 1)) * 500;
-    const y = 190 - ((p - minP) / range) * 190;
-    d += (i === 0 ? `M${x},${y}` : ` L${x},${y}`);
+    const y = 210 - ((p - minP) / range) * 210;
+    lastX = x; lastY = y;
+    // Slight curve makes it feel more like a live trading chart instead of straight casino RNG.
+    if (i === 0) lineD += `M${x},${y}`;
+    else {
+      const prevX = ((i-1) / Math.max(1, pts.length - 1)) * 500;
+      const cx = (prevX + x) / 2;
+      lineD += ` Q${cx},${y} ${x},${y}`;
+    }
   });
-  d += ` L500,190 L0,190 Z`;
-  document.getElementById('stockPath').setAttribute('d', d);
+  const areaD = `${lineD} L500,210 L0,210 Z`;
+  if (line) line.setAttribute('d', lineD);
+  if (area) area.setAttribute('d', areaD);
+
+  const pulse = document.getElementById('stockPulse');
+  if (pulse) {
+    pulse.style.left = lastX + 'px';
+    pulse.style.top = lastY + 'px';
+    pulse.style.background = (t.lastMove || 0) >= 0 ? '#00ff96' : '#ff5577';
+    pulse.style.boxShadow = (t.lastMove || 0) >= 0 ? '0 0 18px #00ff96' : '0 0 18px #ff5577';
+  }
+  const bars = document.getElementById('volumeBars');
+  if (bars) {
+    const vols = (t.volumeHistory || []).slice(-28);
+    const maxV = Math.max(1, ...vols);
+    bars.innerHTML = vols.map(v => `<span style="height:${Math.max(6, (v/maxV)*42)}px"></span>`).join('');
+  }
+}
+
+function updateMarketDashboard(){
+  const avg = averageMarketMove();
+  const mood = document.getElementById('marketMood');
+  const vol = document.getElementById('marketVol');
+  const mom = document.getElementById('marketMomentum');
+  const next = document.getElementById('nextNews');
+  if (!mood || !vol || !mom || !next) return;
+  mood.textContent = !stockState.running ? 'CLOSED' : avg > 1.2 ? 'BULLISH' : avg < -1.2 ? 'BEARISH' : 'MIXED';
+  mood.className = !stockState.running ? '' : avg > 1.2 ? 'hot' : avg < -1.2 ? 'cold' : 'warn';
+  const [volText, volClass] = marketVolatilityLabel();
+  vol.textContent = volText; vol.className = volClass;
+  const t = selectedStock();
+  mom.textContent = (t.momentum || 0) > .008 ? 'BUYERS' : (t.momentum || 0) < -.008 ? 'SELLERS' : 'FLAT';
+  mom.className = (t.momentum || 0) > .008 ? 'hot' : (t.momentum || 0) < -.008 ? 'cold' : '';
+  next.textContent = stockState.running ? `${Math.max(1, stockState.newsClock)} TICKS` : '—';
+  next.className = stockState.newsClock <= 2 && stockState.running ? 'warn' : '';
 }
 
 function updateStockUI(){
@@ -1356,26 +1492,32 @@ function updateStockUI(){
   const amount = stockBetAmount();
 
   document.getElementById('stockSymbol').textContent = t.symbol;
-  document.getElementById('stockPrice').textContent = '$' + t.price.toFixed(2);
+  document.getElementById('stockPrice').textContent = stockPriceLabel(t.price);
   const changeEl = document.getElementById('stockChange');
-  changeEl.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+  changeEl.textContent = signedPct(pct);
   changeEl.className = 'ticker-change ' + (pct >= 0 ? 'up' : 'down');
 
   document.getElementById('stockCash').textContent = fmt(user().balance);
   document.getElementById('stockEquity').textContent = fmt(totalEquity());
   document.getElementById('stockShares').textContent = sharesLabel(p.shares);
-  document.getElementById('stockAvg').textContent = '$' + avg.toFixed(2);
+  document.getElementById('stockAvg').textContent = stockPriceLabel(avg);
   document.getElementById('stockInvested').textContent = fmt(selectedValue);
   const plEl = document.getElementById('stockPL');
   plEl.textContent = (pl >= 0 ? '+' : '−') + fmt(Math.abs(pl));
   plEl.classList.remove('up','down');
   plEl.classList.add(pl >= 0 ? 'up' : 'down');
+  document.getElementById('stockRange').textContent = `${stockPriceLabel(t.low)}-${stockPriceLabel(t.high)}`;
+  document.getElementById('stockVolume').textContent = Math.round(t.volume || 0).toLocaleString();
+  document.getElementById('stockTrend').textContent = trendLabel(t);
+  document.getElementById('stockLastMove').textContent = signedPct(t.lastMove || 0);
+  document.getElementById('stockLastMove').className = 'pos-value ' + ((t.lastMove || 0) >= 0 ? 'up' : 'down');
   document.getElementById('marketNews').textContent = stockState.news;
 
   const buyBtn = document.getElementById('btnBuyShare');
   const sellBtn = document.getElementById('btnSellShare');
   const sellAllStockBtn = document.getElementById('btnSellAllStock');
   const sellAllBtn = document.getElementById('btnStocksCash');
+  const newsBtn = document.getElementById('btnNewsScan');
   buyBtn.textContent = 'BUY ' + fmt(amount);
   sellBtn.textContent = 'SELL ' + fmt(Math.min(amount, selectedValue));
   sellAllStockBtn.textContent = 'SELL ' + t.symbol;
@@ -1383,10 +1525,13 @@ function updateStockUI(){
   sellBtn.disabled = !stockState.running || selectedValue <= 0;
   sellAllStockBtn.disabled = !stockState.running || selectedValue <= 0;
   sellAllBtn.disabled = !stockState.running || portfolioValue() <= 0;
+  if (newsBtn) newsBtn.disabled = !stockState.running;
   document.getElementById('btnStocksStart').textContent = stockState.running ? 'PAUSE MARKET' : 'OPEN MARKET';
 
   renderStockList();
   updateStockChart();
+  updateMarketDashboard();
+  renderStockFeed();
 }
 
 function setStockMessage(text, cls='info'){
@@ -1394,30 +1539,103 @@ function setStockMessage(text, cls='info'){
   stockState.news = text;
 }
 
+const STOCK_NEWS = {
+  good:[
+    ['earnings leaked higher than expected', .045],
+    ['whale buyers slapped the ask', .038],
+    ['viral hype hit social media', .052],
+    ['analysts upgraded the ticker', .032],
+    ['breakout alert triggered scanners', .040],
+    ['short squeeze rumors spread', .060]
+  ],
+  bad:[
+    ['profit taking slammed the chart', -.040],
+    ['bad guidance scared holders', -.052],
+    ['sell wall appeared on the tape', -.034],
+    ['insiders trimmed positions', -.045],
+    ['market makers pulled liquidity', -.060],
+    ['panic candles hit the order book', -.055]
+  ],
+  neutral:[
+    ['sector rotation hit the penny board', 0],
+    ['traders are waiting for confirmation', 0],
+    ['volume is building before the next move', 0]
+  ]
+};
+function randomStock(){
+  const arr = Object.values(stockState.tickers);
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+function triggerStockNews(forceSymbol=null){
+  const t = forceSymbol ? stockState.tickers[forceSymbol] : randomStock();
+  if (!t) return;
+  const roll = Math.random();
+  const bucket = roll < .43 ? 'good' : roll < .84 ? 'bad' : 'neutral';
+  const options = STOCK_NEWS[bucket];
+  const [headline, baseImpact] = options[Math.floor(Math.random()*options.length)];
+  let impact = baseImpact;
+  if (bucket !== 'neutral') impact *= (0.75 + Math.random()*0.7);
+  t.newsImpact += impact;
+  t.sentiment += impact * 2.2;
+  t.momentum += impact * .45;
+  t.trend = impact > .003 ? 1 : impact < -.003 ? -1 : t.trend;
+  t.trendTicks = 5 + Math.floor(Math.random()*6);
+  const cls = impact > 0 ? 'up' : impact < 0 ? 'down' : 'warn';
+  stockState.news = `${t.symbol} NEWS HIT: ${headline}. ${impact > 0 ? 'Bullish pressure' : impact < 0 ? 'Bearish pressure' : 'No clear direction'} on the tape.`;
+  addStockFeed(`${t.symbol}: ${headline}`, cls);
+  stockState.newsClock = 4 + Math.floor(Math.random()*5);
+  sfxTick();
+}
+
 function stockTick(){
   if (!stockState.running) return;
   stockState.tick++;
-  const macro = (Math.random() - 0.5) * 0.0014;
+  stockState.newsClock--;
+  const wave = Math.sin(stockState.tick / 5) * 0.0025;
+  const macroJitter = (Math.random() - 0.5) * 0.003;
+  stockState.marketBias = (stockState.marketBias * 0.86) + wave + macroJitter;
+
+  if (stockState.newsClock <= 0) triggerStockNews();
+
   Object.values(stockState.tickers).forEach(t => {
-    const meanReversion = ((t.base - t.price) / Math.max(1, t.base)) * 0.0012;
-    const randomMove = (Math.random() - 0.5) * 2 * t.volatility;
-    let move = t.drift + macro + meanReversion + randomMove;
-
-    if (Math.random() < 0.015) {
-      const shock = (Math.random() - 0.5) * t.volatility * 5;
-      move += shock;
-      stockState.news = `${t.symbol} news hit: ${shock >= 0 ? 'buyers stepped in' : 'sellers took control'}.`;
+    if ((t.trendTicks || 0) <= 0 && Math.random() < 0.10) {
+      t.trend = [-1,0,1][Math.floor(Math.random()*3)];
+      t.trendTicks = 4 + Math.floor(Math.random()*8);
     }
+    t.trendTicks = Math.max(0, (t.trendTicks || 0) - 1);
+    if (t.trendTicks <= 0) t.trend = 0;
 
-    t.price = Math.max(0.10, t.price * (1 + move));
+    const meanReversion = ((t.base - t.price) / Math.max(0.05, t.base)) * 0.0025;
+    const randomMove = (Math.random() - 0.5) * 2 * t.volatility;
+    const trendForce = (t.trend || 0) * t.volatility * 0.55;
+    const sentimentForce = (t.sentiment || 0) * 0.05;
+    let move = t.drift + stockState.marketBias + meanReversion + randomMove + trendForce + sentimentForce + (t.newsImpact || 0);
+    move = Math.max(-0.095, Math.min(0.115, move));
+
+    const oldPrice = t.price;
+    t.price = Math.max(0.01, cents(t.price * (1 + move)));
+    if (t.price === oldPrice && Math.abs(move) > .002) t.price = Math.max(0.01, cents(oldPrice + (move > 0 ? .01 : -.01)));
+    t.lastMove = oldPrice ? ((t.price - oldPrice) / oldPrice) * 100 : 0;
+    t.high = Math.max(t.high || t.price, t.price);
+    t.low = Math.min(t.low || t.price, t.price);
+    t.momentum = (t.momentum || 0) * .72 + move * .22;
+    t.sentiment = (t.sentiment || 0) * .90;
+    t.newsImpact = (t.newsImpact || 0) * .58;
+    if (Math.abs(t.newsImpact) < .0005) t.newsImpact = 0;
+
+    const volumeSpike = Math.abs(t.lastMove) * 110 + Math.abs(t.sentiment || 0) * 900;
+    t.volume = Math.max(50, Math.round(250 + Math.random()*500 + volumeSpike));
+    t.volumeHistory.push(t.volume);
+    if (t.volumeHistory.length > 60) t.volumeHistory.shift();
     t.history.push(t.price);
-    if (t.history.length > 95) t.history.shift();
+    if (t.history.length > 100) t.history.shift();
   });
 
-  if (stockState.tick % 5 === 0 && Math.random() < 0.35) {
+  if (stockState.tick % 4 === 0) {
     const equity = totalEquity();
     const sessionPL = cents(equity - stockState.sessionStartEquity);
-    stockState.news = `Market update: total equity ${fmt(equity)} (${sessionPL >= 0 ? '+' : '−'}${fmt(Math.abs(sessionPL))} this session).`;
+    const avg = averageMarketMove();
+    stockState.news = `Market tape: ${avg >= 0 ? 'green' : 'red'} board ${signedPct(avg)} avg. Equity ${fmt(equity)} (${sessionPL >= 0 ? '+' : '−'}${fmt(Math.abs(sessionPL))} session).`;
   }
   updateStockUI();
 }
@@ -1429,20 +1647,29 @@ function startStockMarket(){
     clearInterval(stockState.timer);
     stockState.timer = null;
     setStockMessage('Market paused. Open it again to continue price movement.', 'info');
+    addStockFeed('Market paused.', 'warn');
     updateStockUI();
     return;
   }
   stockState.running = true;
   stockState.sessionStartEquity = totalEquity();
-  stockState.news = 'Market open. Prices update slowly so you can actually trade.';
+  stockState.newsClock = 3 + Math.floor(Math.random()*4);
+  stockState.news = 'Market open. Penny stocks move slowly, but news can spike or dump them fast.';
   document.getElementById('stockChart').classList.remove('crashed','danger');
   clearInterval(stockState.timer);
-  stockState.timer = setInterval(stockTick, 1200);
-  setStockMessage('MARKET OPEN — PICK A TICKER AND PLACE A TRADE', 'info');
+  stockState.timer = setInterval(stockTick, 1350);
+  setStockMessage('MARKET OPEN — 1¢ TO $1 TRADES, WATCH THE NEWS TAPE', 'info');
+  addStockFeed('Opening bell: penny market is live.', 'warn');
   updateStockUI();
 }
 
 document.getElementById('btnStocksStart').onclick = startStockMarket;
+const newsScanBtn = document.getElementById('btnNewsScan');
+if (newsScanBtn) newsScanBtn.onclick = () => {
+  if (!stockState.running) return;
+  triggerStockNews(stockState.selected);
+  updateStockUI();
+};
 
 function buySelectedStock(){
   if (!stockState.running) return;
@@ -1455,6 +1682,8 @@ function buySelectedStock(){
   user().balance = cents(user().balance - amount);
   p.shares += shares;
   p.cost = cents(p.cost + amount);
+  t.momentum += 0.0025;
+  t.volume += Math.round(80 + amount*600);
   const s = stats();
   s.spins++;
   s.totalWagered = cents(s.totalWagered + amount);
@@ -1462,7 +1691,8 @@ function buySelectedStock(){
   if (s.recentSpins.length > 24) s.recentSpins.pop();
   flashBalance('down');
   save(); renderShell(); updateStockUI();
-  setStockMessage(`BOUGHT ${sharesLabel(shares)} ${t.symbol} AT $${t.price.toFixed(2)} FOR ${fmt(amount)}`, 'info');
+  setStockMessage(`BOUGHT ${sharesLabel(shares)} ${t.symbol} AT ${stockPriceLabel(t.price)} FOR ${fmt(amount)}`, 'info');
+  addStockFeed(`Bought ${fmt(amount)} of ${t.symbol}`, 'up');
   sfxClick();
 }
 
@@ -1484,6 +1714,8 @@ function sellSelectedStock(mode='amount'){
   if (p.shares < 0.000001) p.shares = 0;
   p.cost = p.shares > 0 ? cents(Math.max(0, p.cost - costBasis)) : 0;
   p.realized = cents((p.realized || 0) + realized);
+  t.momentum -= 0.002;
+  t.volume += Math.round(70 + proceeds*500);
 
   user().balance = cents(user().balance + proceeds);
   const s = stats();
@@ -1496,6 +1728,7 @@ function sellSelectedStock(mode='amount'){
   if (realized > 0) flashBalance('up'); else flashBalance('down');
   save(); renderShell(); updateStockUI();
   setStockMessage(`SOLD ${sharesLabel(sharesToSell)} ${t.symbol} FOR ${fmt(proceeds)} — ${realized >= 0 ? 'PROFIT' : 'LOSS'} ${fmt(Math.abs(realized))}`, realized >= 0 ? 'win' : 'lose');
+  addStockFeed(`Sold ${t.symbol}: ${realized >= 0 ? '+' : '−'}${fmt(Math.abs(realized))}`, realized >= 0 ? 'up' : 'down');
   if (realized > 0) sfxWin(); else if (realized < 0) sfxLose(); else sfxClick();
   return proceeds;
 }
@@ -1509,19 +1742,17 @@ document.getElementById('btnStocksCash').onclick = () => {
   let totalProceeds = 0;
   let totalCost = 0;
   Object.keys(stockState.positions).forEach(sym => {
-    const previous = stockState.selected;
-    stockState.selected = sym;
-    const p = selectedPosition();
-    const t = selectedStock();
-    if (p.shares > 0) {
+    const p = stockState.positions[sym];
+    const t = stockState.tickers[sym];
+    if (p && t && p.shares > 0) {
       const proceeds = cents(p.shares * t.price);
       totalProceeds = cents(totalProceeds + proceeds);
       totalCost = cents(totalCost + p.cost);
       user().balance = cents(user().balance + proceeds);
       p.shares = 0;
       p.cost = 0;
+      t.volume += Math.round(100 + proceeds*500);
     }
-    stockState.selected = previous;
   });
   const realized = cents(totalProceeds - totalCost);
   const s = stats();
@@ -1533,6 +1764,7 @@ document.getElementById('btnStocksCash').onclick = () => {
   if (s.recentSpins.length > 24) s.recentSpins.pop();
   save(); renderShell(); updateStockUI();
   setStockMessage(`SOLD ENTIRE PORTFOLIO FOR ${fmt(totalProceeds)} — ${realized >= 0 ? 'PROFIT' : 'LOSS'} ${fmt(Math.abs(realized))}`, realized >= 0 ? 'win' : 'lose');
+  addStockFeed(`Portfolio closed: ${realized >= 0 ? '+' : '−'}${fmt(Math.abs(realized))}`, realized >= 0 ? 'up' : 'down');
   if (realized > 0) sfxWin(); else if (realized < 0) sfxLose(); else sfxClick();
 };
 
